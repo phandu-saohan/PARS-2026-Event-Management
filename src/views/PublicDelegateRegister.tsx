@@ -625,7 +625,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                         <p className="text-[10.5px] text-slate-500 font-semibold leading-tight">{createdAttendee.organization}</p>
                       </div>
                     </div>
-                    <p className="text-[10px] text-slate-400 italic font-medium">Năm sinh: {createdAttendee.yearOfBirth} • Giới tính: {createdAttendee.gender}</p>
+                    <p className="text-[10px] text-slate-400 italic font-medium">Năm sinh: {createdAttendee.yearOfBirth}</p>
                   </div>
                 </div>
 
@@ -824,8 +824,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                 </div>
               )}
 
-              {/* FormStepper rendered inside the registration portal */}
-              <FormStepper currentStep={currentStep} isSubmitted={false} L={L} />
+
 
               <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
 
@@ -837,8 +836,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                 )}
 
                 {/* STEP 1: THÔNG TIN ĐẠI BIỂU */}
-                {currentStep === 1 && (
-                  <div className="space-y-6">
+                <div className="space-y-6">
                     <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
                       <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">01</span>
                       <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
@@ -1129,27 +1127,10 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                       </div>
                     </div>
 
-                    {/* Navigation Button Step 1 */}
-                    <div className="pt-6 border-t border-slate-100 flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (validateStep1()) {
-                            setCurrentStep(2);
-                            scrollToFormTop();
-                          }
-                        }}
-                        className="px-6 py-3 rounded-xl bg-teal-900 hover:bg-teal-950 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow hover:shadow-md cursor-pointer"
-                      >
-                        {L.t('Tiếp tục: Chọn gói đăng ký →', 'Continue: Select Package →')}
-                      </button>
-                    </div>
                   </div>
-                )}
 
                 {/* STEP 2: CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ */}
-                {currentStep === 2 && (
-                  <div className="space-y-6">
+                <div className="space-y-6 mt-8">
                     <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
                       <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">02</span>
                       <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
@@ -1270,35 +1251,10 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                         })}
                     </div>
 
-                    {/* Navigation Buttons Step 2 */}
-                    <div className="pt-6 border-t border-slate-100 flex justify-between gap-4">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCurrentStep(1);
-                          scrollToFormTop();
-                        }}
-                        className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
-                      >
-                        {L.t('← Quay lại: Thông tin đại biểu', '← Back: Delegate Info')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCurrentStep(3);
-                          scrollToFormTop();
-                        }}
-                        className="px-6 py-3 rounded-xl bg-teal-900 hover:bg-teal-950 text-white font-extrabold text-xs uppercase tracking-wider transition-all shadow hover:shadow-md cursor-pointer"
-                      >
-                        {L.t('Tiếp tục: Dịch vụ phụ trợ →', 'Continue: Optional Services →')}
-                      </button>
-                    </div>
                   </div>
-                )}
 
                 {/* STEP 3: DỊCH VỤ PHỤ TRỢ TỰ CHỌN */}
-                {currentStep === 3 && (
-                  <div className="space-y-6">
+                <div className="space-y-6 mt-8">
                     <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
                       <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">03</span>
                       <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
@@ -1394,30 +1350,19 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                       </div>
                     </div>
 
-                    {/* Submit & Navigation Buttons Step 3 */}
-                    <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between gap-4">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCurrentStep(2);
-                          scrollToFormTop();
-                        }}
-                        className="px-6 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs uppercase tracking-wider transition-all cursor-pointer"
-                      >
-                        {L.t('← Quay lại: Chọn gói đăng ký', '← Back: Select Package')}
-                      </button>
+                    {/* Submit Button */}
+                    <div className="pt-6 border-t border-slate-100 flex justify-end">
                       <button
                         id="btn-submit-delegate"
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-8 py-3 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
+                        className="px-8 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
                         {isSubmitting ? L.t('Đang gửi thông tin đăng ký...', 'Submitting registration details...') : L.t('Xác Nhận Đăng Ký & Đi Đến Thanh Toán ⚡', 'Confirm Registration & Go to Payment ⚡')}
                       </button>
                     </div>
                   </div>
-                )}
 
               </form>
 
