@@ -1,0 +1,62 @@
+{
+  "name": "PARS 2026 - Hội Nghị Khoa Học Thẩm Mỹ",
+  "short_name": "PARS 2026",
+  "description": "Hệ thống quản lý Hội nghị Khoa học Thẩm mỹ Việt Nam 2026 - Vietnamese Society of Aesthetic Plastic Surgery",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#3d57a6",
+  "background_color": "#fbf8f5",
+  "lang": "vi",
+  "dir": "ltr",
+  "categories": ["medical", "events", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check-in đại biểu",
+      "short_name": "Check-in",
+      "description": "Quét mã QR check-in đại biểu",
+      "url": "/?view=checkin",
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Danh sách đại biểu",
+      "short_name": "Đại biểu",
+      "description": "Xem danh sách đại biểu đã đăng ký",
+      "url": "/?view=attendees",
+      "icons": [
+        {
+          "src": "/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

@@ -1,0 +1,53 @@
+{
+  "rewrites": [
+    { "source": "/manifest.json", "destination": "/api/manifest" },
+    { "source": "/api/health", "destination": "/api/health" },
+    { "source": "/api/sepay-check", "destination": "/api/sepay-check" },
+    { "source": "/api/email/send", "destination": "/api/email/send" },
+    { "source": "/api/email/test-connection", "destination": "/api/email/test-connection" },
+    { "source": "/api/zalo/send", "destination": "/api/zalo/send" },
+    { "source": "/api/zalo/verify-token", "destination": "/api/zalo/verify-token" },
+    { "source": "/api/zalo/refresh-token", "destination": "/api/zalo/refresh-token" },
+    { "source": "/api/whatsapp/send", "destination": "/api/whatsapp/send" },
+    { "source": "/api/onesignal/send-push", "destination": "/api/onesignal/send-push" },
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/OneSignalSDKWorker.js", "destination": "/OneSignalSDKWorker.js" },
+    { "source": "/check-registration.html", "destination": "/check-registration.html" },
+    { "source": "/check-registration", "destination": "/check-registration.html" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
+        { "key": "Pragma", "value": "no-cache" },
+        { "key": "Expires", "value": "0" }
+      ]
+    },
+    {
+      "source": "/OneSignalSDKWorker.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/manifest.json",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/index.html",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}

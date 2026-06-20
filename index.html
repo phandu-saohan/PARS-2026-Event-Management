@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>PARS 2026 - Hội Nghị Khoa Học Thẩm Mỹ</title>
+    <meta name="description" content="Hệ thống quản lý Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên PARS 2026" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- ⚡ Perf: font-display=swap allows immediate text render with fallback font -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700;900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700;900&display=swap" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Montserrat:wght@300;400;500;600;700;900&display=swap" /></noscript>
+    <style>/* ⚡ Critical CSS: fallback font stack renders immediately, swaps to Montserrat */
+      body { font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; }
+      @font-face { font-family: 'Montserrat'; font-display: swap; }
+    </style>
+    <link rel="preconnect" href="https://vzfacodpaveftuowsnze.supabase.co" crossorigin />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#3d57a6" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PARS 2026" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <script>
+      // Auto-reload on chunk load error (missing hashed files after a deployment)
+      window.addEventListener('error', function(e) {
+        if (e.target && e.target.tagName === 'SCRIPT') {
+          if (!sessionStorage.getItem('reloaded_once')) {
+            sessionStorage.setItem('reloaded_once', 'true');
+            window.location.reload();
+          }
+        }
+      }, true);
+
+      window.addEventListener('vite:preloadError', function() {
+        window.location.reload();
+      });
+    </script>
+  </head>
+  <body class="bg-slate-950 text-slate-50">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

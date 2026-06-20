@@ -1,0 +1,6 @@
+{
+  "name": "PARS2026",
+  "description": "Hệ thống quản lý hội nghị khoa học PARS2026 chuyên sâu - Quản lý đại biểu, báo cáo viên, lịch trình, công việc nội bộ, tài chính và nhà tài trợ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

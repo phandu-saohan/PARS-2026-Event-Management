@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- PARS Embed Form: delegate -->
+    <div id="pars-frame-root-delegate" style="width: 100%; overflow: hidden; position: relative;"><iframe
+            id="pars-embed-frame-delegate"
+            style="border: none; width: 100%; display: block; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);"
+            src="http://localhost:5173/?view=register-delegate&lang=en" width="100%" height="950px"
+            sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"></iframe>
+        <script>
+            (function () {
+                var frame = document.getElementById('pars-embed-frame-delegate');
+                window.addEventListener('message', function (e) {
+                    if (e.data && e.data.type === 'pars-height' && typeof e.data.height === 'number') {
+                        frame.style.height = e.data.height + 'px';
+                    }
+                });
+            })();
+        </script>
+    </div>
+</body>
+
+</html>
