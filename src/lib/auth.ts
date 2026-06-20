@@ -40,6 +40,8 @@ export async function signIn(email: string, password: string): Promise<{ user: A
  * Đăng xuất
  */
 export async function signOut(): Promise<void> {
+  localStorage.removeItem('pars_supabase_user_profile');
+  localStorage.removeItem('pars_mock_user');
   await supabase.auth.signOut();
 }
 
@@ -124,12 +126,12 @@ async function fetchUserProfile(authId: string, email: string): Promise<AuthUser
         }
       }
 
-      // Fallback: tạo user profile mặc định với role 'ctv' nếu chưa có
+      // Fallback: tạo user profile mặc định với role 'ctv' nếu chưa có (ngoại trừ admin@admin.com)
       return {
         id: authId,
         email,
         name: email.split('@')[0],
-        role: 'ctv',
+        role: email.trim().toLowerCase() === 'admin@admin.com' ? 'admin' : 'ctv',
         status: 'active',
       };
     }
@@ -164,7 +166,7 @@ async function fetchUserProfile(authId: string, email: string): Promise<AuthUser
       id: authId,
       email,
       name: email.split('@')[0],
-      role: 'ctv',
+      role: email.trim().toLowerCase() === 'admin@admin.com' ? 'admin' : 'ctv',
       status: 'active',
     };
   }

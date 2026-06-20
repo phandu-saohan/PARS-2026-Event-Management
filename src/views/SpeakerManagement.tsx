@@ -1712,7 +1712,7 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
                           {[
                             { color: '#000000', name: 'Đen' },
                             { color: '#4b5563', name: 'Xám' },
-                            { color: '#4f46e5', name: 'Indigo' },
+                            { color: '#be6940', name: 'Đồng' },
                             { color: '#0d9488', name: 'Teal' },
                             { color: '#dc2626', name: 'Đỏ' },
                             { color: '#ea580c', name: 'Cam' }
@@ -1893,7 +1893,7 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
                           {[
                             { color: '#000000', name: 'Đen' },
                             { color: '#4b5563', name: 'Xám' },
-                            { color: '#4f46e5', name: 'Indigo' },
+                            { color: '#be6940', name: 'Đồng' },
                             { color: '#0d9488', name: 'Teal' },
                             { color: '#dc2626', name: 'Đỏ' },
                             { color: '#ea580c', name: 'Cam' }

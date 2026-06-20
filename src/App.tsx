@@ -95,7 +95,7 @@ function AppContent() {
     const applyPwaAssets = () => {
       const cfg = store.getBusinessConfig();
       const logoUrl = cfg.pwaLogoUrl;
-      const themeColor = cfg.pwaThemeColor || '#4f46e5';
+      const themeColor = cfg.pwaThemeColor || '#be6940';
 
       if (logoUrl) {
         // Update favicon

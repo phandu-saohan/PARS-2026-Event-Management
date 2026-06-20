@@ -187,7 +187,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
    */
   const applyPwaIconToDocument = (logoUrl?: string, themeColor?: string) => {
     const url = logoUrl || businessConfig.pwaLogoUrl;
-    const color = themeColor || businessConfig.pwaThemeColor || '#4f46e5';
+    const color = themeColor || businessConfig.pwaThemeColor || '#be6940';
 
     if (url) {
       // Update favicon (tab icon)
@@ -710,10 +710,10 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
     try {
       const testContentHtml = `
         <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
-          <h2 style="color: #4f46e5; text-transform: uppercase;">Máy Chủ SMTP Kích Hoạt Thành Công</h2>
+          <h2 style="color: #be6940; text-transform: uppercase;">Máy Chủ SMTP Kích Hoạt Thành Công</h2>
           <p>Kính gửi Quý đại diện quản trị,</p>
           <p>Thư này xác nhận cổng gửi Email Outcoming qua hình thức SMTP của bạn đã cấu hình thành công.</p>
-          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #4f46e5; margin: 20px 0;">
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #be6940; margin: 20px 0;">
             • SMTP Server: ${emailConfig.smtpHost}:${emailConfig.smtpPort}<br/>
             • Email nguồn: ${emailConfig.senderEmail}<br/>
             • Thời gian: ${new Date().toLocaleString()}
@@ -775,10 +775,10 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
     try {
       const testContentHtml = `
         <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
-          <h2 style="color: #4f46e5; text-transform: uppercase;">Cổng Truyền Tin Resend Kích Hoạt Thành Công</h2>
+          <h2 style="color: #be6940; text-transform: uppercase;">Cổng Truyền Tin Resend Kích Hoạt Thành Công</h2>
           <p>Kính gửi Quý đại diện quản trị,</p>
           <p>Thư này xác nhận cổng gửi Email Outcoming qua hình thức API của Resend đã cấu hình thành công.</p>
-          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #4f46e5; margin: 20px 0;">
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #be6940; margin: 20px 0;">
             • Cổng API: Resend Bulk Service<br/>
             • Email nguồn: ${resendConfig.senderEmail}<br/>
             • Thời gian: ${new Date().toLocaleString()}
@@ -1507,13 +1507,13 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                         <div className="flex gap-2 items-center">
                           <input
                             type="color"
-                            value={businessConfig.pwaThemeColor || '#4f46e5'}
+                            value={businessConfig.pwaThemeColor || '#be6940'}
                             onChange={(e) => setBusinessConfig({ ...businessConfig, pwaThemeColor: e.target.value })}
                             className="w-8 h-8 rounded-lg border border-slate-200 cursor-pointer p-0"
                           />
                           <input
                             type="text"
-                            value={businessConfig.pwaThemeColor || '#4f46e5'}
+                            value={businessConfig.pwaThemeColor || '#be6940'}
                             onChange={(e) => setBusinessConfig({ ...businessConfig, pwaThemeColor: e.target.value })}
                             className="w-full px-2 py-1.5 text-xs border border-slate-200 rounded-lg outline-none font-mono text-slate-800"
                           />

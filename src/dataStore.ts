@@ -132,7 +132,7 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   pwaShortName: "PARS 2026",
   pwaDescription: "Hệ thống quản lý Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên PARS 2026",
   pwaLogoUrl: "/icons/icon-512.png",
-  pwaThemeColor: "#4f46e5",
+  pwaThemeColor: "#be6940",
   pwaBackgroundColor: "#0f172a",
   delegateFormConfig: {
     isOpen: true,
@@ -2535,9 +2535,9 @@ export class DataStore {
                               attendee.id.includes('SPN');
         const emailHtml = `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-            <div style="text-align: center; border-bottom: 2px solid #4f46e5; padding-bottom: 15px; margin-bottom: 20px;">
+            <div style="text-align: center; border-bottom: 2px solid #be6940; padding-bottom: 15px; margin-bottom: 20px;">
               <h2 style="color: #1e1b4b; margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px;">Hội Nghị PARS 2026</h2>
-              <p style="color: #4f46e5; font-size: 11px; margin: 5px 0 0 0; font-weight: bold;">Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên</p>
+              <p style="color: #be6940; font-size: 11px; margin: 5px 0 0 0; font-weight: bold;">Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên</p>
             </div>
             
             <p style="font-size: 14px; color: #334155; line-height: 1.6;">
@@ -2545,9 +2545,9 @@ export class DataStore {
             </p>
             
             ${!hideQrSection ? `
-            <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #4f46e5; margin: 20px 0;">
+            <div style="background-color: #f8fafc; padding: 15px; border-radius: 8px; border-left: 4px solid #be6940; margin: 20px 0;">
               <table style="width: 100%; border-collapse: collapse; font-size: 13.5px; color: #334155;">
-                <tr><td style="padding: 6px 0; font-weight: bold; width: 130px;">Mã Đại Biểu:</td><td style="padding: 6px 0; color: #4f46e5; font-family: monospace; font-weight: bold;">${attendee.id}</td></tr>
+                <tr><td style="padding: 6px 0; font-weight: bold; width: 130px;">Mã Đại Biểu:</td><td style="padding: 6px 0; color: #be6940; font-family: monospace; font-weight: bold;">${attendee.id}</td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Gói Tham Dự:</td><td style="padding: 6px 0;">${attendee.packageName}</td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Lệ Phí:</td><td style="padding: 6px 0; font-family: monospace; font-weight: bold;">${attendee.packageFee.toLocaleString()} VNĐ</td></tr>
                 <tr><td style="padding: 6px 0; font-weight: bold;">Trạng Thái:</td><td style="padding: 6px 0; font-weight: bold; color: ${attendee.paymentStatus === 'paid' ? '#10b981' : '#f59e0b'};">${payStatusText}</td></tr>

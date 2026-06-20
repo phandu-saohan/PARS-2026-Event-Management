@@ -1,18 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   /* ==========================================
      OFFICIAL PARS BRAND COLOR PALETTE
      ========================================== */
-  --color-pars-primary: #3d57a6;
-  --color-pars-primary-navy: #3d57a6;
-  --color-pars-primary-blue: #3d57a6;
+  --color-pars-primary: #be6940;
+  --color-pars-primary-navy: #be6940;
+  --color-pars-primary-blue: #be6940;
   
-  --color-pars-accent: #be6940;
-  --color-pars-pink: #be6940;
-  --color-pars-accent-light: #d67e55;
+  --color-pars-accent: #3d57a6;
+  --color-pars-pink: #3d57a6;
+  --color-pars-accent-light: #4c66b4;
   
   --color-pars-background: #fbf8f5;
   --color-pars-text: #333333;
@@ -22,32 +22,32 @@
      INTEGRATING COLORS TO TAILWIND UTILITIES
      ========================================== */
   
-  /* Overwrite indigo with primary Navy (#3d57a6) to instantly style menus, headers, elements, & buttons */
+  /* Overwrite indigo with primary Copper (#be6940) to instantly style menus, headers, elements, & buttons */
   --color-indigo-50: #fbf8f5;
   --color-indigo-100: #f4eeeb;
   --color-indigo-150: #eaded6;
   --color-indigo-200: #ddd1cb;
-  --color-indigo-300: #d67e55; /* Accent Highlight Copper Light */
+  --color-indigo-300: #3d57a6; /* Accent Highlight Navy */
   --color-indigo-400: #7f7672; /* PARS Muted text */
-  --color-indigo-500: #3d57a6; /* Primary Navy Medium */
-  --color-indigo-600: #3d57a6; /* Primary Brand Navy */
-  --color-indigo-650: #be6940; /* Brand Accent Copper */
-  --color-indigo-700: #2b3e7c;
-  --color-indigo-800: #1c2a57;
-  --color-indigo-900: #121b3a;
-  --color-indigo-950: #3d57a6; /* PARS Navy Header & Sidebar */
+  --color-indigo-500: #be6940; /* Primary Copper Medium */
+  --color-indigo-600: #be6940; /* Primary Brand Copper */
+  --color-indigo-650: #3d57a6; /* Brand Accent Navy */
+  --color-indigo-700: #a35530; /* Hover Copper (darker copper) */
+  --color-indigo-800: #8c4725;
+  --color-indigo-900: #753b1e;
+  --color-indigo-950: #be6940; /* PARS Copper Header & Sidebar */
 
   /* Map teal to Navy and Gold spectrum for high premium vibe */
   --color-teal-50: #fbf8f5;
   --color-teal-100: #f4eeeb;
   --color-teal-200: #ddd1cb;
   --color-teal-205: #eaded6;
-  --color-teal-600: #be6940;
-  --color-teal-700: #a35530;
-  --color-teal-800: #be6940;
-  --color-teal-850: #be6940;
-  --color-teal-900: #be6940;
-  --color-teal-950: #3d57a6;
+  --color-teal-600: #3d57a6;
+  --color-teal-700: #2b3e7c;
+  --color-teal-800: #3d57a6;
+  --color-teal-850: #3d57a6;
+  --color-teal-900: #3d57a6;
+  --color-teal-950: #be6940;
 
   /* Map slate palette to PARS Neutral Off-Black (#333333) and Muted Gray (#7f7672) */
   --color-slate-50: #fbf8f5;  /* Background color */
@@ -57,7 +57,7 @@
   --color-slate-200: #ddd1cb;
   --color-slate-250: #c5b8b1;
   --color-slate-300: #c5b8b1;
-  --color-slate-350: #be6940; /* Border highlight copper */
+  --color-slate-350: #3d57a6; /* Border highlight navy */
   --color-slate-400: #7f7672; /* PARS Muted Gray */
   --color-slate-450: #7f7672;
   --color-slate-500: #7f7672;
@@ -66,8 +66,8 @@
   --color-slate-700: #333333; /* Text Main color */
   --color-slate-800: #333333; /* Text Main color */
   --color-slate-850: #222222;
-  --color-slate-905: #3d57a6; /* Bold Deep Navy titles */
-  --color-slate-950: #1c2a57;
+  --color-slate-905: #be6940; /* Bold Deep Copper titles */
+  --color-slate-950: #753b1e;
 
   /* Map amber with luxury copper (#be6940) and olive (#748c45) */
   --color-amber-50: #fdfbf7;
@@ -78,11 +78,26 @@
   --color-amber-500: #748c45; /* Olive green for checkmarks/success/accent */
   --color-amber-600: #5f7338;
   --color-amber-700: #be6940;
+
+  /* Map blue palette to the brand Accent Navy (#3d57a6) spectrum */
+  --color-blue-50: #f0f3fa;
+  --color-blue-100: #e1e7f5;
+  --color-blue-150: #c3cfeb;
+  --color-blue-200: #c3cfeb;
+  --color-blue-300: #9fb2df;
+  --color-blue-400: #6c89cf;
+  --color-blue-500: #3d57a6;
+  --color-blue-600: #3d57a6;
+  --color-blue-700: #2b3e7c;
+  --color-blue-750: #2b3e7c;
+  --color-blue-800: #1c2850;
+  --color-blue-900: #0e1428;
+  --color-blue-950: #3d57a6;
 }
 
 /* Base resets & tweaks for smooth PARS interface look */
 body {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background-color: var(--color-pars-background);
   color: var(--color-pars-text);
   -webkit-font-smoothing: antialiased;
@@ -98,7 +113,7 @@ table {
   border-collapse: collapse !important;
 }
 
-/* Table Header Row Styling (Navy is Primary Background) */
+/* Table Header Row Styling (Copper is Primary Background) */
 thead, 
 thead tr {
   background-color: var(--color-pars-primary) !important;
@@ -112,7 +127,7 @@ thead th {
   font-family: inherit;
   text-transform: uppercase !important;
   letter-spacing: 0.05em !important;
-  border-bottom: 3.5px solid var(--color-pars-pink) !important; /* Premium Copper Bottom Separation Accent */
+  border-bottom: 3.5px solid var(--color-pars-pink) !important; /* Premium Navy Bottom Separation Accent */
   padding-top: 12px !important;
   padding-bottom: 12px !important;
 }
@@ -130,8 +145,8 @@ thead th svg,
 thead th button svg,
 thead th svg *,
 thead th button svg * {
-  color: #d67e55 !important; /* Light Copper */
-  stroke: #d67e55 !important;
+  color: #eaded6 !important; /* Light Cream */
+  stroke: #eaded6 !important;
 }
 
 /* Alternating rows and soft hover dynamics on table body rows */
@@ -140,14 +155,86 @@ tbody tr {
 }
 
 tbody tr:nth-child(even) {
-  background-color: rgba(61, 87, 166, 0.02) !important; /* extremely subtle off-white Navy tint */
+  background-color: rgba(190, 105, 64, 0.02) !important; /* extremely subtle off-white Copper tint */
 }
 
 tbody tr:hover {
-  background-color: rgba(190, 105, 64, 0.04) !important; /* elegant soft copper tint on row hover */
+  background-color: rgba(61, 87, 166, 0.04) !important; /* elegant soft navy tint on row hover */
 }
 
 tbody td {
   border-bottom: 1px solid #ddd1cb !important;
+}
+
+/* ==========================================================================
+   SIDEBAR STYLING OVERRIDES (DARK NAVY / WHITE TEXT / COPPER ACCENTS)
+   ========================================================================== */
+aside.w-64 {
+  background-color: #111c3a !important; /* Deep Premium Navy Blue */
+  color: #ffffff !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+aside.w-64 h1,
+aside.w-64 span,
+aside.w-64 div,
+aside.w-64 button {
+  color: #ffffff !important;
+}
+
+aside.w-64 p {
+  color: #94a3b8 !important; /* Muted blue-gray for subtitle */
+}
+
+/* Divider lines */
+aside.w-64 div.border-b,
+aside.w-64 div.border-t {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+aside.w-64 div.border-t {
+  background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Normal Navigation Buttons */
+aside.w-64 button.pl-3 {
+  color: #e2e8f0 !important; /* Light grayish-blue for readability */
+}
+
+aside.w-64 button.pl-3:hover {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  color: #ffffff !important;
+}
+
+aside.w-64 button.pl-3 svg {
+  color: #94a3b8 !important;
+}
+
+/* Active Navigation Button */
+aside.w-64 button.bg-slate-900\/60 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-left-color: #be6940 !important; /* Brand Copper active indicator */
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+aside.w-64 button.bg-slate-900\/60 svg {
+  color: #be6940 !important; /* Brand Copper active icon */
+}
+
+/* Logout Button */
+aside.w-64 .bg-rose-950\/20 {
+  background-color: rgba(244, 63, 94, 0.1) !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+  color: #fda4af !important;
+}
+
+aside.w-64 .bg-rose-950\/20:hover {
+  background-color: rgba(244, 63, 94, 0.2) !important;
+  color: #ffffff !important;
+}
+
+aside.w-64 .bg-rose-950\/20 svg {
+  color: #f43f5e !important;
 }
 

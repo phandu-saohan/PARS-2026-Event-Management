@@ -1106,9 +1106,9 @@ Ban Thư ký Hội nghị PARS 2026`
   return (
     <div className="space-y-6 font-sans">
       {/* TRẠM ĐIỀU KHIỂN SẢNH TIẾP ĐÓN - ONLINE/OFFLINE & MÁY QUÉT Honeywell/Zebra */}
-      <div className="bg-gradient-to-r from-teal-950 to-slate-900 text-white p-4 rounded-xl border border-teal-850 shadow-md flex flex-wrap justify-between items-center gap-4">
+      <div className="bg-[#111c3a] text-white p-4 rounded-xl border border-slate-700/50 shadow-md flex flex-wrap justify-between items-center gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-teal-500/10 flex items-center justify-center border border-teal-500/20 text-teal-400">
+          <div className="w-10 h-10 rounded-lg bg-[#be6940]/10 flex items-center justify-center border border-[#be6940]/25 text-[#be6940]">
             <Database className="w-5 h-5" />
           </div>
           <div>

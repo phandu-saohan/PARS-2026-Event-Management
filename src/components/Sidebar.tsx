@@ -69,13 +69,13 @@ export default function Sidebar({ currentView, onNavigate, currentRole, isOpen, 
       <div className="p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))]">
         {/* Brand visual header with Pink accent gradient logo */}
         <div className="flex items-center gap-3.5 mb-6 border-b border-indigo-900/50 pb-5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-pink-600 to-rose-500 flex items-center justify-center text-white font-extrabold text-sm tracking-widest shadow-md shadow-pink-500/10">
-            VS
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 to-indigo-650 flex items-center justify-center text-white font-extrabold text-sm tracking-widest shadow-md shadow-amber-500/10">
+            PA
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <h1 className="font-extrabold text-white text-base tracking-tight leading-none">PARS 2026</h1>
-              <span className="w-1.5 h-1.5 bg-pink-500 rounded-full animate-ping" />
+              <span className="w-1.5 h-1.5 bg-amber-600 rounded-full animate-ping" />
             </div>
             <p className="text-[9px] text-[#94a3b8] font-mono tracking-wider mt-1.5 uppercase font-semibold">Hệ thống Quản lý Sự kiện</p>
           </div>
