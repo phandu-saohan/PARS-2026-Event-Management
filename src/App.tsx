@@ -106,6 +106,10 @@ function AppContent() {
           document.head.appendChild(favicon);
         }
         favicon.href = logoUrl;
+        favicon.type = logoUrl.startsWith('data:image/png') ? 'image/png'
+          : logoUrl.startsWith('data:image/svg') ? 'image/svg+xml'
+          : logoUrl.startsWith('data:image/jpeg') || logoUrl.startsWith('data:image/jpg') ? 'image/jpeg'
+          : 'image/png';
 
         // Update apple-touch-icon
         let appleIcon = document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');

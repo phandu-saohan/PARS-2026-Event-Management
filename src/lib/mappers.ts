@@ -447,6 +447,7 @@ export function mapBusinessConfigToDb(c: BusinessConfig): Record<string, any> {
     delegate_form_config: c.delegateFormConfig || null,
     speaker_form_config: c.speakerFormConfig || null,
     sponsor_form_config: c.sponsorFormConfig || null,
+    add_on_services: c.addOnServices || null,
     cme_template_config: c.cmeTemplateConfig || null,
   };
 }
@@ -472,6 +473,7 @@ export function mapDbToBusinessConfig(row: any): BusinessConfig {
     delegateFormConfig: row.delegate_form_config || undefined,
     speakerFormConfig: row.speaker_form_config || undefined,
     sponsorFormConfig: row.sponsor_form_config || undefined,
+    addOnServices: row.add_on_services || undefined,
     cmeTemplateConfig: row.cme_template_config || undefined,
   };
 }

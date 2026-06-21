@@ -163,8 +163,7 @@ export interface AddOnService {
   nameEn: string;
   descriptionVi: string;
   descriptionEn: string;
-  fee: number; // VNĐ — giá trước 10/11
-  feePost?: number; // VNĐ — giá từ 10/11 trở đi (nếu khác)
+  fee: number; // VNĐ
   isEnabled: boolean;
   color?: string; // teal | amber | purple | pink | indigo | rose
 }

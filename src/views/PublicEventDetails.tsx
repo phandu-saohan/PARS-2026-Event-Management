@@ -917,15 +917,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   if (pkg.id === 'pkg-free') {
                     feeDisplay = 'Miễn Phí';
                   } else {
-                    const PRICING = {
-                      'pkg-member': isPost ? 3000000 : 2500000,
-                      'pkg-standard': isPost ? 3500000 : 3000000,
-                      'pkg-student': isPost ? 1500000 : 1000000,
-                      'pkg-foreign': isPost ? 5000000 : 3750000,
-                    };
-                    const fee = PRICING[pkg.id as keyof typeof PRICING] ?? pkg.fee;
+                    const fee = pkg.fee;
                     if (pkg.id === 'pkg-foreign') {
-                      feeDisplay = isPost ? `$200 (${fee.toLocaleString('vi-VN')} VNĐ)` : `$150 (${fee.toLocaleString('vi-VN')} VNĐ)`;
+                      feeDisplay = `$${Math.round(fee / 25000)} (${fee.toLocaleString('vi-VN')} VNĐ)`;
                     } else {
                       feeDisplay = `${fee.toLocaleString('vi-VN')} VNĐ`;
                     }

@@ -50,6 +50,7 @@ CREATE TABLE public.business_config (
     delegate_form_config JSONB DEFAULT '{}'::jsonb,
     speaker_form_config JSONB DEFAULT '{}'::jsonb,
     sponsor_form_config JSONB DEFAULT '{}'::jsonb,
+    add_on_services JSONB DEFAULT '[]'::jsonb,
     cme_template_config JSONB DEFAULT '{}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

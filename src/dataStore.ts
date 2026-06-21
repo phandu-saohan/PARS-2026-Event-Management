@@ -163,7 +163,6 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
       email: { vi: "Địa chỉ Email nhận vé & CME *", en: "Email for Ticket & CME *" },
       workplace: { vi: "Đơn vị công tác (Bệnh viện/Khoa Y/Viện thẩm mỹ) *", en: "Workplace (Hospital/Medical School/Clinic) *" },
       address: { vi: "Địa chỉ liên hệ *", en: "Contact Address *" },
-      timelineOption: { vi: "Lựa chọn Thời điểm Đăng ký *", en: "Registration Timeline Option *" },
       notes: { vi: "Ghi chú yêu cầu đặc biệt khác cho BTC", en: "Special notes or request for Organizer" },
     },
   },
@@ -3129,6 +3128,227 @@ export class DataStore {
       supabase.from('virtual_sections').delete().eq('id', id).then(({ error }) => {
         if (error) console.error('Error deleting virtual section from Supabase:', error);
       });
+    }
+  }
+
+  exportBackupData(): string {
+    const backupObj = {
+      version: '1.0',
+      backupDate: new Date().toISOString(),
+      data: {
+        attendees: this.attendees,
+        speakers: this.speakers,
+        sessions: this.sessions,
+        sponsors: this.sponsors,
+        tasks: this.tasks,
+        finance: this.finance,
+        packages: this.packages,
+        zaloConfig: this.zaloConfig,
+        emailConfig: this.emailConfig,
+        resendConfig: this.resendConfig,
+        whatsappConfig: this.whatsappConfig,
+        templates: this.templates,
+        notificationLogs: this.notificationLogs,
+        specialtyTracks: this.specialtyTracks,
+        businessConfig: this.businessConfig,
+        embedScripts: this.embedScripts,
+        sepayConfig: this.sepayConfig,
+        oneSignalConfig: this.oneSignalConfig,
+        rooms: this.rooms,
+        dates: this.dates,
+        shifts: this.shifts,
+        virtualSections: this.virtualSections,
+        contacts: this.contacts
+      }
+    };
+    return JSON.stringify(backupObj, null, 2);
+  }
+
+  async importBackupData(backupJsonStr: string): Promise<{ success: boolean; message: string }> {
+    try {
+      const backupObj = JSON.parse(backupJsonStr);
+      if (!backupObj || !backupObj.version || !backupObj.data) {
+        return { success: false, message: 'File backup không đúng định dạng hoặc bị hỏng!' };
+      }
+
+      const d = backupObj.data;
+
+      // Update in-memory cache
+      if (d.attendees) this.attendees = d.attendees;
+      if (d.speakers) this.speakers = d.speakers;
+      if (d.sessions) this.sessions = d.sessions;
+      if (d.sponsors) this.sponsors = d.sponsors;
+      if (d.tasks) this.tasks = d.tasks;
+      if (d.finance) this.finance = d.finance;
+      if (d.packages) this.packages = d.packages;
+      if (d.zaloConfig) this.zaloConfig = d.zaloConfig;
+      if (d.emailConfig) this.emailConfig = d.emailConfig;
+      if (d.resendConfig) this.resendConfig = d.resendConfig;
+      if (d.whatsappConfig) this.whatsappConfig = d.whatsappConfig;
+      if (d.templates) this.templates = d.templates;
+      if (d.notificationLogs) this.notificationLogs = d.notificationLogs;
+      if (d.specialtyTracks) this.specialtyTracks = d.specialtyTracks;
+      if (d.businessConfig) this.businessConfig = d.businessConfig;
+      if (d.embedScripts) this.embedScripts = d.embedScripts;
+      if (d.sepayConfig) this.sepayConfig = d.sepayConfig;
+      if (d.oneSignalConfig) this.oneSignalConfig = d.oneSignalConfig;
+      if (d.rooms) this.rooms = d.rooms;
+      if (d.dates) this.dates = d.dates;
+      if (d.shifts) this.shifts = d.shifts;
+      if (d.virtualSections) this.virtualSections = d.virtualSections;
+      if (d.contacts) this.contacts = d.contacts;
+
+      // Save all to localStorage
+      this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
+      this.saveToLocalStorage(DataStore.KEY_SPEAKERS, this.speakers);
+      this.saveToLocalStorage(DataStore.KEY_SESSIONS, this.sessions);
+      this.saveToLocalStorage(DataStore.KEY_SPONSORS, this.sponsors);
+      this.saveToLocalStorage(DataStore.KEY_TASKS, this.tasks);
+      this.saveToLocalStorage(DataStore.KEY_FINANCE, this.finance);
+      this.saveToLocalStorage(DataStore.KEY_PACKAGES, this.packages);
+      this.saveToLocalStorage(DataStore.KEY_ZALO, this.zaloConfig);
+      this.saveToLocalStorage(DataStore.KEY_EMAIL, this.emailConfig);
+      this.saveToLocalStorage(DataStore.KEY_RESEND, this.resendConfig);
+      this.saveToLocalStorage(DataStore.KEY_WHATSAPP, this.whatsappConfig);
+      this.saveToLocalStorage(DataStore.KEY_TEMPLATES, this.templates);
+      this.saveToLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, this.notificationLogs);
+      this.saveToLocalStorage(DataStore.KEY_SPECIALTY_TRACKS, this.specialtyTracks);
+      this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, this.businessConfig);
+      this.saveToLocalStorage(DataStore.KEY_EMBED_SCRIPTS, this.embedScripts);
+      this.saveToLocalStorage(DataStore.KEY_SEPAY, this.sepayConfig);
+      this.saveToLocalStorage(DataStore.KEY_ONESIGNAL, this.oneSignalConfig);
+      this.saveToLocalStorage(DataStore.KEY_ROOMS, this.rooms);
+      this.saveToLocalStorage(DataStore.KEY_DATES, this.dates);
+      this.saveToLocalStorage(DataStore.KEY_SHIFTS, this.shifts);
+      this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
+      this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
+
+      // Save to Supabase (if configured)
+      if (isSupabaseConfigured()) {
+        console.log('🔄 Restoring backup data to Supabase...');
+
+        // 1. Delete target table rows first
+        await Promise.all([
+          supabase.from('attendees').delete().neq('id', ''),
+          supabase.from('speakers').delete().neq('id', ''),
+          supabase.from('sessions').delete().neq('id', ''),
+          supabase.from('sponsors').delete().neq('id', ''),
+          supabase.from('internal_tasks').delete().neq('id', ''),
+          supabase.from('finance_transactions').delete().neq('id', ''),
+          supabase.from('notification_logs').delete().neq('id', ''),
+          supabase.from('packages').delete().neq('id', ''),
+          supabase.from('specialty_tracks').delete().neq('id', ''),
+          supabase.from('embed_scripts').delete().neq('id', ''),
+          supabase.from('contacts').delete().neq('id', ''),
+          supabase.from('notification_templates').delete().neq('id', ''),
+        ]);
+
+        // 2. Perform sequential insertions to respect constraints
+        const promises: any[] = [];
+
+        // Save business config
+        if (this.businessConfig) {
+          promises.push(supabase.from('business_config').upsert(mapBusinessConfigToDb(this.businessConfig)));
+        }
+
+        // Save system config parameters
+        promises.push(supabase.from('system_config').upsert([
+          { key: 'zalo_config', value: this.zaloConfig },
+          { key: 'email_config', value: this.emailConfig },
+          { key: 'resend_config', value: this.resendConfig },
+          { key: 'whatsapp_config', value: this.whatsappConfig },
+          { key: 'sepay_config', value: this.sepayConfig },
+          { key: 'onesignal_config', value: this.oneSignalConfig }
+        ]));
+
+        await Promise.all(promises);
+
+        const dataPromises: any[] = [];
+
+        // Save packages
+        if (this.packages && this.packages.length > 0) {
+          const mappedPackages = this.packages.map(p => mapPackageToDb(p));
+          dataPromises.push(supabase.from('packages').insert(mappedPackages));
+        }
+
+        // Save specialty tracks
+        if (this.specialtyTracks && this.specialtyTracks.length > 0) {
+          const mappedTracks = this.specialtyTracks.map(t => mapTrackToDb(t));
+          dataPromises.push(supabase.from('specialty_tracks').insert(mappedTracks));
+        }
+
+        // Save embed scripts
+        if (this.embedScripts && this.embedScripts.length > 0) {
+          const mappedEmbeds = this.embedScripts.map(e => mapEmbedScriptToDb(e));
+          dataPromises.push(supabase.from('embed_scripts').insert(mappedEmbeds));
+        }
+
+        // Save templates
+        if (this.templates && this.templates.length > 0) {
+          const mappedTemplates = this.templates.map(t => mapTemplateToDb(t));
+          dataPromises.push(supabase.from('notification_templates').insert(mappedTemplates));
+        }
+
+        await Promise.all(dataPromises);
+
+        const corePromises: any[] = [];
+
+        // Save attendees
+        if (this.attendees && this.attendees.length > 0) {
+          const mappedAttendees = this.attendees.map(a => mapAttendeeToDb(a));
+          corePromises.push(supabase.from('attendees').insert(mappedAttendees));
+        }
+
+        // Save speakers
+        if (this.speakers && this.speakers.length > 0) {
+          const mappedSpeakers = this.speakers.map(s => mapSpeakerToDb(s));
+          corePromises.push(supabase.from('speakers').insert(mappedSpeakers));
+        }
+
+        // Save sponsors
+        if (this.sponsors && this.sponsors.length > 0) {
+          const mappedSponsors = this.sponsors.map(sp => mapSponsorToDb(sp));
+          corePromises.push(supabase.from('sponsors').insert(mappedSponsors));
+        }
+
+        // Save sessions
+        if (this.sessions && this.sessions.length > 0) {
+          const mappedSessions = this.sessions.map(s => mapSessionToDb(s));
+          corePromises.push(supabase.from('sessions').insert(mappedSessions));
+        }
+
+        // Save tasks
+        if (this.tasks && this.tasks.length > 0) {
+          const mappedTasks = this.tasks.map(t => mapTaskToDb(t));
+          corePromises.push(supabase.from('internal_tasks').insert(mappedTasks));
+        }
+
+        // Save finance
+        if (this.finance && this.finance.length > 0) {
+          const mappedFinance = this.finance.map(f => mapFinanceToDb(f));
+          corePromises.push(supabase.from('finance_transactions').insert(mappedFinance));
+        }
+
+        // Save contacts
+        if (this.contacts && this.contacts.length > 0) {
+          const mappedContacts = this.contacts.map(c => mapContactToDb(c));
+          corePromises.push(supabase.from('contacts').insert(mappedContacts));
+        }
+
+        // Save notification logs
+        if (this.notificationLogs && this.notificationLogs.length > 0) {
+          const mappedLogs = this.notificationLogs.map(l => mapNotifLogToDb(l));
+          corePromises.push(supabase.from('notification_logs').insert(mappedLogs));
+        }
+
+        await Promise.all(corePromises);
+        console.log('✅ Supabase database restoration completed.');
+      }
+
+      return { success: true, message: 'Khôi phục dữ liệu từ bản sao lưu thành công!' };
+    } catch (e: any) {
+      console.error(e);
+      return { success: false, message: `Lỗi khôi phục dữ liệu: ${e.message || e}` };
     }
   }
 }

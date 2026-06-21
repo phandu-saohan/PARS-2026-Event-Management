@@ -66,6 +66,23 @@ async function runMigration() {
       console.log(`🎉 Thực thi ${file} thành công!`);
     }
 
+    console.log('\n🔐 Đang thiết lập phân quyền (GRANT) cho các role anon, authenticated, service_role...');
+    const grantSql = `
+      GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+      GRANT ALL ON SCHEMA public TO postgres;
+      GRANT ALL ON SCHEMA public TO public;
+
+      GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+      GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+      GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO postgres, anon, authenticated, service_role;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, anon, authenticated, service_role;
+      ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON FUNCTIONS TO postgres, anon, authenticated, service_role;
+    `;
+    await client.query(grantSql);
+    console.log('🎉 Thiết lập phân quyền thành công!');
+
     console.log('\n🚀 CƠ SỞ DỮ LIỆU CỦA BẠN ĐÃ ĐƯỢC THIẾT LẬP HOÀN TOÀN TRÊN SUPABASE!');
   } catch (err) {
     console.error('\n❌ LỖI TRONG QUÁ TRÌNH CẬP NHẬT:', err.message || err);

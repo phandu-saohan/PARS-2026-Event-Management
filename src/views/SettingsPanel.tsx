@@ -64,7 +64,7 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ role }: SettingsPanelProps) {
   // Navigation tab state
-  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout'>('business');
+  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup'>('business');
   const [formActiveSection, setFormActiveSection] = useState<'delegate' | 'speaker' | 'sponsor'>('delegate');
 
   // Printer config states (saved to localStorage for device-specific setup)
@@ -1287,6 +1287,18 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
             <span>Thiết kế Chứng chỉ CME</span>
           </button>
 
+          <button
+            onClick={() => setActiveSubTab('backup')}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border-none ${
+              activeSubTab === 'backup'
+                ? 'bg-rose-700 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-rose-50 hover:text-rose-800 bg-transparent'
+            }`}
+          >
+            <span className="shrink-0 text-base">💾</span>
+            <span>Sao Lưu & Phục Hồi</span>
+          </button>
+
           {/* Quick diagnostic tips */}
           <div className="pt-4 mt-4 border-t border-slate-200 px-2 space-y-2 text-[10.5px] text-slate-500 leading-normal">
             <span className="font-extrabold text-slate-800 block text-[10px]">🖥️ DATABASE SYNC:</span>
@@ -1790,7 +1802,12 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       type="button"
                       onClick={() => {
                         const newId = 'addon-' + Date.now();
-                        const current = businessConfig.addOnServices || [];
+                        const current = businessConfig.addOnServices || [
+                          { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
+                          { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
+                          { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
+                          { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, isEnabled: true, color: 'pink' }
+                        ];
                         setBusinessConfig({
                           ...businessConfig,
                           addOnServices: [...current, {
@@ -1800,7 +1817,6 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                             descriptionVi: 'Mô tả dịch vụ...',
                             descriptionEn: 'Service description...',
                             fee: 0,
-                            feePost: 0,
                             isEnabled: false,
                             color: 'teal'
                           }]
@@ -1820,7 +1836,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                     { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
                     { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
                     { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
-                    { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, feePost: 5000000, isEnabled: true, color: 'pink' }
+                    { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, isEnabled: true, color: 'pink' }
                   ];
 
                   // Initialize defaults if not yet saved
@@ -1937,9 +1953,9 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-3 gap-3">
+                          <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-[10px] font-black text-slate-500 block mb-1">Giá trước 10/11 (VNĐ)</label>
+                              <label className="text-[10px] font-black text-slate-500 block mb-1">Giá dịch vụ (VNĐ)</label>
                               <input
                                 type="number"
                                 min={0}
@@ -1948,21 +1964,6 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                                 onChange={(e) => {
                                   const updated = [...services];
                                   updated[idx] = { ...svc, fee: Number(e.target.value) };
-                                  setBusinessConfig({ ...businessConfig, addOnServices: updated });
-                                }}
-                                className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-[10px] font-black text-slate-500 block mb-1">Giá từ 10/11 (VNĐ)</label>
-                              <input
-                                type="number"
-                                min={0}
-                                step={1000}
-                                value={svc.feePost ?? svc.fee}
-                                onChange={(e) => {
-                                  const updated = [...services];
-                                  updated[idx] = { ...svc, feePost: Number(e.target.value) };
                                   setBusinessConfig({ ...businessConfig, addOnServices: updated });
                                 }}
                                 className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold"
@@ -3890,16 +3891,13 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                             fields.push(
                               { key: 'nationality', labelVi: 'Chọn ngôn ngữ / Quốc tịch', labelEn: 'Select Language / Nationality', placeholderVi: 'Chọn ngôn ngữ *', placeholderEn: 'Select Language *' },
                               { key: 'avatar', labelVi: 'Ảnh Chân Dung / Avatar', labelEn: 'Portrait / Avatar', placeholderVi: 'Ảnh Chân Dung / Avatar *', placeholderEn: ' scientific Portrait *' },
-                              { key: 'doctorProof', labelVi: 'Minh chứng Bác Sĩ', labelEn: 'Doctor Credentials Proof', placeholderVi: 'Minh chứng Bác Sĩ *', placeholderEn: 'Doctor Credentials Proof *' },
                               { key: 'academicTitle', labelVi: 'Học hàm / Học vị', labelEn: 'Academic Title', placeholderVi: 'Học hàm / Học vị *', placeholderEn: 'Academic Title *' },
                               { key: 'fullName', labelVi: 'Họ và Tên', labelEn: 'Full Name', placeholderVi: 'Họ và Tên (In hoa có dấu) *', placeholderEn: 'Full Name (Capitalized) *' },
-                              { key: 'gender', labelVi: 'Giới tính', labelEn: 'Gender', placeholderVi: 'Giới tính *', placeholderEn: 'Gender *' },
                               { key: 'yearOfBirth', labelVi: 'Năm sinh', labelEn: 'Year of Birth', placeholderVi: 'Năm sinh *', placeholderEn: 'Year of Birth *' },
                               { key: 'phone', labelVi: 'Số điện thoại di động', labelEn: 'Contact Phone Number', placeholderVi: 'Số điện thoại di động *', placeholderEn: 'Contact Phone Number *' },
                               { key: 'email', labelVi: 'Địa chỉ Email nhận vé & CME', labelEn: 'Email for Ticket & CME', placeholderVi: 'Địa chỉ Email nhận vé & CME *', placeholderEn: 'Email for Ticket & CME *' },
                               { key: 'workplace', labelVi: 'Đơn vị công tác', labelEn: 'Workplace', placeholderVi: 'Đơn vị công tác (Bệnh viện/Khoa Y/Viện thẩm mỹ) *', placeholderEn: 'Workplace (Hospital/Medical School/Clinic) *' },
                               { key: 'address', labelVi: 'Địa chỉ liên hệ', labelEn: 'Contact Address', placeholderVi: 'Địa chỉ liên hệ *', placeholderEn: 'Contact Address *' },
-                              { key: 'timelineOption', labelVi: 'Lựa chọn Thời điểm Đăng ký', labelEn: 'Registration Timeline Option', placeholderVi: 'Lựa chọn Thời điểm Đăng ký *', placeholderEn: 'Registration Timeline Option *' },
                               { key: 'notes', labelVi: 'Ghi chú cho BTC', labelEn: 'Notes for Organizer', placeholderVi: 'Ghi chú yêu cầu đặc biệt khác cho BTC', placeholderEn: 'Special notes or request for Organizer' }
                             );
                           } else if (formActiveSection === 'speaker') {
@@ -4447,6 +4445,116 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
               </div>
             );
           })()}
+
+          {/* ================= SECTION 12: BACKUP & RESTORE ================= */}
+          {activeSubTab === 'backup' && (
+            <div className="space-y-6">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Sao Lưu & Phục Hồi Hệ Thống</h3>
+                  <p className="text-[11px] text-slate-450 mt-0.5">Tạo bản sao lưu toàn bộ dữ liệu cấu hình, danh sách đại biểu, báo cáo viên và khôi phục khi cần thiết.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Backup Box */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: '#e0e7ff', color: '#4f46e5' }}>
+                      📥
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Sao lưu dữ liệu</h4>
+                      <p className="text-[10px] text-slate-455 mt-0.5">Xuất toàn bộ cơ sở dữ liệu hiện tại thành tệp tin backup.json để lưu trữ an toàn.</p>
+                    </div>
+                  </div>
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        try {
+                          const backupData = store.exportBackupData();
+                          const blob = new Blob([backupData], { type: 'application/json' });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          const dateStr = new Date().toISOString().slice(0, 10);
+                          a.href = url;
+                          a.download = `pars-backup-${dateStr}.json`;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          URL.revokeObjectURL(url);
+                        } catch (err: any) {
+                          alert(`Không thể tạo file backup: ${err.message || err}`);
+                        }
+                      }}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-extrabold rounded-xl transition-all text-xs border-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm shadow-indigo-600/10"
+                    >
+                      💾 Tạo & Tải Bản Sao Lưu (.json)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Restore Box */}
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ backgroundColor: '#ffe4e6', color: '#e11d48' }}>
+                      📤
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider font-sans">Khôi phục dữ liệu</h4>
+                      <p className="text-[10px] text-slate-455 mt-0.5">Tải lên tệp tin backup.json đã lưu trước đó để khôi phục toàn bộ trạng thái hệ thống.</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    <input
+                      type="file"
+                      accept=".json"
+                      id="restore-file-input"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        if (!window.confirm('CẢNH BÁO CỰC KỲ QUAN TRỌNG: Việc khôi phục dữ liệu sẽ XÓA SẠCH toàn bộ dữ liệu hiện tại của hệ thống (bao gồm cấu hình, đại biểu, báo cáo viên) và ghi đè bằng dữ liệu trong file backup. Bạn có chắc chắn muốn tiếp tục không?')) {
+                          e.target.value = '';
+                          return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                          const content = event.target?.result as string;
+                          try {
+                            const res = await store.importBackupData(content);
+                            if (res.success) {
+                              alert(res.message);
+                              window.location.reload();
+                            } else {
+                              alert(res.message);
+                            }
+                          } catch (err: any) {
+                            alert(`Lỗi phục hồi dữ liệu: ${err.message || err}`);
+                          }
+                        };
+                        reader.readAsText(file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        document.getElementById('restore-file-input')?.click();
+                      }}
+                      className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-extrabold rounded-xl transition-all text-xs border-none cursor-pointer flex items-center justify-center gap-1.5 shadow-sm shadow-rose-600/10"
+                    >
+                      🔄 Chọn File & Khôi Phục Dữ Liệu
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Modals or other subtab containers */}
         </div>

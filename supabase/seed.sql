@@ -85,7 +85,7 @@ INSERT INTO public.business_config (
     "maxEntries": 0,
     "sectionLabels": {
       "personalInfo":  { "vi": "THÔNG TIN ĐẠI BIỂU ĐĂNG KÝ",      "en": "DELEGATE PERSONAL INFORMATION" },
-      "scheduleAddOns":{ "vi": "THỜI ĐIỂM & DỊCH VỤ PHỤ TRỢ TỰ CHỌN", "en": "SCHEDULE & OPTIONAL ADD-ON SERVICES" },
+      "scheduleAddOns":{ "vi": "DỊCH VỤ PHỤ TRỢ TỰ CHỌN", "en": "OPTIONAL ADD-ON SERVICES" },
       "package":       { "vi": "CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ",         "en": "CONFERENCE REGISTRATION PACKAGE" },
       "payment":       { "vi": "THÔNG TIN THANH TOÁN CHUYỂN KHOẢN",  "en": "BANK TRANSFER PAYMENT DETAILS" }
     }

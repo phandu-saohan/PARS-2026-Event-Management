@@ -127,7 +127,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
     { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
     { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
     { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
-    { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, feePost: 5000000, isEnabled: true, color: 'pink' }
+    { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, isEnabled: true, color: 'pink' }
   ];
 
   // Auto-height postMessage for iframe embedding in WordPress
@@ -337,32 +337,13 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
     .replace(/[^A-Z0-9\s]/g, '');
   const transferMessage = `${cleanFullNameAscii} ${cleanPhoneInput}`;
 
-  // Official interactive pricing matrix
-  const PRICING = {
-    pre_10_11: {
-      'pkg-member': 2500000,
-      'pkg-standard': 3000000,
-      'pkg-student': 1000000,
-      'pkg-foreign': 3750000, // $150
-      'pkg-free': 0,
-    },
-    post_10_11: {
-      'pkg-member': 3000000,
-      'pkg-standard': 3500000,
-      'pkg-student': 1500000,
-      'pkg-foreign': 5000000, // $200
-      'pkg-free': 0,
-    }
-  };
-
-  const currentPrices = PRICING[period];
-  const baseFee = currentPrices[packageId as keyof typeof currentPrices] ?? 0;
+  const baseFee = selectedPackage?.fee ?? 0;
 
   // Calculate add-on fees dynamically from config
   const addOnFeeDetails = addOnServices
     .filter(s => addOnSelections[s.id])
     .map(s => {
-      const fee = period === 'post_10_11' && s.feePost ? s.feePost : s.fee;
+      const fee = s.fee;
       return { id: s.id, nameVi: s.nameVi, nameEn: s.nameEn, fee };
     });
   const totalAddOnFee = addOnFeeDetails.reduce((sum, d) => sum + d.fee, 0);
@@ -870,118 +851,63 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                         </button>
                       </div>
                     </div>
-                      /*
+                      */
                     }
 
-
-                    {/* Avatar & Doctor Proof row */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Avatar Section */}
-                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
-                          {avatarImage ? (
-                            <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
-                          ) : (
-                            <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
-                              {L.t('Chưa có ảnh', 'No Photo')}
-                            </span>
-                          )}
-                          {isAvatarUploading && (
-                            <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
-                              Loading...
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
-                          <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
-                            {L.f('avatar', 'Ảnh Chân Dung / Avatar *', 'Portrait Photo *')}
+                    {/* Avatar Section */}
+                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                      <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
+                        {avatarImage ? (
+                          <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
+                        ) : (
+                          <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
+                            {L.t('Chưa có ảnh', 'No Photo')}
                           </span>
-                          <p className="text-[10px] text-slate-500 leading-snug">
-                            {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt tức thì.', 'Recommended clear face portrait for instant facial recognition check-in.')}
-                          </p>
-                          <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
-                            <div 
-                              role="button"
-                              onClick={() => avatarInputRef.current?.click()}
-                              className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
-                            >
-                              {L.t('Tải ảnh chân dung', 'Upload Portrait')}
-                              <input 
-                                ref={avatarInputRef}
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleAvatarUpload} 
-                                className="hidden" 
-                              />
-                            </div>
-                            {avatarImage && (
-                              <button
-                                type="button"
-                                onClick={() => setAvatarImage(null)}
-                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
-                              >
-                                {L.t('Xóa', 'Remove')}
-                              </button>
-                            )}
+                        )}
+                        {isAvatarUploading && (
+                          <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
+                            Loading...
                           </div>
-                        </div>
+                        )}
                       </div>
-
-                      {/* Doctor Proof Section */}
-                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <div className="relative group shrink-0 w-20 h-20 rounded-lg bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
-                          {doctorProofImage ? (
-                            <img src={doctorProofImage} className="w-full h-full object-cover" alt="Doctor Proof" />
-                          ) : (
-                            <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
-                              {L.t('Chưa có ảnh', 'No Proof')}
-                            </span>
-                          )}
-                          {isDoctorProofUploading && (
-                            <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
-                              Loading...
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
-                          <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
-                            {L.f('doctorProof', 'Minh chứng Bác Sĩ *', 'Doctor Credentials Proof *')}
-                          </span>
-                          <p className="text-[10px] text-slate-500 leading-snug">
-                            {L.t('Tải ảnh Thẻ bác sĩ, bằng cấp chuyên khoa, hoặc chứng chỉ hành nghề.', 'Upload doctor ID card, specialty degree, or practicing certificate.')}
-                          </p>
-                          <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
-                            <div 
-                              role="button"
-                              onClick={() => doctorProofInputRef.current?.click()}
-                              className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
-                            >
-                              {L.t('Tải ảnh minh chứng', 'Upload Credentials')}
-                              <input 
-                                ref={doctorProofInputRef}
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleDoctorProofUpload} 
-                                className="hidden" 
-                              />
-                            </div>
-                            {doctorProofImage && (
-                              <button
-                                type="button"
-                                onClick={() => setDoctorProofImage(null)}
-                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
-                              >
-                                {L.t('Xóa', 'Remove')}
-                              </button>
-                            )}
+                      <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
+                        <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
+                          {L.f('avatar', 'Ảnh Chân Dung / Avatar *', 'Portrait Photo *')}
+                        </span>
+                        <p className="text-[10px] text-slate-500 leading-snug">
+                          {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt tức thì.', 'Recommended clear face portrait for instant facial recognition check-in.')}
+                        </p>
+                        <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
+                          <div 
+                            role="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
+                          >
+                            {L.t('Tải ảnh chân dung', 'Upload Portrait')}
+                            <input 
+                              ref={avatarInputRef}
+                              type="file" 
+                              accept="image/*" 
+                              onChange={handleAvatarUpload} 
+                              className="hidden" 
+                            />
                           </div>
+                          {avatarImage && (
+                            <button
+                              type="button"
+                              onClick={() => setAvatarImage(null)}
+                              className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
+                            >
+                              {L.t('Xóa', 'Remove')}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Title & Name */}
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      <div className="md:col-span-3">
+                      <div className="md:col-span-4">
                         <label className="block text-xs font-bold text-slate-700 mb-1">
                           {L.f('academicTitle', 'Học hàm / Học vị *', 'Academic Title *')}
                         </label>
@@ -1002,7 +928,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                         </select>
                       </div>
 
-                      <div className="md:col-span-6">
+                      <div className="md:col-span-8">
                         <label className="block text-xs font-bold text-slate-700 mb-1">
                           {L.f('fullName', 'Họ và Tên (In hoa có dấu) *', 'Full Name (Capitalized) *')}
                         </label>
@@ -1014,30 +940,6 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                           placeholder={L.p('ví dụ: NGUYỄN VĂN A', 'e.g. NGUYEN VAN A')}
                           className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold focus:border-teal-600 focus:outline-none focus:bg-white uppercase tracking-wider transition-all placeholder-slate-400"
                         />
-                      </div>
-
-                      <div className="md:col-span-3">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('gender', 'Giới tính *', 'Gender *')}
-                        </label>
-                        <div className="flex bg-slate-50 rounded-xl border border-slate-200 p-1">
-                          <button
-                            type="button"
-                            onClick={() => setGender('Nam')}
-                            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${gender === 'Nam' ? 'bg-white text-teal-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                              }`}
-                          >
-                            {L.t('Nam', 'Male')}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setGender('Nữ')}
-                            className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${gender === 'Nữ' ? 'bg-white text-teal-950 shadow-sm' : 'text-slate-500 hover:text-slate-800'
-                              }`}
-                          >
-                            {L.t('Nữ', 'Female')}
-                          </button>
-                        </div>
                       </div>
                     </div>
 
@@ -1138,43 +1040,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                       </h3>
                     </div>
 
-                    {/* Time Period picker moved here */}
-                    <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl space-y-2">
-                      <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider">
-                        {L.f('timelineOption', 'Lựa chọn Thời điểm Đăng ký *', 'Registration Timeline Option *')}
-                      </label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setPeriod('pre_10_11')}
-                          className={`p-3 text-xs font-extrabold rounded-xl transition-all border text-left flex justify-between items-center cursor-pointer ${period === 'pre_10_11'
-                            ? 'bg-teal-900 text-amber-400 border-teal-950 shadow-md ring-2 ring-teal-900/10'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350'
-                            }`}
-                        >
-                          <span>{L.t('Trước Ngày 10/11/2026 (Giá Ưu Đãi)', 'Before Nov 10, 2026 (Early Bird)')}</span>
-                          <span className="font-mono text-[9px] px-2 py-0.5 bg-amber-400/10 text-amber-500 rounded font-normal">
-                            {L.t('Được khuyên dùng', 'Recommended')}
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setPeriod('post_10_11')}
-                          className={`p-3 text-xs font-extrabold rounded-xl transition-all border text-left flex justify-between items-center cursor-pointer ${period === 'post_10_11'
-                            ? 'bg-teal-900 text-amber-400 border-teal-950 shadow-md ring-2 ring-teal-900/10'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-350'
-                            }`}
-                        >
-                          <span>{L.t('Từ 10/11/2026 trở đi (Giá Cận Sự Kiện)', 'From Nov 10, 2026 (Regular Price)')}</span>
-                          <span className="font-mono text-[9px] px-2 py-0.5 bg-rose-500/15 text-rose-500 rounded font-normal">
-                            {L.t('Cận hội nghị', 'Regular')}
-                          </span>
-                        </button>
-                      </div>
-                      <p className="text-[9.5px] text-slate-500 leading-snug">
-                        {L.t('* Biểu giá chi tiết của gói học tập và dịch vụ phụ trội (như Tour tham quan) tự động quy đổi theo thời điểm quý đại biểu chọn.', '* Detailed pricing for packages and add-ons (e.g., tours) automatically adapts to your selected date.')}
-                      </p>
-                    </div>
+
 
                     <div className={`grid grid-cols-1 gap-5 ${nationality === 'foreign' ? 'md:grid-cols-1 max-w-md mx-auto w-full' : 'md:grid-cols-3'
                       }`}>
@@ -1188,7 +1054,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                         })
                         .map((pkg) => {
                           const isSelected = packageId === pkg.id;
-                          const currentPkgPrice = currentPrices[pkg.id as keyof typeof currentPrices] ?? 0;
+                          const currentPkgPrice = pkg.fee;
                           return (
                             <label
                               key={pkg.id}
@@ -1234,9 +1100,9 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                               <div className="font-mono font-black text-slate-950 text-base md:text-lg mt-5 border-t border-slate-100 pt-3 text-right">
                                 {pkg.id === 'pkg-foreign' ? (
                                   <span>
-                                    {period === 'pre_10_11' ? '$150' : '$200'}{' '}
+                                    ${Math.round(pkg.fee / 25000)}{' '}
                                     <span className="text-[10px] font-normal text-slate-400 font-sans">
-                                      ({currentPkgPrice.toLocaleString()} VNĐ)
+                                      ({pkg.fee.toLocaleString()} VNĐ)
                                     </span>
                                   </span>
                                 ) : (
@@ -1266,7 +1132,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {addOnServices.filter(svc => svc.isEnabled).map((svc) => {
                         const isSelected = addOnSelections[svc.id] || false;
-                        const svcFee = period === 'post_10_11' && svc.feePost ? svc.feePost : svc.fee;
+                        const svcFee = svc.fee;
                         const colorMap: Record<string, { bg: string; border: string; ring: string; text: string; checkbox: string }> = {
                           teal: { bg: 'bg-teal-50/40', border: 'border-teal-600', ring: 'ring-teal-600/10', text: 'text-teal-900', checkbox: 'text-teal-800' },
                           amber: { bg: 'bg-amber-50/40', border: 'border-amber-500', ring: 'ring-amber-500/10', text: 'text-amber-850', checkbox: 'text-amber-600' },
@@ -1331,7 +1197,7 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
                           <span>{L.t('Phí Gói Đăng Ký', 'Package Fee')} ({selectedPackage?.name}):</span>
                           <span className="font-mono text-slate-905">
                             {selectedPackage?.id === 'pkg-foreign' ? (
-                              `${period === 'pre_10_11' ? '$150' : '$200'} (${baseFee.toLocaleString()} VNĐ)`
+                              `$${Math.round(baseFee / 25000)} (${baseFee.toLocaleString()} VNĐ)`
                             ) : (
                               `${baseFee.toLocaleString()} VNĐ`
                             )}
