@@ -405,6 +405,12 @@ INSERT INTO public.system_config (key, value) VALUES
   "restApiKey": "",
   "safariWebId": "",
   "isEnabled": false
+}'::jsonb),
+('marketing_channels_config', '{
+  "facebook": { "appId": "", "pageId": "", "pageAccessToken": "", "pageName": "", "isConfigured": false },
+  "zalo": { "appId": "", "secretKey": "", "oaId": "", "accessToken": "", "oaName": "", "isConfigured": false },
+  "tiktok": { "clientKey": "", "clientSecret": "", "accessToken": "", "accountName": "", "isConfigured": false },
+  "youtube": { "clientId": "", "clientSecret": "", "accessToken": "", "channelName": "", "isConfigured": false }
 }'::jsonb)
 ON CONFLICT (key) DO NOTHING;
 
