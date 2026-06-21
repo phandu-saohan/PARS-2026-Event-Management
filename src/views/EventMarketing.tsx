@@ -8,7 +8,7 @@ import {
   Share2, Send, Video, TrendingUp, Users, Eye, Sparkles, Plus, Trash2, 
   Settings, CheckCircle2, Calendar, AlertTriangle, FileText, 
   Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2, X,
-  ChevronLeft, ChevronRight, Upload, Film, CheckSquare
+  ChevronLeft, ChevronRight, Upload, Film, CheckSquare, BookOpen
 } from 'lucide-react';
 import { MarketingPost, MarketingChannelsConfig } from '../types';
 import { store } from '../dataStore';
@@ -33,7 +33,7 @@ const TOPICS = [
 
 export default function EventMarketing({ role }: EventMarketingProps) {
   const [posts, setPosts] = useState<MarketingPost[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'news_feed' | 'video' | 'channels'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'news_feed' | 'video' | 'channels' | 'guide'>('all');
   
   // Editorial Calendar states
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -1081,6 +1081,14 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           }`}
         >
           Kênh liên kết ({(Object.values(channelsConfig) as any[]).filter(c => c.isConfigured).length})
+        </button>
+        <button
+          onClick={() => setActiveTab('guide')}
+          className={`pb-3 text-xs font-bold transition-all border-b-2 bg-transparent cursor-pointer flex items-center gap-1.5 ${
+            activeTab === 'guide' ? 'border-emerald-600 text-emerald-600' : 'border-transparent text-slate-450 hover:text-slate-700'
+          }`}
+        >
+          <BookOpen className="w-3.5 h-3.5" /> Hướng dẫn cấu hình
         </button>
       </div>
 
@@ -2551,6 +2559,278 @@ export default function EventMarketing({ role }: EventMarketingProps) {
             <p className="text-[10px] text-slate-500 text-center leading-normal">
               Vui lòng không tắt cửa sổ này trong khi tiến trình kết nối API mạng xã hội đang diễn ra.
             </p>
+          </div>
+        </div>
+      )}
+      {activeTab === 'guide' && (
+        <div className="space-y-6 pb-10">
+          {/* Header */}
+          <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-2xl p-6 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-sm font-black uppercase tracking-wider">Hướng dẫn Cấu hình Kết nối</h2>
+                <p className="text-[10.5px] text-emerald-100 mt-0.5">Kết nối các mạng xã hội với hệ thống Marketing PARS 2026</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+              {[
+                { icon: '🔵', name: 'Facebook Page', badge: 'Graph API' },
+                { icon: '🟦', name: 'Zalo OA', badge: 'OpenAPI v2' },
+                { icon: '🔴', name: 'YouTube Shorts', badge: 'Data API v3' },
+                { icon: '⬛', name: 'TikTok', badge: 'Commercial API' },
+              ].map(ch => (
+                <div key={ch.name} className="bg-white/10 rounded-xl p-3 text-center">
+                  <div className="text-xl mb-1">{ch.icon}</div>
+                  <p className="text-[10px] font-bold">{ch.name}</p>
+                  <p className="text-[9px] text-emerald-200 mt-0.5">{ch.badge}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ─── FACEBOOK ─── */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 bg-[#1877F2]/8 border-b border-[#1877F2]/15">
+              <div className="w-8 h-8 rounded-xl bg-[#1877F2] flex items-center justify-center shrink-0">
+                <Facebook className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-800">📘 Hướng dẫn liên kết FACEBOOK PAGE</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">Graph API — Page Access Token vĩnh viễn (Never-Expiring)</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                {
+                  step: 1,
+                  title: 'Lấy Facebook Page ID',
+                  color: 'bg-blue-100 text-blue-700',
+                  content: 'Truy cập Fanpage của bạn → Chọn mục Giới thiệu → Cuộn xuống phần Thông tin về Trang để sao chép ID Trang (Page ID) — dãy số gồm 15 chữ số.'
+                },
+                {
+                  step: 2,
+                  title: 'Tạo ứng dụng trên Facebook Developers',
+                  color: 'bg-blue-100 text-blue-700',
+                  content: 'Truy cập developers.facebook.com → Đăng nhập → nhấp Tạo ứng dụng mới (Create App) → Chọn loại ứng dụng là Doanh nghiệp (Business) hoặc Khác.'
+                },
+                {
+                  step: 3,
+                  title: 'Lấy Token qua Graph API Explorer',
+                  color: 'bg-blue-100 text-blue-700',
+                  content: 'Vào menu Công cụ → Trình khám phá Graph API. Chọn ứng dụng vừa tạo. Tại phần Quyền (Permissions), thêm: pages_manage_posts, pages_read_engagement, pages_show_list. Nhấp Generate Access Token và xác nhận phân quyền cho Fanpage.'
+                },
+                {
+                  step: 4,
+                  title: 'Đổi sang Token vĩnh viễn',
+                  color: 'bg-blue-100 text-blue-700',
+                  content: 'Dùng token vừa sinh để gọi Graph API đổi sang Token dài hạn (60 ngày). Tiếp tục lấy Token của Page từ /me/accounts. Token Page này có thời hạn vĩnh viễn trừ khi bạn đổi mật khẩu admin hoặc gỡ ứng dụng.'
+                },
+                {
+                  step: 5,
+                  title: 'Điền vào form cấu hình',
+                  color: 'bg-blue-100 text-blue-700',
+                  content: 'Dán Page ID, App ID và Page Access Token vào form cấu hình Facebook trong tab Kênh liên kết trên PARS 2026, sau đó nhấn Kiểm tra kết nối.'
+                },
+              ].map(s => (
+                <div key={s.step} className="flex gap-4">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${s.color}`}>{s.step}</div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-800 mb-1">{s.title}</p>
+                    <p className="text-[10.5px] text-slate-600 leading-relaxed">{s.content}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex gap-2">
+                <span className="text-base shrink-0">💡</span>
+                <p className="text-[10px] text-blue-700 leading-relaxed">
+                  <strong>Mẹo:</strong> Để token không bao giờ hết hạn, hãy tạo <strong>System User Token</strong> trong Meta Business Suite → Settings → System Users. Token này sẽ không bao giờ hết hạn khi không có vi phạm bảo mật.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── ZALO OA ─── */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 bg-sky-500/8 border-b border-sky-500/15">
+              <div className="w-8 h-8 rounded-xl bg-sky-500 flex items-center justify-center shrink-0">
+                <span className="text-white text-xs font-black">Za</span>
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-800">💬 Hướng dẫn liên kết ZALO OA</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">OpenAPI v2.0 — Authorization Code + Refresh Token tự động</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                {
+                  step: 1,
+                  title: 'Lấy Zalo OA ID',
+                  color: 'bg-sky-100 text-sky-700',
+                  content: 'Truy cập cổng quản trị Zalo OA tại oa.zalo.me/manage → Chọn tài khoản OA sự kiện → Sao chép OA ID hiển thị ngay dưới tên tài khoản.'
+                },
+                {
+                  step: 2,
+                  title: 'Lấy App ID & Secret Key',
+                  color: 'bg-sky-100 text-sky-700',
+                  content: 'Truy cập developers.zalo.me → Nhấp Ứng dụng của tôi → Tạo ứng dụng mới. Trong tab Cài đặt, sao chép App ID và Mã bảo mật (App Secret Key).'
+                },
+                {
+                  step: 3,
+                  title: 'Cấp quyền và lấy Access Token',
+                  color: 'bg-sky-100 text-sky-700',
+                  content: 'Tại phần Liên kết OA, chọn tài khoản OA của sự kiện và nhấp kết nối. Sử dụng chức năng Ủy quyền nhanh OAuth trên hệ thống PARS để hệ thống tự động gọi API lấy mã Access Token và Refresh Token.'
+                },
+              ].map(s => (
+                <div key={s.step} className="flex gap-4">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${s.color}`}>{s.step}</div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-800 mb-1">{s.title}</p>
+                    <p className="text-[10.5px] text-slate-600 leading-relaxed">{s.content}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 flex gap-2">
+                <span className="text-base shrink-0">⚠️</span>
+                <p className="text-[10px] text-amber-700 leading-relaxed">
+                  <strong>Lưu ý quan trọng:</strong> Hệ thống PARS đã tích hợp sẵn cơ chế chạy ngầm tự động gọi <code className="bg-amber-100 px-1 rounded">/api/zalo?action=refresh-token</code> định kỳ để tự động gia hạn token Zalo OA trước khi hết hạn 25 giờ. Token Zalo có hiệu lực <strong>3 tháng</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── YOUTUBE ─── */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 bg-red-500/8 border-b border-red-500/15">
+              <div className="w-8 h-8 rounded-xl bg-red-600 flex items-center justify-center shrink-0">
+                <Play className="w-4 h-4 text-white fill-white" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-800">🎥 Hướng dẫn liên kết YOUTUBE SHORTS</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">Google Data API v3 — OAuth 2.0 Client ID</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                {
+                  step: 1,
+                  title: 'Tạo dự án trên Google Cloud Console',
+                  color: 'bg-red-100 text-red-700',
+                  content: 'Truy cập console.cloud.google.com → Tạo một Project mới, đặt tên là PARS 2026 Marketing.'
+                },
+                {
+                  step: 2,
+                  title: 'Kích hoạt YouTube Data API',
+                  color: 'bg-red-100 text-red-700',
+                  content: 'Vào mục APIs & Services → Nhấp Enable APIs and Services → Tìm kiếm và kích hoạt YouTube Data API v3.'
+                },
+                {
+                  step: 3,
+                  title: 'Tạo OAuth 2.0 Client ID',
+                  color: 'bg-red-100 text-red-700',
+                  content: 'Vào Credentials → Create Credentials → OAuth client ID. Chọn loại Web application. Tại Authorized redirect URIs, thêm https://pars2026.vercel.app/. Sao chép Client ID và Client Secret được Google cấp.'
+                },
+                {
+                  step: 4,
+                  title: 'Phân quyền Scope',
+                  color: 'bg-red-100 text-red-700',
+                  content: 'Khi cấu hình qua hệ thống OAuth nhanh, cấp quyền cho các phạm vi: youtube.upload (đăng tải video) và youtube.readonly (xem thông tin kênh).'
+                },
+              ].map(s => (
+                <div key={s.step} className="flex gap-4">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${s.color}`}>{s.step}</div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-800 mb-1">{s.title}</p>
+                    <p className="text-[10.5px] text-slate-600 leading-relaxed">{s.content}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <p className="text-[10px] text-slate-500 leading-relaxed">
+                  <strong className="text-slate-700">📋 Scopes cần thiết:</strong><br/>
+                  <code className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[9px] inline-block mt-1 mr-1">https://www.googleapis.com/auth/youtube.upload</code>
+                  <code className="bg-white border border-slate-200 rounded px-1.5 py-0.5 text-[9px] inline-block mt-1">https://www.googleapis.com/auth/youtube.readonly</code>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ─── TIKTOK ─── */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl overflow-hidden">
+            <div className="flex items-center gap-3 px-6 py-4 bg-slate-800/6 border-b border-slate-800/10">
+              <div className="w-8 h-8 rounded-xl bg-slate-900 flex items-center justify-center shrink-0">
+                <Video className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xs font-black text-slate-800">🎵 Hướng dẫn liên kết TIKTOK COMMERCIAL API</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">Content Posting API — video.upload + user.info.basic</p>
+              </div>
+            </div>
+            <div className="p-6 space-y-4">
+              {[
+                {
+                  step: 1,
+                  title: 'Tạo tài khoản TikTok Developer',
+                  color: 'bg-slate-100 text-slate-700',
+                  content: 'Truy cập developers.tiktok.com và đăng nhập bằng tài khoản thương hiệu của hội nghị PARS 2026.'
+                },
+                {
+                  step: 2,
+                  title: 'Đăng ký TikTok Commercial App',
+                  color: 'bg-slate-100 text-slate-700',
+                  content: 'Nhấp Tạo ứng dụng → Chọn loại tích hợp Video Content Posting. Sao chép Client Key và Client Secret được cấp.'
+                },
+                {
+                  step: 3,
+                  title: 'Lấy Access Token qua OAuth',
+                  color: 'bg-slate-100 text-slate-700',
+                  content: 'Sử dụng tính năng ủy quyền OAuth trên giao diện PARS để cấp quyền cho phép ứng dụng truy cập tài khoản TikTok doanh nghiệp và đăng tải video ngắn (scope: video.upload và user.info.basic).'
+                },
+              ].map(s => (
+                <div key={s.step} className="flex gap-4">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5 ${s.color}`}>{s.step}</div>
+                  <div>
+                    <p className="text-[11px] font-bold text-slate-800 mb-1">{s.title}</p>
+                    <p className="text-[10.5px] text-slate-600 leading-relaxed">{s.content}</p>
+                  </div>
+                </div>
+              ))}
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 flex gap-2">
+                <span className="text-base shrink-0">⚠️</span>
+                <p className="text-[10px] text-rose-700 leading-relaxed">
+                  <strong>Lưu ý:</strong> TikTok Access Token hết hạn sau <strong>24 giờ</strong>. Hệ thống sẽ tự động nhắc gia hạn. Khi gặp lỗi đăng video, vào tab Kênh liên kết để cập nhật token mới.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick links */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5">
+            <h4 className="text-[10px] font-black text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+              <ExternalLink className="w-3.5 h-3.5" /> Liên kết nhanh đến trang Developer
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { name: 'Facebook Developers', url: 'https://developers.facebook.com', color: 'hover:bg-[#1877F2]/10 hover:border-[#1877F2]/30', icon: '🔵' },
+                { name: 'Zalo Developers', url: 'https://developers.zalo.me', color: 'hover:bg-sky-50 hover:border-sky-200', icon: '🟦' },
+                { name: 'Google Cloud Console', url: 'https://console.cloud.google.com', color: 'hover:bg-red-50 hover:border-red-200', icon: '🔴' },
+                { name: 'TikTok Developers', url: 'https://developers.tiktok.com', color: 'hover:bg-slate-100 hover:border-slate-300', icon: '⬛' },
+              ].map(link => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white transition-all text-slate-700 no-underline ${link.color}`}
+                >
+                  <span className="text-sm">{link.icon}</span>
+                  <span className="text-[10px] font-semibold leading-tight">{link.name}</span>
+                  <ExternalLink className="w-2.5 h-2.5 ml-auto shrink-0 text-slate-400" />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       )}
