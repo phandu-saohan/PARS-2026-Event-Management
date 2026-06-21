@@ -416,28 +416,35 @@ export interface MarketingChannelsConfig {
     pageAccessToken: string;
     pageName: string;
     isConfigured: boolean;
+    // Facebook long-lived token does not use refresh token flow
   };
   zalo: {
     appId: string;
     secretKey: string;
     oaId: string;
     accessToken: string;
+    refreshToken: string;      // Zalo Refresh Token (3 months)
     oaName: string;
     isConfigured: boolean;
+    tokenExpiresAt?: string;   // ISO timestamp khi token sẽ hết hạn
   };
   tiktok: {
     clientKey: string;
     clientSecret: string;
     accessToken: string;
+    refreshToken: string;      // TikTok Refresh Token (1 year)
     accountName: string;
     isConfigured: boolean;
+    tokenExpiresAt?: string;
   };
   youtube: {
     clientId: string;
     clientSecret: string;
     accessToken: string;
+    refreshToken: string;      // Google Refresh Token (permanent until revoked)
     channelName: string;
     isConfigured: boolean;
+    tokenExpiresAt?: string;
   };
 }
 

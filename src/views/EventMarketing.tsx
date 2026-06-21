@@ -56,7 +56,9 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [modalSecretKey, setModalSecretKey] = useState('');
   const [modalPageId, setModalPageId] = useState('');
   const [modalAccessToken, setModalAccessToken] = useState('');
+  const [modalRefreshToken, setModalRefreshToken] = useState('');
   const [modalAccountName, setModalAccountName] = useState('');
+  const [isRefreshingToken, setIsRefreshingToken] = useState(false);
 
   // Publishing terminal progress log overlay
   const [isPublishing, setIsPublishing] = useState(false);
@@ -641,28 +643,31 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       setModalAccessToken(conf.pageAccessToken || '');
       setModalAccountName(conf.pageName || '');
       setModalSecretKey('');
+      setModalRefreshToken('');
     } else if (channel === 'zalo') {
       setModalAppId(conf.appId || '');
       setModalPageId(conf.oaId || '');
       setModalAccessToken(conf.accessToken || '');
       setModalAccountName(conf.oaName || '');
       setModalSecretKey(conf.secretKey || '');
+      setModalRefreshToken((conf as any).refreshToken || '');
     } else if (channel === 'tiktok') {
       setModalAppId(conf.clientKey || '');
       setModalPageId('');
       setModalAccessToken(conf.accessToken || '');
       setModalAccountName(conf.accountName || '');
       setModalSecretKey(conf.clientSecret || '');
+      setModalRefreshToken((conf as any).refreshToken || '');
     } else if (channel === 'youtube') {
       setModalAppId(conf.clientId || '');
       setModalPageId('');
       setModalAccessToken(conf.accessToken || '');
       setModalAccountName(conf.channelName || '');
       setModalSecretKey(conf.clientSecret || '');
+      setModalRefreshToken((conf as any).refreshToken || '');
     }
   };
 
-  // Save manual configurations
   const handleSaveChannelConfig = () => {
     if (!editingChannel) return;
     const currentConfig = store.getMarketingChannelsConfig();
@@ -674,7 +679,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
         pageId: modalPageId,
         pageAccessToken: modalAccessToken,
         pageName: modalAccountName || 'Trang Facebook liên kết',
-        isConfigured: Boolean(modalAccessToken && modalPageId)
+        isConfigured: Boolean(modalAccessToken && modalPageId),
       };
     } else if (editingChannel === 'zalo') {
       updated.zalo = {
@@ -682,24 +687,27 @@ export default function EventMarketing({ role }: EventMarketingProps) {
         secretKey: modalSecretKey,
         oaId: modalPageId,
         accessToken: modalAccessToken,
+        refreshToken: modalRefreshToken,
         oaName: modalAccountName || 'Kênh Zalo OA liên kết',
-        isConfigured: Boolean(modalAccessToken && modalPageId)
+        isConfigured: Boolean(modalAccessToken && modalPageId),
       };
     } else if (editingChannel === 'tiktok') {
       updated.tiktok = {
         clientKey: modalAppId,
         clientSecret: modalSecretKey,
         accessToken: modalAccessToken,
+        refreshToken: modalRefreshToken,
         accountName: modalAccountName || '@tiktok_creator',
-        isConfigured: Boolean(modalAccessToken)
+        isConfigured: Boolean(modalAccessToken),
       };
     } else if (editingChannel === 'youtube') {
       updated.youtube = {
         clientId: modalAppId,
         clientSecret: modalSecretKey,
         accessToken: modalAccessToken,
+        refreshToken: modalRefreshToken,
         channelName: modalAccountName || 'Kênh YouTube Shorts',
-        isConfigured: Boolean(modalAccessToken)
+        isConfigured: Boolean(modalAccessToken),
       };
     }
 
@@ -714,20 +722,86 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     if (window.confirm(`Bạn có chắc chắn muốn ngắt kết nối và xóa cấu hình kênh ${key.toUpperCase()}?`)) {
       const currentConfig = store.getMarketingChannelsConfig();
       const updated = { ...currentConfig };
-      
       if (key === 'facebook') {
         updated.facebook = { appId: '', pageId: '', pageAccessToken: '', pageName: '', isConfigured: false };
       } else if (key === 'zalo') {
-        updated.zalo = { appId: '', secretKey: '', oaId: '', accessToken: '', oaName: '', isConfigured: false };
+        updated.zalo = { appId: '', secretKey: '', oaId: '', accessToken: '', refreshToken: '', oaName: '', isConfigured: false };
       } else if (key === 'tiktok') {
-        updated.tiktok = { clientKey: '', clientSecret: '', accessToken: '', accountName: '', isConfigured: false };
+        updated.tiktok = { clientKey: '', clientSecret: '', accessToken: '', refreshToken: '', accountName: '', isConfigured: false };
       } else if (key === 'youtube') {
-        updated.youtube = { clientId: '', clientSecret: '', accessToken: '', channelName: '', isConfigured: false };
+        updated.youtube = { clientId: '', clientSecret: '', accessToken: '', refreshToken: '', channelName: '', isConfigured: false };
       }
-
       store.saveMarketingChannelsConfig(updated);
       setChannelsConfig(updated);
       showToast(`Đã ngắt kết nối thành công kênh ${key.toUpperCase()}!`);
+    }
+  };
+
+  // Auto refresh OAuth token via /api/token-refresh
+  const handleRefreshToken = async (channel: 'zalo' | 'tiktok' | 'youtube' | 'facebook') => {
+    setIsRefreshingToken(true);
+    const conf = channelsConfig[channel] as any;
+
+    let body: Record<string, string> = { platform: channel };
+    if (channel === 'zalo') {
+      if (!conf.appId || !conf.secretKey || !conf.refreshToken) {
+        showToast('Thiếu App ID, Secret Key hoặc Refresh Token Zalo!', 'error');
+        setIsRefreshingToken(false);
+        return;
+      }
+      body = { platform: 'zalo', appId: conf.appId, secretKey: conf.secretKey, refreshToken: conf.refreshToken };
+    } else if (channel === 'tiktok') {
+      if (!conf.clientKey || !conf.clientSecret || !conf.refreshToken) {
+        showToast('Thiếu Client Key, Client Secret hoặc Refresh Token TikTok!', 'error');
+        setIsRefreshingToken(false);
+        return;
+      }
+      body = { platform: 'tiktok', clientKey: conf.clientKey, clientSecret: conf.clientSecret, refreshToken: conf.refreshToken };
+    } else if (channel === 'youtube') {
+      if (!conf.clientId || !conf.clientSecret || !conf.refreshToken) {
+        showToast('Thiếu Client ID, Client Secret hoặc Refresh Token YouTube!', 'error');
+        setIsRefreshingToken(false);
+        return;
+      }
+      body = { platform: 'youtube', clientId: conf.clientId, clientSecret: conf.clientSecret, refreshToken: conf.refreshToken };
+    } else if (channel === 'facebook') {
+      showToast('Facebook dùng tính năng gia hạn token qua modal cấu hình. Vui lòng dán Short-Lived Token vào ô bên dưới.', 'error');
+      setIsRefreshingToken(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/token-refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local channelsConfig with new token
+        const currentConfig = store.getMarketingChannelsConfig();
+        const updated = { ...currentConfig };
+        if (channel === 'zalo') {
+          updated.zalo = { ...updated.zalo, accessToken: result.accessToken, refreshToken: result.refreshToken || conf.refreshToken, tokenExpiresAt: result.tokenExpiresAt };
+        } else if (channel === 'tiktok') {
+          updated.tiktok = { ...updated.tiktok, accessToken: result.accessToken, refreshToken: result.refreshToken || conf.refreshToken, tokenExpiresAt: result.tokenExpiresAt };
+        } else if (channel === 'youtube') {
+          updated.youtube = { ...updated.youtube, accessToken: result.accessToken, tokenExpiresAt: result.tokenExpiresAt };
+        }
+        store.saveMarketingChannelsConfig(updated);
+        setChannelsConfig(updated);
+        // Also update modal fields
+        setModalAccessToken(result.accessToken);
+        if (result.refreshToken) setModalRefreshToken(result.refreshToken);
+        showToast(result.message || 'Refresh token thành công!', 'success');
+      } else {
+        showToast(result.error || 'Refresh token thất bại!', 'error');
+      }
+    } catch (e: any) {
+      showToast('Không thể kết nối /api/token-refresh: ' + e.message, 'error');
+    } finally {
+      setIsRefreshingToken(false);
     }
   };
 
@@ -2216,6 +2290,86 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                   <div>
                     <h4 className="font-extrabold text-slate-800 text-xs">Zalo Official Account (OA)</h4>
                     <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.zalo.isConfigured
+                        ? channelsConfig.zalo.oaName
+                        : 'Kênh tương tác và truyền tải tin'}
+                    </p>
+                    {/* Token expiry indicator */}
+                    {channelsConfig.zalo.isConfigured && (channelsConfig.zalo as any).tokenExpiresAt && (() => {
+                      const expiresAt = new Date((channelsConfig.zalo as any).tokenExpiresAt);
+                      const hoursLeft = Math.floor((expiresAt.getTime() - Date.now()) / 3600000);
+                      const isExpired = hoursLeft <= 0;
+                      const isWarning = hoursLeft <= 2 && hoursLeft > 0;
+                      return (
+                        <span className={`inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                          isExpired ? 'bg-rose-100 text-rose-700' :
+                          isWarning ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>
+                          <RefreshCw className="w-2 h-2" />
+                          {isExpired ? 'Token đã hết hạn!' : `Token hết hạn sau ${hoursLeft}h`}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
+                  channelsConfig.zalo.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {channelsConfig.zalo.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.zalo.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('zalo')}
+                      disabled={testingConnection === 'zalo'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'zalo' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      Kiểm tra
+                    </button>
+
+                    <button
+                      onClick={() => handleRefreshToken('zalo')}
+                      disabled={isRefreshingToken}
+                      className="px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                    >
+                      {isRefreshingToken ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      Làm mới Token
+                    </button>
+
+                    <button
+                      onClick={() => handleDisconnectChannel('zalo')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => handleOpenSettings('zalo')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.zalo.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
+                </button>
+              </div>
+            </div>
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+                    <Link className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">Zalo Official Account (OA)</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
                       {channelsConfig.zalo.isConfigured 
                         ? channelsConfig.zalo.oaName 
                         : 'Kênh tương tác và truyền tải tin'}
@@ -2267,6 +2421,78 @@ export default function EventMarketing({ role }: EventMarketingProps) {
 
             {/* TikTok */}
             <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+                    <Video className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">TikTok Commercial API</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.tiktok.isConfigured
+                        ? channelsConfig.tiktok.accountName
+                        : 'Nền tảng video ngắn viral'}
+                    </p>
+                    {channelsConfig.tiktok.isConfigured && (channelsConfig.tiktok as any).tokenExpiresAt && (() => {
+                      const expiresAt = new Date((channelsConfig.tiktok as any).tokenExpiresAt);
+                      const hoursLeft = Math.floor((expiresAt.getTime() - Date.now()) / 3600000);
+                      const isExpired = hoursLeft <= 0;
+                      const isWarning = hoursLeft <= 2 && hoursLeft > 0;
+                      return (
+                        <span className={`inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                          isExpired ? 'bg-rose-100 text-rose-700' :
+                          isWarning ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>
+                          <RefreshCw className="w-2 h-2" />
+                          {isExpired ? 'Token đã hết hạn!' : `Token hết hạn sau ${hoursLeft}h`}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
+                  channelsConfig.tiktok.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {channelsConfig.tiktok.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
+                </span>
+              </div>
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.tiktok.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('tiktok')}
+                      disabled={testingConnection === 'tiktok'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'tiktok' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                      Kiểm tra
+                    </button>
+                    <button
+                      onClick={() => handleRefreshToken('tiktok')}
+                      disabled={isRefreshingToken}
+                      className="px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                    >
+                      {isRefreshingToken ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      Làm mới Token
+                    </button>
+                    <button
+                      onClick={() => handleDisconnectChannel('tiktok')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => handleOpenSettings('tiktok')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.tiktok.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
+                </button>
+              </div>
+            </div>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-800 flex items-center justify-center border border-slate-200">
@@ -2326,6 +2552,78 @@ export default function EventMarketing({ role }: EventMarketingProps) {
 
             {/* YouTube */}
             <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center border border-red-100">
+                    <Play className="w-5 h-5 shrink-0 fill-red-500 text-red-500" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">YouTube Shorts (Data API v3)</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.youtube.isConfigured
+                        ? channelsConfig.youtube.channelName
+                        : 'Đăng tải và phân phối video ngắn'}
+                    </p>
+                    {channelsConfig.youtube.isConfigured && (channelsConfig.youtube as any).tokenExpiresAt && (() => {
+                      const expiresAt = new Date((channelsConfig.youtube as any).tokenExpiresAt);
+                      const minsLeft = Math.floor((expiresAt.getTime() - Date.now()) / 60000);
+                      const isExpired = minsLeft <= 0;
+                      const isWarning = minsLeft <= 15 && minsLeft > 0;
+                      return (
+                        <span className={`inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                          isExpired ? 'bg-rose-100 text-rose-700' :
+                          isWarning ? 'bg-amber-100 text-amber-700' :
+                          'bg-slate-100 text-slate-500'
+                        }`}>
+                          <RefreshCw className="w-2 h-2" />
+                          {isExpired ? 'Token đã hết hạn!' : `Token hết hạn sau ${minsLeft} phút`}
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
+                  channelsConfig.youtube.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                }`}>
+                  {channelsConfig.youtube.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
+                </span>
+              </div>
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.youtube.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('youtube')}
+                      disabled={testingConnection === 'youtube'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'youtube' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                      Kiểm tra
+                    </button>
+                    <button
+                      onClick={() => handleRefreshToken('youtube')}
+                      disabled={isRefreshingToken}
+                      className="px-2.5 py-1.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center gap-1 cursor-pointer hover:bg-emerald-100 transition-colors disabled:opacity-50"
+                    >
+                      {isRefreshingToken ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                      Làm mới Token
+                    </button>
+                    <button
+                      onClick={() => handleDisconnectChannel('youtube')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => handleOpenSettings('youtube')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.youtube.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
+                </button>
+              </div>
+            </div>
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3.5">
                   <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-650 flex items-center justify-center border border-rose-100">
