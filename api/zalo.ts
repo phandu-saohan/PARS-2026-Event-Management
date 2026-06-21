@@ -228,6 +228,84 @@ async function handleRefreshToken(req: VercelRequest, res: VercelResponse) {
 }
 
 // ==========================================
+// 4. Action: create-article (Create Zalo OA Article Feed)
+// ==========================================
+async function handleCreateArticle(req: VercelRequest, res: VercelResponse) {
+  const { accessToken, title, description, bodyText, coverUrl } = req.body;
+
+  if (!accessToken || !title) {
+    return res.status(400).json({
+      success: false,
+      message: "Thiếu Access Token hoặc tiêu đề bài viết."
+    });
+  }
+
+  try {
+    const apiBase = process.env.ZALO_API_BASE_URL || "https://openapi.zalo.me";
+    const zaloUrl = `${apiBase}/v2.0/oa/article/create`;
+
+    const articlePayload = {
+      type: "normal",
+      title: title,
+      author: "Ban Tổ Chức PARS 2026",
+      cover: {
+        cover_type: "photo",
+        photo_url: coverUrl || "https://pars2026.vercel.app/pwa-192x192.png",
+        status: "show"
+      },
+      description: description || title,
+      body: [
+        {
+          type: "text",
+          content: bodyText || description || title
+        }
+      ],
+      status: "show"
+    };
+
+    const fetchOptions: any = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "access_token": accessToken
+      },
+      body: JSON.stringify(articlePayload)
+    };
+
+    const proxyUrl = process.env.ZALO_PROXY_URL || process.env.HTTP_PROXY || process.env.HTTPS_PROXY;
+    if (proxyUrl) {
+      try {
+        const { ProxyAgent } = require('undici');
+        fetchOptions.dispatcher = new ProxyAgent(proxyUrl);
+      } catch (proxyErr) {
+        console.error('[Zalo Create Article API] Failed to initialize ProxyAgent:', proxyErr);
+      }
+    }
+
+    const response = await fetch(zaloUrl, fetchOptions);
+    const resJson = await response.json();
+
+    if (resJson.error === 0) {
+      return res.json({
+        success: true,
+        data: resJson.data,
+        message: "Tạo bài đăng Zalo OA thành công!"
+      });
+    } else {
+      return res.json({
+        success: false,
+        message: `Zalo trả về lỗi mã ${resJson.error}: ${resJson.message || "Không thể tạo bài đăng"}`
+      });
+    }
+  } catch (err: any) {
+    return res.json({
+      success: false,
+      message: `Không kết nối được Zalo API: ${err.message}`
+    });
+  }
+}
+
+// ==========================================
 // Main Handler
 // ==========================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -251,6 +329,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleVerifyToken(req, res);
   } else if (action === 'refresh-token') {
     return handleRefreshToken(req, res);
+  } else if (action === 'create-article') {
+    return handleCreateArticle(req, res);
   } else {
     return res.status(400).json({ error: 'Invalid or missing action query parameter' });
   }
