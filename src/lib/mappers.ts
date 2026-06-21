@@ -6,7 +6,8 @@ import type {
   Attendee, SpeakerRegistration, Sponsor, ConferenceSession,
   InternalTask, FinanceTransaction, RegistrationPackage, UserAccount,
   NotificationTemplate, SentNotificationLog, SpecialtyTrack,
-  BusinessConfig, EmbedScript, ZaloConfig, EmailConfig, Contact
+  BusinessConfig, EmbedScript, ZaloConfig, EmailConfig, Contact,
+  MarketingPost
 } from '../types';
 
 // ============================================================
@@ -538,5 +539,42 @@ export function mapDbToContact(row: any): Contact {
     phone: row.phone || '',
     groupName: row.group_name || 'Mặc định',
     createdAt: row.created_at || undefined,
+  };
+}
+
+// ============================================================
+// EVENT MARKETING POSTS
+// ============================================================
+export function mapMarketingPostToDb(p: MarketingPost): Record<string, any> {
+  return {
+    id: p.id,
+    title: p.title,
+    content: p.content || null,
+    type: p.type,
+    platforms: p.platforms || [],
+    status: p.status,
+    scheduled_at: p.scheduledAt || null,
+    published_at: p.publishedAt || null,
+    metrics: p.metrics || {},
+    media_url: p.mediaUrl || null,
+    video_script: p.videoScript || null,
+    created_at: p.createdAt,
+  };
+}
+
+export function mapDbToMarketingPost(row: any): MarketingPost {
+  return {
+    id: row.id,
+    title: row.title || '',
+    content: row.content || '',
+    type: row.type || 'news_feed',
+    platforms: row.platforms || [],
+    status: row.status || 'draft',
+    scheduledAt: row.scheduled_at || undefined,
+    publishedAt: row.published_at || undefined,
+    metrics: row.metrics || {},
+    mediaUrl: row.media_url || undefined,
+    videoScript: row.video_script || undefined,
+    createdAt: row.created_at || new Date().toISOString(),
   };
 }

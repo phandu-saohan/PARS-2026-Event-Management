@@ -7,7 +7,7 @@ import React from 'react';
 import { 
   Users, Award, Calendar, CheckSquare, Coins, Megaphone, Settings, 
   BarChart2, Globe, Shield, User, FileText, RefreshCw, LogOut, Send,
-  HelpCircle, Search
+  HelpCircle, Search, Share2
 } from 'lucide-react';
 import { Role } from '../types';
 import { useAuth } from './AuthProvider';
@@ -32,6 +32,7 @@ export default function Sidebar({ currentView, onNavigate, currentRole, isOpen, 
     { id: 'bulk-send', name: 'Gửi Tin Hàng Loạt', icon: Send, roles: ['admin', 'btc'] },
     { id: 'tasks', name: 'Công Việc Nội Bộ', icon: CheckSquare, roles: ['admin', 'btc', 'ctv'] },
     { id: 'finances', name: 'Đối Soát Tài Chính', icon: Coins, roles: ['admin', 'btc'] },
+    { id: 'marketing', name: 'Marketing Sự Kiện', icon: Share2, roles: ['admin', 'btc'] },
     { id: 'settings', name: 'Cài Đặt Hệ Thống', icon: Settings, roles: ['admin', 'btc'] },
     { id: 'user-guide', name: 'Hướng Dẫn Sử Dụng', icon: HelpCircle, roles: ['admin', 'btc', 'ctv'] },
   ];

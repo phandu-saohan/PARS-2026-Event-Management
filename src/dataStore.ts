@@ -28,6 +28,7 @@ import {
   Contact,
   SponsorPackage,
   CmeTemplateConfig,
+  MarketingPost,
 } from './types';
 import { supabase, isSupabaseConfigured, uploadToSupabaseStorage } from './lib/supabase';
 import {
@@ -45,6 +46,7 @@ import {
   mapBusinessConfigToDb, mapDbToBusinessConfig,
   mapEmbedScriptToDb, mapDbToEmbedScript,
   mapContactToDb, mapDbToContact,
+  mapMarketingPostToDb, mapDbToMarketingPost,
 } from './lib/mappers';
 
 // Empty fallbacks to remove mock data from source code
@@ -473,6 +475,7 @@ export class DataStore {
   private static KEY_SECTIONS = 'pars_schedule_sections';
   private static KEY_ONESIGNAL = 'pars_config_onesignal';
   private static KEY_CONTACTS = 'pars_contacts';
+  private static KEY_MARKETING_POSTS = 'pars_marketing_posts';
 
   // In-memory cache
   private attendees: Attendee[] = [];
@@ -501,6 +504,7 @@ export class DataStore {
   private shifts: ConferenceShift[] = [];
   private virtualSections: VirtualSection[] = [];
   private contacts: Contact[] = [];
+  private marketingPosts: MarketingPost[] = [];
 
   constructor() {
     this.loadLocalStorage();
@@ -568,6 +572,7 @@ export class DataStore {
     this.whatsappConfig = this.getLocalStorage(DataStore.KEY_WHATSAPP, DEFAULT_WHATSAPP_CONFIG);
     this.oneSignalConfig = this.getLocalStorage(DataStore.KEY_ONESIGNAL, DEFAULT_ONESIGNAL_CONFIG);
     this.contacts = this.getLocalStorage(DataStore.KEY_CONTACTS, []);
+    this.marketingPosts = this.getLocalStorage(DataStore.KEY_MARKETING_POSTS, []);
   }
 
   /**
@@ -609,6 +614,7 @@ export class DataStore {
         { data: dbShifts },
         { data: dbSections },
         { data: dbContacts },
+        { data: dbMarketingPosts },
       ] = await Promise.all([
         supabase.from('packages').select('*'),
         supabase.from('specialty_tracks').select('*'),
@@ -629,6 +635,7 @@ export class DataStore {
         Promise.resolve(supabase.from('shifts').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('virtual_sections').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('contacts').select('*')).catch(() => ({ data: null })),
+        Promise.resolve(supabase.from('marketing_posts').select('*')).catch(() => ({ data: null })),
       ]);
 
       if (pkgs) {
@@ -772,6 +779,10 @@ export class DataStore {
         this.contacts = dbContacts.map(mapDbToContact);
         this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
       }
+      if (dbMarketingPosts) {
+        this.marketingPosts = dbMarketingPosts.map(mapDbToMarketingPost);
+        this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+      }
 
       console.log('✅ Supabase cache synchronization complete!');
       window.dispatchEvent(new CustomEvent('store-loaded'));
@@ -885,6 +896,23 @@ export class DataStore {
         }
         this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
         window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'contacts' } }));
+      })
+      .subscribe();
+
+    // Listen to marketing posts updates
+    supabase.channel('db-marketing-posts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'marketing_posts' }, (payload) => {
+        const { eventType, new: newRow, old: oldRow } = payload;
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const post = mapDbToMarketingPost(newRow);
+          const idx = this.marketingPosts.findIndex(p => p.id === post.id);
+          if (idx >= 0) this.marketingPosts[idx] = post;
+          else this.marketingPosts.push(post);
+        } else if (eventType === 'DELETE') {
+          this.marketingPosts = this.marketingPosts.filter(p => p.id !== oldRow.id);
+        }
+        this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+        window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'marketing_posts' } }));
       })
       .subscribe();
   }
@@ -1403,6 +1431,35 @@ export class DataStore {
     if (isSupabaseConfigured()) {
       supabase.from('specialty_tracks').delete().eq('id', id).then(({ error }) => {
         if (error) console.error('Error deleting track from Supabase:', error);
+      });
+    }
+  }
+
+  // Event Marketing Posts
+  getMarketingPosts() { return this.marketingPosts; }
+  saveMarketingPost(post: MarketingPost) {
+    const idx = this.marketingPosts.findIndex(p => p.id === post.id);
+    if (idx >= 0) {
+      this.marketingPosts[idx] = post;
+    } else {
+      this.marketingPosts.push(post);
+    }
+    this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('marketing_posts').upsert(mapMarketingPostToDb(post)).then(({ error }) => {
+        if (error) console.error('Error syncing marketing post to Supabase:', error);
+      });
+    }
+    return post;
+  }
+  deleteMarketingPost(id: string) {
+    this.marketingPosts = this.marketingPosts.filter(p => p.id !== id);
+    this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('marketing_posts').delete().eq('id', id).then(({ error }) => {
+        if (error) console.error('Error deleting marketing post from Supabase:', error);
       });
     }
   }
@@ -2859,6 +2916,7 @@ export class DataStore {
     localStorage.removeItem(DataStore.KEY_SPECIALTY_TRACKS);
     localStorage.removeItem(DataStore.KEY_BUSINESS_CONFIG);
     localStorage.removeItem(DataStore.KEY_EMBED_SCRIPTS);
+    localStorage.removeItem(DataStore.KEY_MARKETING_POSTS);
     this.loadLocalStorage();
 
     if (isSupabaseConfigured()) {
@@ -2871,6 +2929,7 @@ export class DataStore {
         supabase.from('internal_tasks').delete().neq('id', ''),
         supabase.from('finance_transactions').delete().neq('id', ''),
         supabase.from('notification_logs').delete().neq('id', ''),
+        supabase.from('marketing_posts').delete().neq('id', ''),
       ]).then(() => {
         console.log('Cleared Supabase tables on reset.');
       });
@@ -3158,7 +3217,8 @@ export class DataStore {
         dates: this.dates,
         shifts: this.shifts,
         virtualSections: this.virtualSections,
-        contacts: this.contacts
+        contacts: this.contacts,
+        marketingPosts: this.marketingPosts
       }
     };
     return JSON.stringify(backupObj, null, 2);
@@ -3197,6 +3257,7 @@ export class DataStore {
       if (d.shifts) this.shifts = d.shifts;
       if (d.virtualSections) this.virtualSections = d.virtualSections;
       if (d.contacts) this.contacts = d.contacts;
+      if (d.marketingPosts) this.marketingPosts = d.marketingPosts;
 
       // Save all to localStorage
       this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
@@ -3222,6 +3283,7 @@ export class DataStore {
       this.saveToLocalStorage(DataStore.KEY_SHIFTS, this.shifts);
       this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
       this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
+      this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
 
       // Save to Supabase (if configured)
       if (isSupabaseConfigured()) {
@@ -3241,6 +3303,7 @@ export class DataStore {
           supabase.from('embed_scripts').delete().neq('id', ''),
           supabase.from('contacts').delete().neq('id', ''),
           supabase.from('notification_templates').delete().neq('id', ''),
+          supabase.from('marketing_posts').delete().neq('id', ''),
         ]);
 
         // 2. Perform sequential insertions to respect constraints
@@ -3333,6 +3396,12 @@ export class DataStore {
         if (this.contacts && this.contacts.length > 0) {
           const mappedContacts = this.contacts.map(c => mapContactToDb(c));
           corePromises.push(supabase.from('contacts').insert(mappedContacts));
+        }
+
+        // Save marketing posts
+        if (this.marketingPosts && this.marketingPosts.length > 0) {
+          const mappedPosts = this.marketingPosts.map(p => mapMarketingPostToDb(p));
+          corePromises.push(supabase.from('marketing_posts').insert(mappedPosts));
         }
 
         // Save notification logs

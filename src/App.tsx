@@ -28,6 +28,7 @@ const SponsorManagement = lazy(() => import('./views/SponsorManagement'));
 const NotificationSystem = lazy(() => import('./views/NotificationSystem'));
 const SettingsPanel = lazy(() => import('./views/SettingsPanel'));
 const UserGuide = lazy(() => import('./views/UserGuide'));
+const EventMarketing = lazy(() => import('./views/EventMarketing'));
 
 // Public views
 const PublicEventDetails = lazy(() => import('./views/PublicEventDetails'));
@@ -49,6 +50,7 @@ const VIEW_ROLE_PERMISSIONS: Record<string, Role[]> = {
   'bulk-send': ['admin', 'btc'],
   settings: ['admin', 'btc'],
   'user-guide': ['admin', 'btc', 'ctv'],
+  marketing: ['admin', 'btc'],
 };
 
 function AppContent() {
@@ -58,7 +60,7 @@ function AppContent() {
       const params = new URLSearchParams(window.location.search);
       const viewParam = params.get('view');
       const validViews = [
-        'overview', 'attendees', 'speakers', 'schedule', 'tasks', 'finances', 'sponsors', 'notifications', 'bulk-send', 'settings',
+        'overview', 'attendees', 'speakers', 'schedule', 'tasks', 'finances', 'sponsors', 'notifications', 'bulk-send', 'settings', 'marketing',
         'event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration'
       ];
       if (viewParam && validViews.includes(viewParam)) {
@@ -316,6 +318,8 @@ function AppContent() {
         return (
           <SettingsPanel role={role} />
         );
+      case 'marketing':
+        return <EventMarketing role={role} />;
       case 'user-guide':
         return <UserGuide />;
 

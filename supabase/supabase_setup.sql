@@ -24,6 +24,7 @@ DROP TABLE IF EXISTS public.user_accounts CASCADE;
 DROP TABLE IF EXISTS public.business_config CASCADE;
 DROP TABLE IF EXISTS public.specialty_tracks CASCADE;
 DROP TABLE IF EXISTS public.packages CASCADE;
+DROP TABLE IF EXISTS public.marketing_posts CASCADE;
 
 
 -- ------------------------------------------------------------
@@ -271,7 +272,21 @@ CREATE TABLE public.system_config (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
-
+-- 15. Marketing Posts Configuration
+CREATE TABLE public.marketing_posts (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT,
+    type TEXT NOT NULL, -- 'news_feed', 'video_short'
+    platforms TEXT[], -- Array of strings (facebook, zalo, tiktok, youtube)
+    status TEXT NOT NULL, -- 'draft', 'scheduled', 'published'
+    scheduled_at TIMESTAMP WITH TIME ZONE,
+    published_at TIMESTAMP WITH TIME ZONE,
+    metrics JSONB, -- reach, likes, shares, comments, views
+    media_url TEXT,
+    video_script TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
 -- Enable RLS on all tables
 ALTER TABLE public.packages ENABLE ROW LEVEL SECURITY;
@@ -288,6 +303,7 @@ ALTER TABLE public.notification_templates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notification_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.embed_scripts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.system_config ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.marketing_posts ENABLE ROW LEVEL SECURITY;
 
 -- 1. Public Read Policies (for client UI, check-in, info screens)
 CREATE POLICY "Allow public read packages" ON public.packages FOR SELECT USING (true);
@@ -296,6 +312,7 @@ CREATE POLICY "Allow public read business_config" ON public.business_config FOR 
 CREATE POLICY "Allow public read sessions" ON public.sessions FOR SELECT USING (true);
 CREATE POLICY "Allow public read sponsors" ON public.sponsors FOR SELECT USING (true);
 CREATE POLICY "Allow public read speakers" ON public.speakers FOR SELECT USING (true);
+CREATE POLICY "Allow public read marketing_posts" ON public.marketing_posts FOR SELECT USING (true);
 
 -- 2. Registration Policies (allow public insert for delegates, speakers & sponsors registration forms)
 CREATE POLICY "Allow public insert attendees" ON public.attendees FOR INSERT WITH CHECK (true);
@@ -320,6 +337,7 @@ CREATE POLICY "Allow authenticated manage notification_templates" ON public.noti
 CREATE POLICY "Allow authenticated manage notification_logs" ON public.notification_logs TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Allow authenticated manage embed_scripts" ON public.embed_scripts TO authenticated USING (true) WITH CHECK (true);
 CREATE POLICY "Allow authenticated manage system_config" ON public.system_config TO authenticated USING (true) WITH CHECK (true);
+CREATE POLICY "Allow authenticated manage marketing_posts" ON public.marketing_posts TO authenticated USING (true) WITH CHECK (true);
 
 
 
@@ -332,6 +350,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.internal_tasks;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.finance_transactions;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.notification_logs;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.packages;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.marketing_posts;
 
 
 -- ============================================================

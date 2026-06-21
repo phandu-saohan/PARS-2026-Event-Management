@@ -388,3 +388,24 @@ export interface Contact {
   createdAt?: string;
 }
 
+export interface MarketingPost {
+  id: string;
+  title: string;
+  content: string;
+  type: 'news_feed' | 'video_short';
+  platforms: string[];
+  status: 'draft' | 'scheduled' | 'published';
+  scheduledAt?: string;
+  publishedAt?: string;
+  metrics?: {
+    reach?: number;
+    likes?: number;
+    shares?: number;
+    comments?: number;
+    views?: number;
+  };
+  mediaUrl?: string;
+  videoScript?: string;
+  createdAt: string;
+}
+
