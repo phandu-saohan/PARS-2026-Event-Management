@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Share2, Send, Video, TrendingUp, Users, Eye, Sparkles, Plus, Trash2, 
   Settings, CheckCircle2, Calendar, AlertTriangle, FileText, 
-  Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2, X
+  Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2, X,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { MarketingPost, MarketingChannelsConfig } from '../types';
 import { store } from '../dataStore';
@@ -31,8 +32,15 @@ const TOPICS = [
 
 export default function EventMarketing({ role }: EventMarketingProps) {
   const [posts, setPosts] = useState<MarketingPost[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'news_feed' | 'video' | 'channels'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'news_feed' | 'video' | 'channels'>('all');
   
+  // Editorial Calendar states
+  const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
+  const [selectedPostForPreview, setSelectedPostForPreview] = useState<MarketingPost | null>(null);
+  
+  // News Feed & Video prefill date
+  const [prefillDate, setPrefillDate] = useState<string>('');
+
   // Real marketing channels config
   const [channelsConfig, setChannelsConfig] = useState<MarketingChannelsConfig>(() => 
     store.getMarketingChannelsConfig()
@@ -61,6 +69,10 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [newsAudience, setNewsAudience] = useState('doctors');
   const [newsTopic, setNewsTopic] = useState('masterclass');
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  
+  // Scheduling state for News Feed
+  const [newsIsScheduled, setNewsIsScheduled] = useState(false);
+  const [newsScheduledAt, setNewsScheduledAt] = useState('');
 
   // Shorts Script Editor Form State
   const [videoTitle, setVideoTitle] = useState('');
@@ -70,6 +82,10 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [videoPlatforms, setVideoPlatforms] = useState<string[]>(['tiktok', 'youtube']);
   const [videoTopic, setVideoTopic] = useState('masterclass');
   const [isGeneratingVideoAI, setIsGeneratingVideoAI] = useState(false);
+
+  // Scheduling state for Video Script
+  const [videoIsScheduled, setVideoIsScheduled] = useState(false);
+  const [videoScheduledAt, setVideoScheduledAt] = useState('');
 
   // Loading state
   const [loading, setLoading] = useState(true);
@@ -86,6 +102,17 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     window.addEventListener('store-updated', handleStoreUpdate);
     return () => window.removeEventListener('store-updated', handleStoreUpdate);
   }, []);
+ 
+  // Listen to prefillDate updates from Editorial Calendar
+  useEffect(() => {
+    if (prefillDate) {
+      const datetimeStr = `${prefillDate}T09:00`;
+      setNewsScheduledAt(datetimeStr);
+      setVideoScheduledAt(datetimeStr);
+      setNewsIsScheduled(true);
+      setVideoIsScheduled(true);
+    }
+  }, [prefillDate]);
 
   // Listen to OAuth success message events from popup
   useEffect(() => {
@@ -436,11 +463,27 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       return;
     }
 
+    // Determine status & scheduling
+    const isScheduled = type === 'news_feed' ? newsIsScheduled : videoIsScheduled;
+    const scheduledAtVal = type === 'news_feed' ? newsScheduledAt : videoScheduledAt;
+
+    if (isScheduled && !publishImmediately && !scheduledAtVal) {
+      showToast('Vui lòng chọn thời gian lên lịch đăng bài!', 'error');
+      return;
+    }
+
     // Check configuration status of channels
     const missingChannels = platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
     if (publishImmediately && missingChannels.length > 0) {
       showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
       return;
+    }
+
+    let statusVal: 'draft' | 'scheduled' | 'published' = 'draft';
+    if (publishImmediately) {
+      statusVal = 'published';
+    } else if (isScheduled && scheduledAtVal) {
+      statusVal = 'scheduled';
     }
 
     const newPost: MarketingPost = {
@@ -449,13 +492,14 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       content,
       type,
       platforms,
-      status: publishImmediately ? 'published' : 'draft',
+      status: statusVal,
       createdAt: new Date().toISOString(),
       mediaUrl: mediaUrl || undefined,
-      videoScript: videoScript || undefined
+      videoScript: videoScript || undefined,
+      scheduledAt: statusVal === 'scheduled' ? new Date(scheduledAtVal).toISOString() : undefined
     };
 
-    if (publishImmediately) {
+    if (statusVal === 'published') {
       newPost.publishedAt = new Date().toISOString();
       newPost.metrics = {
         reach: Math.floor(Math.random() * 12000) + 1500,
@@ -469,18 +513,26 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     } else {
       try {
         store.saveMarketingPost(newPost);
-        showToast('Đã lưu bài viết vào nháp thành công!');
+        if (statusVal === 'scheduled') {
+          showToast('Đã lên lịch xuất bản bài đăng thành công!', 'success');
+        } else {
+          showToast('Đã lưu bài viết vào nháp thành công!');
+        }
         
         // Reset Forms
         if (type === 'news_feed') {
           setNewsTitle('');
           setNewsContent('');
           setNewsMediaUrl('');
+          setNewsIsScheduled(false);
+          setNewsScheduledAt('');
         } else {
           setVideoTitle('');
           setVideoHook('');
           setVideoBody('');
           setVideoCta('');
+          setVideoIsScheduled(false);
+          setVideoScheduledAt('');
         }
         loadData();
       } catch (e) {
@@ -923,6 +975,14 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           Tất cả bài đăng
         </button>
         <button
+          onClick={() => setActiveTab('calendar')}
+          className={`pb-3 text-xs font-bold transition-all border-b-2 bg-transparent cursor-pointer ${
+            activeTab === 'calendar' ? 'border-indigo-650 text-indigo-650' : 'border-transparent text-slate-450 hover:text-slate-700'
+          }`}
+        >
+          Lịch xuất bản
+        </button>
+        <button
           onClick={() => setActiveTab('news_feed')}
           className={`pb-3 text-xs font-bold transition-all border-b-2 bg-transparent cursor-pointer ${
             activeTab === 'news_feed' ? 'border-indigo-650 text-indigo-650' : 'border-transparent text-slate-450 hover:text-slate-700'
@@ -1089,6 +1149,357 @@ export default function EventMarketing({ role }: EventMarketingProps) {
         </div>
       )}
 
+      {/* Editorial Calendar Tab */}
+      {activeTab === 'calendar' && (
+        <div className="bg-white border border-slate-200/80 rounded-2xl p-6 space-y-6">
+          {/* Calendar Header / Month Selector */}
+          <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-indigo-650 shrink-0" />
+              <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider">Lịch Biên Tập & Xuất Bản</h2>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  const prev = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+                  setCurrentMonth(prev);
+                }}
+                className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer border-0 flex items-center justify-center"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              
+              <span className="text-xs font-black text-slate-700 font-mono uppercase tracking-wide">
+                {currentMonth.toLocaleString('vi-VN', { month: 'long', year: 'numeric' })}
+              </span>
+              
+              <button
+                type="button"
+                onClick={() => {
+                  const next = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+                  setCurrentMonth(next);
+                }}
+                className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 transition-colors cursor-pointer border-0 flex items-center justify-center"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Grid Layout */}
+          <div className="grid grid-cols-7 gap-2">
+            {/* Days of week header */}
+            {['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'].map((day, idx) => (
+              <div key={idx} className="text-center py-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 rounded-lg">
+                {day}
+              </div>
+            ))}
+
+            {/* Days calculation */}
+            {(() => {
+              const year = currentMonth.getFullYear();
+              const month = currentMonth.getMonth();
+              
+              // First day of current month
+              const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday, 1 is Monday...
+              // Adjusted first day (Monday first: 1=Mon, 2=Tue... 0=Sun is index 6)
+              const firstDayOffset = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+              
+              // Days in previous month
+              const daysInPrevMonth = new Date(year, month, 0).getDate();
+              // Days in current month
+              const daysInMonth = new Date(year, month + 1, 0).getDate();
+              
+              const cells = [];
+              
+              // Add padding days from previous month
+              for (let i = firstDayOffset - 1; i >= 0; i--) {
+                const d = daysInPrevMonth - i;
+                cells.push({
+                  dayNum: d,
+                  dateStr: `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+                  isCurrentMonth: false,
+                  dateObj: new Date(year, month - 1, d)
+                });
+              }
+              
+              // Add days from current month
+              for (let d = 1; d <= daysInMonth; d++) {
+                cells.push({
+                  dayNum: d,
+                  dateStr: `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+                  isCurrentMonth: true,
+                  dateObj: new Date(year, month, d)
+                });
+              }
+              
+              // Add padding days from next month to make complete rows (multiple of 7)
+              const totalCellsNeeded = Math.ceil(cells.length / 7) * 7;
+              const nextMonthPadding = totalCellsNeeded - cells.length;
+              for (let d = 1; d <= nextMonthPadding; d++) {
+                cells.push({
+                  dayNum: d,
+                  dateStr: `${year}-${String(month + 2).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+                  isCurrentMonth: false,
+                  dateObj: new Date(year, month + 1, d)
+                });
+              }
+
+              return cells.map((cell, idx) => {
+                // Filter posts for this specific day
+                const dayPosts = posts.filter(post => {
+                  const targetDateStr = post.status === 'scheduled' && post.scheduledAt 
+                    ? post.scheduledAt 
+                    : (post.publishedAt || post.createdAt);
+                  const postDate = new Date(targetDateStr);
+                  return (
+                    postDate.getFullYear() === cell.dateObj.getFullYear() &&
+                    postDate.getMonth() === cell.dateObj.getMonth() &&
+                    postDate.getDate() === cell.dateObj.getDate()
+                  );
+                });
+
+                const isToday = new Date().toDateString() === cell.dateObj.toDateString();
+
+                return (
+                  <div
+                    key={idx}
+                    className={`min-h-[90px] border border-slate-100 rounded-xl p-2 flex flex-col justify-between group relative transition-all duration-200 ${
+                      cell.isCurrentMonth ? 'bg-white hover:border-slate-300' : 'bg-slate-50/50 opacity-40'
+                    } ${isToday ? 'ring-2 ring-indigo-500/30 border-indigo-400 bg-indigo-50/10' : ''}`}
+                  >
+                    {/* Day number & Actions */}
+                    <div className="flex items-center justify-between">
+                      <span className={`text-[10px] font-black font-mono ${
+                        isToday ? 'bg-indigo-600 text-white w-4.5 h-4.5 rounded-full flex items-center justify-center' : 'text-slate-650'
+                      }`}>
+                        {cell.dayNum}
+                      </span>
+                      
+                      {cell.isCurrentMonth && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Prefill and route to News Feed tab
+                            const formattedDate = cell.dateStr;
+                            setPrefillDate(formattedDate);
+                            setActiveTab('news_feed');
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded bg-indigo-50 hover:bg-indigo-100 text-indigo-650 border-0 cursor-pointer flex items-center justify-center"
+                          title="Lên lịch bài đăng mới"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Post badges list */}
+                    <div className="flex-1 mt-1.5 space-y-1 overflow-y-auto max-h-[50px] no-scrollbar">
+                      {dayPosts.map(p => {
+                        const isScheduled = p.status === 'scheduled';
+                        
+                        // Select badge color depending on primary platform
+                        const mainPlatform = p.platforms[0] || 'facebook';
+                        const badgeStyle = 
+                          mainPlatform === 'facebook' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                          mainPlatform === 'zalo' ? 'bg-sky-50 text-sky-700 border border-sky-100' :
+                          mainPlatform === 'tiktok' ? 'bg-slate-900 text-white border border-slate-800' :
+                          'bg-rose-50 text-rose-700 border border-rose-100';
+
+                        return (
+                          <div
+                            key={p.id}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedPostForPreview(p);
+                            }}
+                            className={`p-1 rounded text-[8px] font-bold truncate leading-tight cursor-pointer shadow-2xs hover:scale-[1.02] transition-transform ${badgeStyle} flex items-center gap-1`}
+                            title={p.title}
+                          >
+                            <span className="w-1 h-1 rounded-full bg-current shrink-0" />
+                            {isScheduled && <span className="text-[7px] font-black uppercase text-amber-600">Lịch -</span>}
+                            <span>{p.title}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+        </div>
+      )}
+
+      {/* Selected Post Preview Modal */}
+      {selectedPostForPreview && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-xl max-w-md w-full overflow-hidden">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                  selectedPostForPreview.type === 'news_feed' ? 'bg-indigo-50 text-indigo-700' : 'bg-pink-50 text-pink-700'
+                }`}>
+                  {selectedPostForPreview.type === 'news_feed' ? 'News Feed' : 'Shorts Video'}
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black ${
+                  selectedPostForPreview.status === 'published' ? 'bg-emerald-50 text-emerald-700' :
+                  selectedPostForPreview.status === 'scheduled' ? 'bg-amber-50 text-amber-700' :
+                  'bg-slate-100 text-slate-655'
+                }`}>
+                  {selectedPostForPreview.status === 'published' ? 'Đã đăng' :
+                   selectedPostForPreview.status === 'scheduled' ? 'Đã lên lịch' : 'Bản nháp'}
+                </span>
+              </div>
+              
+              <button
+                type="button"
+                onClick={() => setSelectedPostForPreview(null)}
+                className="p-1 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors border-0 cursor-pointer flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-4 text-slate-700 text-xs">
+              <div>
+                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Tiêu đề bài viết</h4>
+                <p className="font-extrabold text-slate-800 text-sm mt-1 leading-snug">{selectedPostForPreview.title}</p>
+              </div>
+
+              <div>
+                <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                  {selectedPostForPreview.type === 'news_feed' ? 'Nội dung tiếp thị' : 'Kịch bản Video ngắn'}
+                </h4>
+                <div className="p-3 bg-slate-50 border border-slate-200/60 rounded-xl text-[10.5px] leading-relaxed text-slate-650 whitespace-pre-line max-h-48 overflow-y-auto mt-1">
+                  {selectedPostForPreview.type === 'news_feed' 
+                    ? selectedPostForPreview.content 
+                    : selectedPostForPreview.videoScript
+                  }
+                </div>
+              </div>
+
+              {selectedPostForPreview.mediaUrl && (
+                <div>
+                  <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hình ảnh đính kèm</h4>
+                  <a
+                    href={selectedPostForPreview.mediaUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-indigo-650 hover:underline flex items-center gap-1 text-[10px]"
+                  >
+                    <Link className="w-3.5 h-3.5" /> Xem hình ảnh đính kèm
+                  </a>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Kênh đăng tải</h4>
+                  <div className="flex gap-1.5 mt-1">
+                    {selectedPostForPreview.platforms.map(plat => (
+                      <span key={plat} className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[8px] font-bold uppercase border border-slate-200">
+                        {plat}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">
+                    {selectedPostForPreview.status === 'scheduled' ? 'Thời gian đăng dự kiến' : 'Thời gian tạo'}
+                  </h4>
+                  <p className="font-bold text-slate-650 mt-1">
+                    {selectedPostForPreview.status === 'scheduled' && selectedPostForPreview.scheduledAt
+                      ? new Date(selectedPostForPreview.scheduledAt).toLocaleString('vi-VN')
+                      : new Date(selectedPostForPreview.createdAt).toLocaleString('vi-VN')
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {selectedPostForPreview.status === 'published' && selectedPostForPreview.metrics && (
+                <div className="border-t border-slate-150 pt-3">
+                  <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-2">Chỉ số tương tác (Simulated)</h4>
+                  <div className="grid grid-cols-4 gap-2 text-center bg-indigo-50/20 border border-indigo-100/50 rounded-xl p-3">
+                    <div>
+                      <span className="block text-[8px] text-slate-400 font-bold uppercase">Reach</span>
+                      <strong className="text-xs text-slate-700 font-black">{(selectedPostForPreview.metrics.reach || 0).toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-slate-400 font-bold uppercase">Thích</span>
+                      <strong className="text-xs text-slate-700 font-black">{(selectedPostForPreview.metrics.likes || 0).toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-slate-400 font-bold uppercase">Chia sẻ</span>
+                      <strong className="text-xs text-slate-700 font-black">{(selectedPostForPreview.metrics.shares || 0).toLocaleString()}</strong>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-slate-400 font-bold uppercase">
+                        {selectedPostForPreview.type === 'video_short' ? 'Views' : 'Cmt'}
+                      </span>
+                      <strong className="text-xs text-slate-700 font-black">
+                        {selectedPostForPreview.type === 'video_short' 
+                          ? (selectedPostForPreview.metrics.views || 0).toLocaleString() 
+                          : (selectedPostForPreview.metrics.comments || 0).toLocaleString()
+                        }
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-150 flex items-center justify-between">
+              {selectedPostForPreview.status !== 'published' ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const missingChannels = selectedPostForPreview.platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
+                    if (missingChannels.length > 0) {
+                      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
+                      return;
+                    }
+                    
+                    const p = { ...selectedPostForPreview };
+                    p.status = 'published';
+                    p.publishedAt = new Date().toISOString();
+                    p.metrics = {
+                      reach: Math.floor(Math.random() * 8000) + 1200,
+                      likes: Math.floor(Math.random() * 450) + 20,
+                      shares: Math.floor(Math.random() * 50) + 2,
+                      comments: Math.floor(Math.random() * 80) + 1,
+                      views: p.type === 'video_short' ? Math.floor(Math.random() * 6000) + 300 : undefined
+                    };
+                    
+                    setSelectedPostForPreview(null);
+                    simulatePublishingLogs(p, p.platforms, p.type);
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs border-0 cursor-pointer flex items-center gap-1"
+                >
+                  <Send className="w-3 h-3" /> Đăng ngay
+                </button>
+              ) : (
+                <div />
+              )}
+              
+              <button
+                type="button"
+                onClick={() => setSelectedPostForPreview(null)}
+                className="px-4 py-2 rounded-lg border border-slate-250 bg-white text-slate-650 font-bold text-xs hover:bg-slate-50 cursor-pointer"
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {activeTab === 'news_feed' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Editor */}
@@ -1117,6 +1528,33 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 rows={8}
                 className="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-600 font-sans"
               />
+            </div>
+
+            {/* Scheduling config */}
+            <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-slate-700">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="newsIsScheduled"
+                  checked={newsIsScheduled}
+                  onChange={e => setNewsIsScheduled(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                />
+                <label htmlFor="newsIsScheduled" className="text-xs font-bold text-slate-700 cursor-pointer">
+                  Đặt lịch xuất bản bài đăng này (Schedule Post)
+                </label>
+              </div>
+              {newsIsScheduled && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Thời gian:</span>
+                  <input
+                    type="datetime-local"
+                    value={newsScheduledAt}
+                    onChange={e => setNewsScheduledAt(e.target.value)}
+                    className="p-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-650 bg-white"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1165,13 +1603,23 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 Lưu nháp
               </button>
               
-              <button
-                type="button"
-                onClick={() => handleSavePost(true, 'news_feed')}
-                className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
-              >
-                <Send className="w-3.5 h-3.5" /> Đăng tin tự động
-              </button>
+              {newsIsScheduled ? (
+                <button
+                  type="button"
+                  onClick={() => handleSavePost(false, 'news_feed')}
+                  className="px-5 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5" /> Lên lịch đăng bài
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSavePost(true, 'news_feed')}
+                  className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" /> Đăng tin tự động
+                </button>
+              )}
             </div>
           </div>
 
@@ -1318,6 +1766,33 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               </div>
             </div>
 
+            {/* Scheduling config */}
+            <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 text-slate-700 mt-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="videoIsScheduled"
+                  checked={videoIsScheduled}
+                  onChange={e => setVideoIsScheduled(e.target.checked)}
+                  className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                />
+                <label htmlFor="videoIsScheduled" className="text-xs font-bold text-slate-700 cursor-pointer">
+                  Đặt lịch đăng video này (Schedule Video)
+                </label>
+              </div>
+              {videoIsScheduled && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">Thời gian:</span>
+                  <input
+                    type="datetime-local"
+                    value={videoScheduledAt}
+                    onChange={e => setVideoScheduledAt(e.target.value)}
+                    className="p-2 border border-slate-200 rounded-lg text-xs outline-none focus:border-indigo-650 bg-white"
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
               <button
                 type="button"
@@ -1327,13 +1802,23 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 Lưu nháp kịch bản
               </button>
               
-              <button
-                type="button"
-                onClick={() => handleSavePost(true, 'video_short')}
-                className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
-              >
-                <Send className="w-3.5 h-3.5" /> Đăng video tự động
-              </button>
+              {videoIsScheduled ? (
+                <button
+                  type="button"
+                  onClick={() => handleSavePost(false, 'video_short')}
+                  className="px-5 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5" /> Lên lịch đăng bài
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSavePost(true, 'video_short')}
+                  className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" /> Đăng video tự động
+                </button>
+              )}
             </div>
           </div>
 
