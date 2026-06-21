@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Share2, Send, Video, TrendingUp, Users, Eye, Sparkles, Plus, Trash2, 
   Settings, CheckCircle2, Calendar, AlertTriangle, FileText, 
   Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2, X,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Upload, Film, CheckSquare
 } from 'lucide-react';
 import { MarketingPost, MarketingChannelsConfig } from '../types';
 import { store } from '../dataStore';
+import { uploadToSupabaseStorage, isSupabaseConfigured } from '../lib/supabase';
 
 interface EventMarketingProps {
   role: string;
@@ -82,10 +83,24 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [videoPlatforms, setVideoPlatforms] = useState<string[]>(['tiktok', 'youtube']);
   const [videoTopic, setVideoTopic] = useState('masterclass');
   const [isGeneratingVideoAI, setIsGeneratingVideoAI] = useState(false);
+  const [videoCustomTopic, setVideoCustomTopic] = useState('');
+  const [videoIsCustomTopic, setVideoIsCustomTopic] = useState(false);
+
+  // News Feed AI – custom topic
+  const [newsCustomTopic, setNewsCustomTopic] = useState('');
+  const [newsIsCustomTopic, setNewsIsCustomTopic] = useState(false);
 
   // Scheduling state for Video Script
   const [videoIsScheduled, setVideoIsScheduled] = useState(false);
   const [videoScheduledAt, setVideoScheduledAt] = useState('');
+
+  // Video file upload state
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoFileUrl, setVideoFileUrl] = useState(''); // public URL after upload
+  const [videoUploadProgress, setVideoUploadProgress] = useState(0); // 0-100
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
+  const [videoDragOver, setVideoDragOver] = useState(false);
+  const videoFileInputRef = useRef<HTMLInputElement>(null);
 
   // Loading state
   const [loading, setLoading] = useState(true);
@@ -157,6 +172,38 @@ export default function EventMarketing({ role }: EventMarketingProps) {
 
   // AI Content Generator Mock Logic
   const handleGenerateAIContent = () => {
+    // If custom topic, generate a template that uses the user's text
+    if (newsIsCustomTopic && newsCustomTopic.trim()) {
+      if (!newsCustomTopic.trim()) {
+        showToast('Vui lòng nhập chủ đề bài đăng!', 'error');
+        return;
+      }
+      setIsGeneratingAI(true);
+      setTimeout(() => {
+        const selectedAudience = AUDIENCES.find(a => a.id === newsAudience)?.name || 'Các bác sĩ thẩm mỹ';
+        const topic = newsCustomTopic.trim();
+        const title = `📢 ${topic} – Điểm nổi bật tại PARS 2026`;
+        const content =
+          `Kính gửi ${selectedAudience},\n\n` +
+          `Chúng tôi xin trân trọng thông báo về chủ đề đặc biệt tại Hội nghị Khoa học Thẩm mỹ PARS 2026:\n\n` +
+          `🎯 ${topic.toUpperCase()}\n\n` +
+          `Đây là một trong những nội dung được kỳ vọng nhất của chương trình, với sự tham gia của đội ngũ chuyên gia đầu ngành trong và ngoài nước.\n\n` +
+          `✨ NỘI DUNG NỔI BẬT:\n` +
+          `• Cập nhật xu hướng và bằng chứng khoa học mới nhất liên quan đến ${topic}.\n` +
+          `• Thực hành lâm sàng và chia sẻ kinh nghiệm thực tiễn từ các chuyên gia.\n` +
+          `• Thảo luận mở và giải đáp thắc mắc chuyên sâu.\n\n` +
+          `📅 Thời gian: 14-15/11/2026\n` +
+          `📍 Địa điểm: Hà Nội\n\n` +
+          `Đăng ký tham dự tại: https://pars2026.vercel.app/register-delegate\n\n` +
+          `Hãy cùng chúng tôi nắm bắt cơ hội học hỏi và kết nối trong sự kiện y khoa thẩm mỹ lớn nhất năm!`;
+        setNewsTitle(title);
+        setNewsContent(content);
+        setIsGeneratingAI(false);
+        showToast('Tạo nội dung marketing bằng AI hoàn tất!', 'success');
+      }, 1100);
+      return;
+    }
+    // else fallback to preset topic logic below
     setIsGeneratingAI(true);
     setTimeout(() => {
       let title = '';
@@ -215,8 +262,34 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     }, 1200);
   };
 
-  // AI Video Script Generator Mock Logic
+  // AI Video Script Generator
   const handleGenerateVideoAI = () => {
+    // Custom topic path
+    if (videoIsCustomTopic && videoCustomTopic.trim()) {
+      setIsGeneratingVideoAI(true);
+      setTimeout(() => {
+        const topic = videoCustomTopic.trim();
+        const title = `Kịch bản Shorts: ${topic}`;
+        const hook =
+          `❓ [0-5s Visual: Hình ảnh thu hút liên quan đến ${topic}] ` +
+          `Bạn có biết sự thật ít ai nói về "${topic}" trong lĩnh vực thẩm mỹ?`;
+        const body =
+          `🔬 [5-45s Visual: Thước phim tư liệu / infographic về ${topic}] ` +
+          `${topic} đang là chủ đề được thảo luận sôi nổi nhất tại Hội nghị Khoa học Thẩm mỹ PARS 2026. ` +
+          `Các chuyên gia đầu ngành sẽ trực tiếp trình bày bằng chứng lâm sàng và chia sẻ kinh nghiệm thực chiến về ${topic}. ` +
+          `Đây là cơ hội duy nhất để bạn tiếp cận kiến thức chuyên sâu, được hướng dẫn thực hành và giao lưu với cộng đồng bác sĩ lớn nhất Việt Nam.`;
+        const cta =
+          `👉 [45-60s Visual: Màn hình đăng ký PARS 2026] ` +
+          `Tham gia PARS 2026 để trực tiếp tìm hiểu thêm về ${topic}. Link đăng ký ở bio kênh – giữ chỗ ngay hôm nay!`;
+        setVideoTitle(title);
+        setVideoHook(hook);
+        setVideoBody(body);
+        setVideoCta(cta);
+        setIsGeneratingVideoAI(false);
+        showToast('Tạo kịch bản video ngắn bằng AI hoàn tất!', 'success');
+      }, 1100);
+      return;
+    }
     setIsGeneratingVideoAI(true);
     setTimeout(() => {
       let hook = '';
@@ -440,7 +513,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     let title = type === 'news_feed' ? newsTitle : videoTitle;
     let content = type === 'news_feed' ? newsContent : '';
     let platforms = type === 'news_feed' ? newsPlatforms : videoPlatforms;
-    let mediaUrl = type === 'news_feed' ? newsMediaUrl : '';
+    let mediaUrl = type === 'news_feed' ? newsMediaUrl : videoFileUrl;
     let videoScript = type === 'video_short' ? `${videoHook}\n\n${videoBody}\n\n${videoCta}` : '';
 
     if (!title.trim()) {
@@ -533,6 +606,9 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           setVideoCta('');
           setVideoIsScheduled(false);
           setVideoScheduledAt('');
+          setVideoFile(null);
+          setVideoFileUrl('');
+          setVideoUploadProgress(0);
         }
         loadData();
       } catch (e) {
@@ -1647,17 +1723,40 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Chủ đề bài đăng</label>
-                <select
-                  value={newsTopic}
-                  onChange={e => setNewsTopic(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
-                >
-                  {TOPICS.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Chủ đề bài đăng</label>
+                  <button
+                    type="button"
+                    onClick={() => { setNewsIsCustomTopic(p => !p); setNewsCustomTopic(''); }}
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                      newsIsCustomTopic
+                        ? 'bg-amber-500 border-amber-400 text-white'
+                        : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {newsIsCustomTopic ? '✏️ Tự nhập' : '+ Tự nhập chủ đề'}
+                  </button>
+                </div>
+                {newsIsCustomTopic ? (
+                  <textarea
+                    rows={3}
+                    placeholder="Nhập chủ đề của bạn, ví dụ: Tiêm botox vùng hàm – Tỷ lệ biến chứng và cách phòng tránh..."
+                    value={newsCustomTopic}
+                    onChange={e => setNewsCustomTopic(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-amber-500/60 text-slate-100 outline-none focus:border-amber-400 font-sans placeholder:text-slate-500 resize-none"
+                  />
+                ) : (
+                  <select
+                    value={newsTopic}
+                    onChange={e => setNewsTopic(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
+                  >
+                    {TOPICS.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <button
@@ -1739,6 +1838,139 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                   rows={4}
                   className="w-full text-xs p-3 rounded-xl border border-slate-200 outline-none focus:border-indigo-600 font-sans"
                 />
+              </div>
+            </div>
+
+            {/* Video File Upload Section */}
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                <Upload className="w-3 h-3" /> Upload Video đã quay sẵn (Tuỳ chọn)
+              </label>
+              
+              {/* Drop zone */}
+              <div
+                onDragOver={e => { e.preventDefault(); setVideoDragOver(true); }}
+                onDragLeave={() => setVideoDragOver(false)}
+                onDrop={e => {
+                  e.preventDefault();
+                  setVideoDragOver(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (file && file.type.startsWith('video/')) {
+                    setVideoFile(file);
+                    setVideoFileUrl('');
+                    setVideoUploadProgress(0);
+                  } else if (file) {
+                    showToast('Vui lòng chọn file video (MP4, MOV, WebM)', 'error');
+                  }
+                }}
+                onClick={() => !isUploadingVideo && videoFileInputRef.current?.click()}
+                className={`relative flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-xl p-5 cursor-pointer transition-all select-none ${
+                  videoDragOver
+                    ? 'border-indigo-500 bg-indigo-50'
+                    : videoFile
+                    ? 'border-emerald-400 bg-emerald-50'
+                    : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                }`}
+              >
+                <input
+                  ref={videoFileInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={e => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setVideoFile(file);
+                      setVideoFileUrl('');
+                      setVideoUploadProgress(0);
+                    }
+                    e.target.value = '';
+                  }}
+                />
+                {videoFile ? (
+                  <>
+                    <Film className="w-8 h-8 text-emerald-500" />
+                    <div className="text-center">
+                      <p className="text-[11px] font-bold text-emerald-700 truncate max-w-[200px]">{videoFile.name}</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">{(videoFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                    </div>
+                    {videoFileUrl ? (
+                      <div className="flex items-center gap-1.5 bg-emerald-100 rounded-lg px-3 py-1.5">
+                        <CheckSquare className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="text-[10px] font-bold text-emerald-700">Đã upload lên Supabase Storage</span>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={isUploadingVideo}
+                        onClick={async e => {
+                          e.stopPropagation();
+                          if (!videoFile) return;
+                          setIsUploadingVideo(true);
+                          setVideoUploadProgress(10);
+                          try {
+                            const ext = videoFile.name.split('.').pop() || 'mp4';
+                            const path = `marketing/videos/${Date.now()}_${videoFile.name.replace(/\s+/g, '_')}`;
+                            setVideoUploadProgress(30);
+                            let publicUrl: string | null = null;
+                            if (isSupabaseConfigured()) {
+                              publicUrl = await uploadToSupabaseStorage(path, videoFile, 'assets');
+                            } else {
+                              // Fallback: create local object URL for demo
+                              publicUrl = URL.createObjectURL(videoFile);
+                            }
+                            setVideoUploadProgress(90);
+                            if (publicUrl) {
+                              setVideoFileUrl(publicUrl);
+                              setVideoUploadProgress(100);
+                              showToast('Upload video thành công!', 'success');
+                            } else {
+                              showToast('Upload thất bại. Kiểm tra lại cấu hình Supabase Storage.', 'error');
+                              setVideoUploadProgress(0);
+                            }
+                          } catch (err) {
+                            console.error(err);
+                            showToast('Lỗi khi upload video', 'error');
+                            setVideoUploadProgress(0);
+                          } finally {
+                            setIsUploadingVideo(false);
+                          }
+                        }}
+                        className="px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold flex items-center gap-1.5 border-0 cursor-pointer transition-colors"
+                      >
+                        {isUploadingVideo ? (
+                          <><RefreshCw className="w-3 h-3 animate-spin" /> Đang upload ({videoUploadProgress}%)...</>
+                        ) : (
+                          <><Upload className="w-3 h-3" /> Upload lên Storage</>
+                        )}
+                      </button>
+                    )}
+                    {/* Progress bar */}
+                    {isUploadingVideo && (
+                      <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1">
+                        <div
+                          className="bg-indigo-600 h-1.5 rounded-full transition-all duration-300"
+                          style={{ width: `${videoUploadProgress}%` }}
+                        />
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={e => { e.stopPropagation(); setVideoFile(null); setVideoFileUrl(''); setVideoUploadProgress(0); }}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-red-100 hover:bg-red-200 text-red-600 border-0 cursor-pointer transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-7 h-7 text-slate-300" />
+                    <div className="text-center">
+                      <p className="text-[11px] font-semibold text-slate-500">Kéo thả video vào đây hoặc click để chọn</p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">Hỗ trợ: MP4, MOV, WebM (tối đa 500MB)</p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
@@ -1833,17 +2065,40 @@ export default function EventMarketing({ role }: EventMarketingProps) {
             </p>
 
             <div className="space-y-3.5 pt-2">
-              <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Chủ đề video</label>
-                <select
-                  value={videoTopic}
-                  onChange={e => setVideoTopic(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
-                >
-                  {TOPICS.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Chủ đề video</label>
+                  <button
+                    type="button"
+                    onClick={() => { setVideoIsCustomTopic(p => !p); setVideoCustomTopic(''); }}
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                      videoIsCustomTopic
+                        ? 'bg-pink-500 border-pink-400 text-white'
+                        : 'bg-slate-700 border-slate-600 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {videoIsCustomTopic ? '✏️ Tự nhập' : '+ Tự nhập chủ đề'}
+                  </button>
+                </div>
+                {videoIsCustomTopic ? (
+                  <textarea
+                    rows={3}
+                    placeholder="Nhập chủ đề video, ví dụ: Top 3 sai lầm khi tiêm filler mũi – Bác sĩ cảnh báo..."
+                    value={videoCustomTopic}
+                    onChange={e => setVideoCustomTopic(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-pink-500/60 text-slate-100 outline-none focus:border-pink-400 font-sans placeholder:text-slate-500 resize-none"
+                  />
+                ) : (
+                  <select
+                    value={videoTopic}
+                    onChange={e => setVideoTopic(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
+                  >
+                    {TOPICS.map(t => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <button
