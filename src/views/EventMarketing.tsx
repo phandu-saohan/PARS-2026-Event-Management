@@ -7,9 +7,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   Share2, Send, Video, TrendingUp, Users, Eye, Sparkles, Plus, Trash2, 
   Settings, CheckCircle2, Calendar, AlertTriangle, FileText, 
-  Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2
+  Facebook, Play, Link, ExternalLink, RefreshCw, BarChart2, Loader2, X
 } from 'lucide-react';
-import { MarketingPost } from '../types';
+import { MarketingPost, MarketingChannelsConfig } from '../types';
 import { store } from '../dataStore';
 
 interface EventMarketingProps {
@@ -33,13 +33,25 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [posts, setPosts] = useState<MarketingPost[]>([]);
   const [activeTab, setActiveTab] = useState<'all' | 'news_feed' | 'video' | 'channels'>('all');
   
-  // Channels simulated connection status
-  const [channels, setChannels] = useState({
-    facebook: true,
-    zalo: true,
-    tiktok: false,
-    youtube: false
-  });
+  // Real marketing channels config
+  const [channelsConfig, setChannelsConfig] = useState<MarketingChannelsConfig>(() => 
+    store.getMarketingChannelsConfig()
+  );
+
+  // Connection settings modal state
+  const [editingChannel, setEditingChannel] = useState<'facebook' | 'zalo' | 'tiktok' | 'youtube' | null>(null);
+  const [testingConnection, setTestingConnection] = useState<'facebook' | 'zalo' | 'tiktok' | 'youtube' | null>(null);
+  
+  // Modal form states
+  const [modalAppId, setModalAppId] = useState('');
+  const [modalSecretKey, setModalSecretKey] = useState('');
+  const [modalPageId, setModalPageId] = useState('');
+  const [modalAccessToken, setModalAccessToken] = useState('');
+  const [modalAccountName, setModalAccountName] = useState('');
+
+  // Publishing terminal progress log overlay
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishingLogs, setPublishingLogs] = useState<string[]>([]);
 
   // News Feed Editor Form State
   const [newsTitle, setNewsTitle] = useState('');
@@ -74,6 +86,34 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     window.addEventListener('store-updated', handleStoreUpdate);
     return () => window.removeEventListener('store-updated', handleStoreUpdate);
   }, []);
+
+  // Listen to OAuth success message events from popup
+  useEffect(() => {
+    const handleOauthMessage = (e: MessageEvent) => {
+      if (e.data && e.data.type === 'OAUTH_SUCCESS') {
+        const { channel, token, name } = e.data;
+        const currentConfig = store.getMarketingChannelsConfig();
+        const updated = { ...currentConfig };
+        
+        if (channel === 'facebook') {
+          updated.facebook = { appId: 'fb_app_92837', pageId: 'fb_page_10293', pageAccessToken: token, pageName: name, isConfigured: true };
+        } else if (channel === 'zalo') {
+          updated.zalo = { appId: 'zalo_app_739', secretKey: 'zalo_sec_382', oaId: 'zalo_oa_102', accessToken: token, oaName: name, isConfigured: true };
+        } else if (channel === 'tiktok') {
+          updated.tiktok = { clientKey: 'tik_client_829', clientSecret: 'tik_sec_102', accessToken: token, accountName: name, isConfigured: true };
+        } else if (channel === 'youtube') {
+          updated.youtube = { clientId: 'google_cli_102', clientSecret: 'google_sec_38', accessToken: token, channelName: name, isConfigured: true };
+        }
+        
+        store.saveMarketingChannelsConfig(updated);
+        setChannelsConfig(updated);
+        setEditingChannel(null);
+        showToast(`Kết nối thành công kênh ${channel.toUpperCase()} qua OAuth!`, 'success');
+      }
+    };
+    window.addEventListener('message', handleOauthMessage);
+    return () => window.removeEventListener('message', handleOauthMessage);
+  }, [editingChannel]);
 
   const loadData = () => {
     const data = store.getMarketingPosts();
@@ -165,8 +205,14 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       } else if (videoTopic === 'gala') {
         title = 'Kịch bản Shorts: Đêm Gala hoành tráng Marriott';
         hook = '❓ [0-5s Visual: Đèn sân khấu vụt sáng, ly champagne được nâng lên] Bạn đã sẵn sàng cho đêm tiệc sang trọng bậc nhất ngành thẩm mỹ năm nay chưa?';
-        body = '💃 [5-45s Visual: Khách mời mặc đầm dạ hội lộng lẫy check-in thảm đỏ, không gian tiệc Marriott ngập tràn ánh sáng] Gala Dinner PARS 2026 không chỉ là một bữa tiệc. Đây là đêm thăng hoa của nghệ thuật, âm nhạc và cơ hội kết nối giao thương trực tiếp với hàng trăm giáo sư, bác sĩ thẩm mỹ uy tín trong nước và quốc tế. Một ly rượu giao lưu kết nối, mở ra hàng ngàn cơ hội hợp tác mới cho clinic của bạn.';
-        cta = '✨ [45-60s Visual: Banner Gala Dinner PARS 2026] Hãy chuẩn bị trang phục dạ hội đẹp nhất và sở hữu ngay tấm vé VIP để cùng bùng nổ trong đêm Gala Dinner PARS 2026!';
+        body = `💃 [5-45s Visual: Khách mời mặc đầm dạ hội lộng lẫy check-in thảm đỏ, không gian tiệc Marriott ngập tràn ánh sáng] Gala Dinner PARS 2026 không chỉ là một bữa tiệc. Đây là đêm thăng hoa của nghệ thuật, âm nhạc và cơ hội kết nối giao lưu văn hoá, nghệ thuật ấm cúng và sang trọng qua đêm tiệc Gala Dinner.\n\n` +
+          `🎭 ĐIỂM NHẤN ĐẶC BIỆT:\n` +
+          `• Trình diễn nghệ thuật ánh sáng và âm nhạc truyền thống kết hợp hiện đại.\n` +
+          `• Thưởng thức ẩm thực 5 sao kết tinh văn hóa ba miền.\n` +
+          `• Cơ hội networking trực tiếp cùng hơn 500 bác sĩ đầu ngành và doanh nghiệp thẩm mỹ tên tuổi.\n\n` +
+          `📅 Thời gian: 19:30 - Ngày 15/11/2026\n` +
+          `📍 Địa điểm: Grand Ballroom, Khách sạn Marriott Hà Nội.\n\n` +
+          `🎟️ Vé Gala đã được mở bán kèm gói Đại biểu VIP. Hãy chuẩn bị những trang phục dạ tiệc lộng lẫy nhất để toả sáng cùng PARS 2026!`;
       } else if (videoTopic === 'keynote') {
         title = 'Kịch bản Shorts: Xu hướng thiết bị Laser mới';
         hook = '❓ [0-5s Visual: Tia laser quét nhẹ trên bề mặt da thủy tinh] Công nghệ Laser Picosecond nào đang thống trị thị trường thẩm mỹ thế giới năm nay?';
@@ -186,6 +232,90 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       setIsGeneratingVideoAI(false);
       showToast('Tạo kịch bản video ngắn bằng AI hoàn tất!', 'success');
     }, 1200);
+  };
+
+  // Simulate API Publishing Logs Overlay
+  const simulatePublishingLogs = (post: MarketingPost, platforms: string[], type: 'news_feed' | 'video_short') => {
+    setIsPublishing(true);
+    setPublishingLogs([]);
+    
+    let currentLogs: string[] = [];
+    const addLog = (text: string) => {
+      currentLogs = [...currentLogs, `[${new Date().toLocaleTimeString('vi-VN')}] ${text}`];
+      setPublishingLogs(currentLogs);
+    };
+
+    setTimeout(() => {
+      addLog('🚀 BẮT ĐẦU TIẾN TRÌNH XUẤT BẢN TỰ ĐỘNG...');
+      addLog('🔍 Đang kiểm tra cấu hình kết nối của các kênh truyền thông...');
+      
+      setTimeout(() => {
+        let hasError = false;
+        platforms.forEach(plat => {
+          const conf = channelsConfig[plat as keyof typeof channelsConfig];
+          if (!conf?.isConfigured) {
+            addLog(`❌ Kênh ${plat.toUpperCase()}: Thất bại - Chưa cấu hình Access Token!`);
+            hasError = true;
+          } else {
+            addLog(`🔑 Kênh ${plat.toUpperCase()}: Đã xác thực tài khoản "${
+              plat === 'facebook' ? conf.pageName :
+              plat === 'zalo' ? conf.oaName :
+              plat === 'tiktok' ? conf.accountName :
+              conf.channelName
+            }"`);
+          }
+        });
+
+        if (hasError) {
+          setTimeout(() => {
+            addLog('❌ Quy trình xuất bản bị hủy bỏ do có kênh chưa cấu hình.');
+            setTimeout(() => setIsPublishing(false), 2500);
+          }, 1000);
+          return;
+        }
+
+        setTimeout(() => {
+          platforms.forEach(plat => {
+            addLog(`📤 Kênh ${plat.toUpperCase()}: Đang nạp gói payload bài viết (Title & Media)`);
+          });
+
+          setTimeout(() => {
+            platforms.forEach(plat => {
+              addLog(`⚡ Kênh ${plat.toUpperCase()}: Đang gửi bài viết qua Graph API / Webhook endpoint...`);
+            });
+
+            setTimeout(() => {
+              platforms.forEach(plat => {
+                const mockExternalId = plat.toUpperCase() + '-' + Math.random().toString(36).substr(2, 10).toUpperCase();
+                addLog(`✅ Kênh ${plat.toUpperCase()}: Xuất bản thành công! Phản hồi từ máy chủ: ID: ${mockExternalId}`);
+              });
+
+              setTimeout(() => {
+                addLog('🎉 TẤT CẢ CÁC BÀI ĐĂNG ĐÃ ĐƯỢC ĐỒNG BỘ TRUYỀN THÔNG HOÀN TẤT!');
+                setTimeout(() => {
+                  setIsPublishing(false);
+                  store.saveMarketingPost(post);
+                  showToast('Đăng tin thành công và tự động đồng bộ lên mạng xã hội!', 'success');
+                  
+                  // Reset Forms
+                  if (type === 'news_feed') {
+                    setNewsTitle('');
+                    setNewsContent('');
+                    setNewsMediaUrl('');
+                  } else {
+                    setVideoTitle('');
+                    setVideoHook('');
+                    setVideoBody('');
+                    setVideoCta('');
+                  }
+                  loadData();
+                }, 1500);
+              }, 1000);
+            }, 1800);
+          }, 1500);
+        }, 1200);
+      }, 1000);
+    }, 400);
   };
 
   // Create & Publish Post
@@ -217,9 +347,9 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     }
 
     // Check configuration status of channels
-    const missingChannels = platforms.filter(p => !channels[p as keyof typeof channels]);
+    const missingChannels = platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
     if (publishImmediately && missingChannels.length > 0) {
-      showToast(`Không thể đăng tự động. Vui lòng bật liên kết kênh cho các nền tảng: ${missingChannels.join(', ').toUpperCase()}`, 'error');
+      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
       return;
     }
 
@@ -245,27 +375,30 @@ export default function EventMarketing({ role }: EventMarketingProps) {
         comments: Math.floor(Math.random() * 120) + 3,
         views: type === 'video_short' ? Math.floor(Math.random() * 8000) + 500 : undefined
       };
-    }
-
-    try {
-      store.saveMarketingPost(newPost);
-      showToast(publishImmediately ? 'Đăng tin thành công và tự động đồng bộ lên mạng xã hội!' : 'Đã lưu bài viết vào nháp thành công!');
       
-      // Reset Forms
-      if (type === 'news_feed') {
-        setNewsTitle('');
-        setNewsContent('');
-        setNewsMediaUrl('');
-      } else {
-        setVideoTitle('');
-        setVideoHook('');
-        setVideoBody('');
-        setVideoCta('');
+      // Perform simulated log publication
+      simulatePublishingLogs(newPost, platforms, type);
+    } else {
+      try {
+        store.saveMarketingPost(newPost);
+        showToast('Đã lưu bài viết vào nháp thành công!');
+        
+        // Reset Forms
+        if (type === 'news_feed') {
+          setNewsTitle('');
+          setNewsContent('');
+          setNewsMediaUrl('');
+        } else {
+          setVideoTitle('');
+          setVideoHook('');
+          setVideoBody('');
+          setVideoCta('');
+        }
+        loadData();
+      } catch (e) {
+        console.error(e);
+        showToast('Lỗi lưu bài viết marketing', 'error');
       }
-      loadData();
-    } catch (e) {
-      console.error(e);
-      showToast('Lỗi lưu bài viết marketing', 'error');
     }
   };
 
@@ -282,13 +415,233 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     }
   };
 
-  // Connect / Disconnect Channel Simulation
-  const handleToggleChannel = (key: keyof typeof channels) => {
-    setChannels(prev => {
-      const newVal = !prev[key];
-      showToast(`${newVal ? 'Liên kết thành công' : 'Đã hủy liên kết'} kênh ${String(key).toUpperCase()}`);
-      return { ...prev, [key]: newVal };
-    });
+  // Open settings modal and initialize values
+  const handleOpenSettings = (channel: 'facebook' | 'zalo' | 'tiktok' | 'youtube') => {
+    setEditingChannel(channel);
+    const conf = channelsConfig[channel];
+    if (channel === 'facebook') {
+      setModalAppId(conf.appId || '');
+      setModalPageId(conf.pageId || '');
+      setModalAccessToken(conf.pageAccessToken || '');
+      setModalAccountName(conf.pageName || '');
+      setModalSecretKey('');
+    } else if (channel === 'zalo') {
+      setModalAppId(conf.appId || '');
+      setModalPageId(conf.oaId || '');
+      setModalAccessToken(conf.accessToken || '');
+      setModalAccountName(conf.oaName || '');
+      setModalSecretKey(conf.secretKey || '');
+    } else if (channel === 'tiktok') {
+      setModalAppId(conf.clientKey || '');
+      setModalPageId('');
+      setModalAccessToken(conf.accessToken || '');
+      setModalAccountName(conf.accountName || '');
+      setModalSecretKey(conf.clientSecret || '');
+    } else if (channel === 'youtube') {
+      setModalAppId(conf.clientId || '');
+      setModalPageId('');
+      setModalAccessToken(conf.accessToken || '');
+      setModalAccountName(conf.channelName || '');
+      setModalSecretKey(conf.clientSecret || '');
+    }
+  };
+
+  // Save manual configurations
+  const handleSaveChannelConfig = () => {
+    if (!editingChannel) return;
+    const currentConfig = store.getMarketingChannelsConfig();
+    const updated = { ...currentConfig };
+
+    if (editingChannel === 'facebook') {
+      updated.facebook = {
+        appId: modalAppId,
+        pageId: modalPageId,
+        pageAccessToken: modalAccessToken,
+        pageName: modalAccountName || 'Trang Facebook liên kết',
+        isConfigured: Boolean(modalAccessToken && modalPageId)
+      };
+    } else if (editingChannel === 'zalo') {
+      updated.zalo = {
+        appId: modalAppId,
+        secretKey: modalSecretKey,
+        oaId: modalPageId,
+        accessToken: modalAccessToken,
+        oaName: modalAccountName || 'Kênh Zalo OA liên kết',
+        isConfigured: Boolean(modalAccessToken && modalPageId)
+      };
+    } else if (editingChannel === 'tiktok') {
+      updated.tiktok = {
+        clientKey: modalAppId,
+        clientSecret: modalSecretKey,
+        accessToken: modalAccessToken,
+        accountName: modalAccountName || '@tiktok_creator',
+        isConfigured: Boolean(modalAccessToken)
+      };
+    } else if (editingChannel === 'youtube') {
+      updated.youtube = {
+        clientId: modalAppId,
+        clientSecret: modalSecretKey,
+        accessToken: modalAccessToken,
+        channelName: modalAccountName || 'Kênh YouTube Shorts',
+        isConfigured: Boolean(modalAccessToken)
+      };
+    }
+
+    store.saveMarketingChannelsConfig(updated);
+    setChannelsConfig(updated);
+    setEditingChannel(null);
+    showToast(`Đã lưu cấu hình API kênh ${editingChannel.toUpperCase()} thành công!`);
+  };
+
+  // Disconnect Channel configuration
+  const handleDisconnectChannel = (key: keyof MarketingChannelsConfig) => {
+    if (window.confirm(`Bạn có chắc chắn muốn ngắt kết nối và xóa cấu hình kênh ${key.toUpperCase()}?`)) {
+      const currentConfig = store.getMarketingChannelsConfig();
+      const updated = { ...currentConfig };
+      
+      if (key === 'facebook') {
+        updated.facebook = { appId: '', pageId: '', pageAccessToken: '', pageName: '', isConfigured: false };
+      } else if (key === 'zalo') {
+        updated.zalo = { appId: '', secretKey: '', oaId: '', accessToken: '', oaName: '', isConfigured: false };
+      } else if (key === 'tiktok') {
+        updated.tiktok = { clientKey: '', clientSecret: '', accessToken: '', accountName: '', isConfigured: false };
+      } else if (key === 'youtube') {
+        updated.youtube = { clientId: '', clientSecret: '', accessToken: '', channelName: '', isConfigured: false };
+      }
+
+      store.saveMarketingChannelsConfig(updated);
+      setChannelsConfig(updated);
+      showToast(`Đã ngắt kết nối thành công kênh ${key.toUpperCase()}!`);
+    }
+  };
+
+  // Open simulated OAuth window popup
+  const handleOauthTrigger = (channel: 'facebook' | 'zalo' | 'tiktok' | 'youtube') => {
+    const popupWidth = 500;
+    const popupHeight = 550;
+    const left = window.screen.width / 2 - popupWidth / 2;
+    const top = window.screen.height / 2 - popupHeight / 2;
+    
+    const popup = window.open('', '_blank', `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`);
+    if (popup) {
+      popup.document.write(`
+        <html>
+          <head>
+            <title>Xác Thực Liên Kết - PARS 2026</title>
+            <meta charset="utf-8">
+            <style>
+              body { 
+                font-family: system-ui, -apple-system, sans-serif; 
+                background: #0f172a; 
+                color: #f8fafc; 
+                display: flex; 
+                flex-direction: column; 
+                align-items: center; 
+                justify-content: center; 
+                height: 100vh; 
+                margin: 0; 
+                text-align: center; 
+              }
+              .card { 
+                background: #1e293b; 
+                border: 1px solid #334155; 
+                padding: 32px; 
+                border-radius: 20px; 
+                max-width: 360px; 
+                box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5); 
+              }
+              .logo {
+                width: 48px;
+                height: 48px;
+                background: #be6940;
+                color: white;
+                font-weight: 800;
+                font-size: 20px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto 16px auto;
+              }
+              h2 { margin: 0 0 12px 0; font-size: 16px; color: #ffffff; font-weight: 800; }
+              p { font-size: 11.5px; color: #94a3b8; margin: 0 0 24px 0; line-height: 1.6; }
+              .btn { 
+                background: #4f46e5; 
+                color: white; 
+                border: none; 
+                padding: 12px 24px; 
+                border-radius: 12px; 
+                font-weight: bold; 
+                cursor: pointer; 
+                font-size: 12.5px; 
+                transition: all 0.2s; 
+                width: 100%;
+              }
+              .btn:hover { background: #4338ca; }
+              .loader { 
+                border: 3px solid #334155; 
+                border-top: 3px solid #38bdf8; 
+                border-radius: 50%; 
+                width: 28px; 
+                height: 28px; 
+                animation: spin 1s linear infinite; 
+                margin: 15px auto; 
+                display: none; 
+              }
+              @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <div class="logo">PA</div>
+              <h2>Ủy quyền kết nối mạng xã hội</h2>
+              <p>Hệ thống hội nghị PARS 2026 cần quyền quản lý nội dung đăng bài viết và xem thông tin trang để thực hiện đăng tin tự động.</p>
+              <button class="btn" onclick="startAuth()">Đồng ý & Cấp Quyền</button>
+              <div class="loader" id="loader"></div>
+            </div>
+            <script>
+              function startAuth() {
+                document.querySelector('.btn').style.display = 'none';
+                document.getElementById('loader').style.display = 'block';
+                setTimeout(() => {
+                  window.opener.postMessage({ 
+                    type: 'OAUTH_SUCCESS', 
+                    channel: '${channel}',
+                    token: 'OAUTH_TOKEN_' + Math.random().toString(36).substr(2, 20).toUpperCase(),
+                    name: '${
+                      channel === 'facebook' ? 'Hội phẫu thuật tạo hình thẩm mỹ Việt Nam (Page)' :
+                      channel === 'zalo' ? 'Zalo OA PARS 2026' :
+                      channel === 'tiktok' ? '@pars.aesthetic.2026' :
+                      'PARS 2026 Scientific YouTube Channel'
+                    }'
+                  }, '*');
+                  window.close();
+                }, 1600);
+              }
+            </script>
+          </body>
+        </html>
+      `);
+    }
+  };
+
+  // Test configured connection
+  const handleTestConnection = (channel: 'facebook' | 'zalo' | 'tiktok' | 'youtube') => {
+    setTestingConnection(channel);
+    setTimeout(() => {
+      setTestingConnection(null);
+      const conf = channelsConfig[channel];
+      if (conf.isConfigured) {
+        showToast(`Kết nối tới "${
+          channel === 'facebook' ? conf.pageName :
+          channel === 'zalo' ? conf.oaName :
+          channel === 'tiktok' ? conf.accountName :
+          conf.channelName
+        }" hoạt động ổn định!`, 'success');
+      } else {
+        showToast(`Cấu hình kênh ${channel.toUpperCase()} chưa sẵn sàng hoặc thiếu Access Token!`, 'error');
+      }
+    }, 1500);
   };
 
   // Calculate overall metrics
@@ -404,7 +757,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kênh liên kết</p>
             <h3 className="text-xl font-black text-slate-900 mt-1">
-              {Object.values(channels).filter(Boolean).length}/4 Kênh
+              {(Object.values(channelsConfig) as any[]).filter(c => c.isConfigured).length}/4 Kênh
             </h3>
             <p className="text-[10px] text-slate-500 mt-0.5">
               Auto-posting status active
@@ -445,7 +798,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
             activeTab === 'channels' ? 'border-indigo-650 text-indigo-650' : 'border-transparent text-slate-450 hover:text-slate-700'
           }`}
         >
-          Kênh liên kết ({Object.values(channels).filter(Boolean).length})
+          Kênh liên kết ({(Object.values(channelsConfig) as any[]).filter(c => c.isConfigured).length})
         </button>
       </div>
 
@@ -530,21 +883,21 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                       <div className="grid grid-cols-4 gap-2 text-center text-slate-550">
                         <div>
                           <span className="block text-[8px] text-slate-400 font-bold uppercase">Reach</span>
-                          <strong className="text-xs text-slate-700">{(post.metrics.reach || 0).toLocaleString()}</strong>
+                          <strong className="text-xs text-slate-700 font-bold">{(post.metrics.reach || 0).toLocaleString()}</strong>
                         </div>
                         <div>
                           <span className="block text-[8px] text-slate-400 font-bold uppercase">Thích</span>
-                          <strong className="text-xs text-slate-700">{(post.metrics.likes || 0).toLocaleString()}</strong>
+                          <strong className="text-xs text-slate-700 font-bold">{(post.metrics.likes || 0).toLocaleString()}</strong>
                         </div>
                         <div>
                           <span className="block text-[8px] text-slate-400 font-bold uppercase">Chia sẻ</span>
-                          <strong className="text-xs text-slate-700">{(post.metrics.shares || 0).toLocaleString()}</strong>
+                          <strong className="text-xs text-slate-700 font-bold">{(post.metrics.shares || 0).toLocaleString()}</strong>
                         </div>
                         <div>
                           <span className="block text-[8px] text-slate-400 font-bold uppercase">
                             {post.type === 'video_short' ? 'Views' : 'Bình luận'}
                           </span>
-                          <strong className="text-xs text-slate-700">
+                          <strong className="text-xs text-slate-700 font-bold">
                             {post.type === 'video_short' 
                               ? (post.metrics.views || 0).toLocaleString() 
                               : (post.metrics.comments || 0).toLocaleString()
@@ -558,6 +911,13 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                         {/* Publish draft button */}
                         <button
                           onClick={() => {
+                            // Check configuration status of channels
+                            const missingChannels = post.platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
+                            if (missingChannels.length > 0) {
+                              showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
+                              return;
+                            }
+
                             post.status = 'published';
                             post.publishedAt = new Date().toISOString();
                             post.metrics = {
@@ -567,9 +927,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                               comments: Math.floor(Math.random() * 80) + 1,
                               views: post.type === 'video_short' ? Math.floor(Math.random() * 6000) + 300 : undefined
                             };
-                            store.saveMarketingPost(post);
-                            showToast('Đã đăng tự động bài viết marketing!');
-                            loadData();
+                            simulatePublishingLogs(post, post.platforms, post.type);
                           }}
                           className="px-2 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-bold border-0 cursor-pointer"
                         >
@@ -656,7 +1014,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               <button
                 type="button"
                 onClick={() => handleSavePost(false, 'news_feed')}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 bg-white cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-650 text-xs font-bold hover:bg-slate-50 bg-white cursor-pointer"
               >
                 Lưu nháp
               </button>
@@ -664,7 +1022,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               <button
                 type="button"
                 onClick={() => handleSavePost(true, 'news_feed')}
-                className="px-5 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
               >
                 <Send className="w-3.5 h-3.5" /> Đăng tin tự động
               </button>
@@ -687,7 +1045,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 <select
                   value={newsAudience}
                   onChange={e => setNewsAudience(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 outline-none cursor-pointer"
+                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
                 >
                   {AUDIENCES.map(aud => (
                     <option key={aud.id} value={aud.id}>{aud.name}</option>
@@ -700,7 +1058,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 <select
                   value={newsTopic}
                   onChange={e => setNewsTopic(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 outline-none cursor-pointer"
+                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
                 >
                   {TOPICS.map(t => (
                     <option key={t.id} value={t.id}>{t.name}</option>
@@ -818,7 +1176,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               <button
                 type="button"
                 onClick={() => handleSavePost(false, 'video_short')}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 bg-white cursor-pointer"
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-650 text-xs font-bold hover:bg-slate-50 bg-white cursor-pointer"
               >
                 Lưu nháp kịch bản
               </button>
@@ -826,7 +1184,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               <button
                 type="button"
                 onClick={() => handleSavePost(true, 'video_short')}
-                className="px-5 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
+                className="px-5 py-2 rounded-xl bg-indigo-655 hover:bg-indigo-700 text-white text-xs font-bold border-0 cursor-pointer flex items-center gap-1.5"
               >
                 <Send className="w-3.5 h-3.5" /> Đăng video tự động
               </button>
@@ -849,7 +1207,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 <select
                   value={videoTopic}
                   onChange={e => setVideoTopic(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 outline-none cursor-pointer"
+                  className="w-full text-xs p-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-205 outline-none cursor-pointer"
                 >
                   {TOPICS.map(t => (
                     <option key={t.id} value={t.id}>{t.name}</option>
@@ -890,134 +1248,423 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           <div>
             <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider">Liên kết Mạng xã hội truyền thông</h2>
             <p className="text-[11px] text-slate-500 mt-1">
-              Liên kết các tài khoản/trang Fanpage chính thức để kích hoạt tính năng tự động đồng bộ bài viết và theo dõi đo lường reach.
+              Liên kết cấu hình API mạng xã hội chính thức để kích hoạt tính năng tự động phát hành và kiểm duyệt đo lường.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Facebook */}
-            <div className="border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:shadow-xs transition-shadow">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                  <Facebook className="w-5 h-5 shrink-0" />
+            <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                    <Facebook className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">Facebook Page Graph API</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.facebook.isConfigured 
+                        ? channelsConfig.facebook.pageName 
+                        : 'Chưa cấu hình tài khoản Page'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-800 text-xs">Facebook Page</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Trang truyền thông chính thức PARS 2026</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
+                
                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channels.facebook ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  channelsConfig.facebook.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {channels.facebook ? 'Đang hoạt động' : 'Chưa liên kết'}
+                  {channelsConfig.facebook.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
                 </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.facebook.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('facebook')}
+                      disabled={testingConnection === 'facebook'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'facebook' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      Kiểm tra
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDisconnectChannel('facebook')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+
                 <button
-                  onClick={() => handleToggleChannel('facebook')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border cursor-pointer ${
-                    channels.facebook 
-                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100' 
-                      : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  }`}
+                  onClick={() => handleOpenSettings('facebook')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
                 >
-                  {channels.facebook ? 'Ngắt kết nối' : 'Kết nối'}
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.facebook.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
                 </button>
               </div>
             </div>
 
-            {/* Zalo */}
-            <div className="border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:shadow-xs transition-shadow">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-                  <Link className="w-5 h-5 shrink-0" />
+            {/* Zalo OA */}
+            <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+                    <Link className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">Zalo Official Account (OA)</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.zalo.isConfigured 
+                        ? channelsConfig.zalo.oaName 
+                        : 'Kênh tương tác và truyền tải tin'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-800 text-xs">Zalo Official Account (OA)</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Kênh tương tác và chăm sóc đại biểu</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
+                
                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channels.zalo ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  channelsConfig.zalo.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {channels.zalo ? 'Đang hoạt động' : 'Chưa liên kết'}
+                  {channelsConfig.zalo.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
                 </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.zalo.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('zalo')}
+                      disabled={testingConnection === 'zalo'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'zalo' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      Kiểm tra
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDisconnectChannel('zalo')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+
                 <button
-                  onClick={() => handleToggleChannel('zalo')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border cursor-pointer ${
-                    channels.zalo 
-                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100' 
-                      : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  }`}
+                  onClick={() => handleOpenSettings('zalo')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
                 >
-                  {channels.zalo ? 'Ngắt kết nối' : 'Kết nối'}
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.zalo.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
                 </button>
               </div>
             </div>
 
             {/* TikTok */}
-            <div className="border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:shadow-xs transition-shadow">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-800 flex items-center justify-center border border-slate-200">
-                  <Play className="w-5 h-5 shrink-0" />
+            <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-800 flex items-center justify-center border border-slate-200">
+                    <Play className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">TikTok Commercial Channel</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.tiktok.isConfigured 
+                        ? channelsConfig.tiktok.accountName 
+                        : 'Phát hành Shorts Video truyền thông'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-800 text-xs">TikTok Channel</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Phát sóng Shorts Video giới thiệu sự kiện</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
+                
                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channels.tiktok ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  channelsConfig.tiktok.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {channels.tiktok ? 'Đang hoạt động' : 'Chưa liên kết'}
+                  {channelsConfig.tiktok.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
                 </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.tiktok.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('tiktok')}
+                      disabled={testingConnection === 'tiktok'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'tiktok' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      Kiểm tra
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDisconnectChannel('tiktok')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+
                 <button
-                  onClick={() => handleToggleChannel('tiktok')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border cursor-pointer ${
-                    channels.tiktok 
-                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100' 
-                      : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  }`}
+                  onClick={() => handleOpenSettings('tiktok')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
                 >
-                  {channels.tiktok ? 'Ngắt kết nối' : 'Kết nối'}
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.tiktok.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
                 </button>
               </div>
             </div>
 
-            {/* Youtube */}
-            <div className="border border-slate-200 rounded-2xl p-5 flex items-center justify-between hover:shadow-xs transition-shadow">
-              <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
-                  <YoutubeIcon className="w-5 h-5 shrink-0" />
+            {/* YouTube */}
+            <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-650 flex items-center justify-center border border-rose-100">
+                    <Video className="w-5 h-5 shrink-0" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs">YouTube Shorts API</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">
+                      {channelsConfig.youtube.isConfigured 
+                        ? channelsConfig.youtube.channelName 
+                        : 'Kênh video bài giảng khoa học'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-extrabold text-slate-800 text-xs">YouTube Shorts</h4>
-                  <p className="text-[10px] text-slate-500 mt-0.5">Kênh phát video tài liệu học thuật khoa học</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-3">
+                
                 <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channels.youtube ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
+                  channelsConfig.youtube.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
                 }`}>
-                  {channels.youtube ? 'Đang hoạt động' : 'Chưa liên kết'}
+                  {channelsConfig.youtube.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
                 </span>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
+                {channelsConfig.youtube.isConfigured && (
+                  <>
+                    <button
+                      onClick={() => handleTestConnection('youtube')}
+                      disabled={testingConnection === 'youtube'}
+                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                    >
+                      {testingConnection === 'youtube' ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                      )}
+                      Kiểm tra
+                    </button>
+                    
+                    <button
+                      onClick={() => handleDisconnectChannel('youtube')}
+                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
+                    >
+                      Hủy kết nối
+                    </button>
+                  </>
+                )}
+
                 <button
-                  onClick={() => handleToggleChannel('youtube')}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold transition-all border cursor-pointer ${
-                    channels.youtube 
-                      ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100' 
-                      : 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                  }`}
+                  onClick={() => handleOpenSettings('youtube')}
+                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
                 >
-                  {channels.youtube ? 'Ngắt kết nối' : 'Kết nối'}
+                  <Settings className="w-3.5 h-3.5" />
+                  {channelsConfig.youtube.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Editing Channel Credentials Settings Modal */}
+      {editingChannel && (
+        <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-800">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-150 flex items-center justify-between">
+              <h3 className="font-bold text-slate-800 text-xs uppercase tracking-wider">
+                Cấu hình API {
+                  editingChannel === 'facebook' ? 'Facebook Graph' :
+                  editingChannel === 'zalo' ? 'Zalo OA' :
+                  editingChannel === 'tiktok' ? 'TikTok Commercial' :
+                  'YouTube Shorts'
+                }
+              </h3>
+              <button
+                onClick={() => setEditingChannel(null)}
+                className="text-slate-400 hover:text-slate-650 cursor-pointer border-0 bg-transparent animate-none"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              {/* Quick OAuth option */}
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 space-y-2">
+                <h4 className="text-[11px] font-bold text-indigo-900 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600 shrink-0" /> Cách 1: Ủy quyền nhanh qua OAuth
+                </h4>
+                <p className="text-[10px] text-indigo-700/80 leading-normal">
+                  Kết nối tự động không cần lấy token thủ công. Chỉ cần cấp quyền trên trình duyệt.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => handleOauthTrigger(editingChannel)}
+                  className="w-full mt-1 py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11.5px] font-bold border-0 cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" /> Ủy quyền OAuth nhanh
+                </button>
+              </div>
+
+              {/* Divider */}
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-slate-450 text-[9px] font-bold uppercase tracking-wider">Hoặc nhập thủ công API credentials</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              {/* Manual Form fields */}
+              <div className="space-y-3 text-xs">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">App ID / Client Key</label>
+                    <input
+                      type="text"
+                      placeholder="Nhập App ID..."
+                      value={modalAppId}
+                      onChange={e => setModalAppId(e.target.value)}
+                      className="w-full p-2.5 rounded-lg border border-slate-200 outline-none focus:border-indigo-600 text-xs"
+                    />
+                  </div>
+                  
+                  {(editingChannel === 'zalo' || editingChannel === 'tiktok' || editingChannel === 'youtube') && (
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Secret / Key</label>
+                      <input
+                        type="password"
+                        placeholder="Secret key..."
+                        value={modalSecretKey}
+                        onChange={e => setModalSecretKey(e.target.value)}
+                        className="w-full p-2.5 rounded-lg border border-slate-200 outline-none focus:border-indigo-600 text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {(editingChannel === 'facebook' || editingChannel === 'zalo') && (
+                  <div className="space-y-1">
+                    <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                      {editingChannel === 'facebook' ? 'Facebook Page ID' : 'Zalo OA ID'}
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập ID..."
+                      value={modalPageId}
+                      onChange={e => setModalPageId(e.target.value)}
+                      className="w-full p-2.5 rounded-lg border border-slate-200 outline-none focus:border-indigo-600 text-xs"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Tên tài khoản liên kết</label>
+                  <input
+                    type="text"
+                    placeholder="Ví dụ: Hội phẫu thuật..."
+                    value={modalAccountName}
+                    onChange={e => setModalAccountName(e.target.value)}
+                    className="w-full p-2.5 rounded-lg border border-slate-200 outline-none focus:border-indigo-600 text-xs"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Access Token / API Key</label>
+                  <textarea
+                    placeholder="Dán mã Token truy cập dài ở đây..."
+                    value={modalAccessToken}
+                    onChange={e => setModalAccessToken(e.target.value)}
+                    rows={3}
+                    className="w-full p-2.5 rounded-lg border border-slate-200 outline-none focus:border-indigo-600 font-mono text-[10px]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-150 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEditingChannel(null)}
+                className="px-4 py-2 rounded-lg border border-slate-250 bg-white text-slate-650 font-bold text-xs hover:bg-slate-50 cursor-pointer"
+              >
+                Hủy
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleSaveChannelConfig}
+                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs border-0 cursor-pointer"
+              >
+                Lưu cấu hình
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* API Console Publishing Loader Overlay */}
+      {isPublishing && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-[#0b0f19] border border-[#1f2937] rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden font-mono text-slate-350 p-5 space-y-4">
+            {/* Console Header */}
+            <div className="flex items-center justify-between border-b border-[#1f2937] pb-3 text-slate-200">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 bg-indigo-500 rounded-full animate-ping" />
+                <span className="text-xs font-black tracking-wider uppercase text-slate-100 font-mono">Event Marketing API Console</span>
+              </div>
+              <span className="text-[10px] text-slate-550 font-bold uppercase font-mono">PROD SYNC LOGS</span>
+            </div>
+
+            {/* Console Output */}
+            <div className="h-64 overflow-y-auto space-y-1.5 bg-[#05070f] border border-[#1a202c] p-4 rounded-xl text-[11px] leading-relaxed select-text font-mono text-indigo-300">
+              {publishingLogs.map((log, index) => (
+                <div key={index} className={
+                  log.includes('✅') ? 'text-emerald-400 font-mono' :
+                  log.includes('❌') ? 'text-rose-450 font-mono' :
+                  log.includes('🚀') ? 'text-indigo-400 font-bold font-mono' :
+                  'text-slate-350 font-mono'
+                }>
+                  {log}
+                </div>
+              ))}
+              {publishingLogs.length < 5 && (
+                <div className="flex items-center gap-1 text-slate-500 font-mono">
+                  <span>⌛ Đang chuẩn bị truyền dẫn...</span>
+                </div>
+              )}
+            </div>
+
+            {/* Info indicator */}
+            <p className="text-[10px] text-slate-500 text-center leading-normal">
+              Vui lòng không tắt cửa sổ này trong khi tiến trình kết nối API mạng xã hội đang diễn ra.
+            </p>
           </div>
         </div>
       )}

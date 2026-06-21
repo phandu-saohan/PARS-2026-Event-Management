@@ -409,3 +409,35 @@ export interface MarketingPost {
   createdAt: string;
 }
 
+export interface MarketingChannelsConfig {
+  facebook: {
+    appId: string;
+    pageId: string;
+    pageAccessToken: string;
+    pageName: string;
+    isConfigured: boolean;
+  };
+  zalo: {
+    appId: string;
+    secretKey: string;
+    oaId: string;
+    accessToken: string;
+    oaName: string;
+    isConfigured: boolean;
+  };
+  tiktok: {
+    clientKey: string;
+    clientSecret: string;
+    accessToken: string;
+    accountName: string;
+    isConfigured: boolean;
+  };
+  youtube: {
+    clientId: string;
+    clientSecret: string;
+    accessToken: string;
+    channelName: string;
+    isConfigured: boolean;
+  };
+}
+

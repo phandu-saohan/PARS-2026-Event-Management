@@ -29,6 +29,7 @@ import {
   SponsorPackage,
   CmeTemplateConfig,
   MarketingPost,
+  MarketingChannelsConfig,
 } from './types';
 import { supabase, isSupabaseConfigured, uploadToSupabaseStorage } from './lib/supabase';
 import {
@@ -448,6 +449,13 @@ const DEFAULT_ONESIGNAL_CONFIG: OneSignalConfig = {
   isEnabled: false,
 };
 
+const DEFAULT_MARKETING_CHANNELS_CONFIG: MarketingChannelsConfig = {
+  facebook: { appId: '', pageId: '', pageAccessToken: '', pageName: '', isConfigured: false },
+  zalo: { appId: '', secretKey: '', oaId: '', accessToken: '', oaName: '', isConfigured: false },
+  tiktok: { clientKey: '', clientSecret: '', accessToken: '', accountName: '', isConfigured: false },
+  youtube: { clientId: '', clientSecret: '', accessToken: '', channelName: '', isConfigured: false }
+};
+
 export class DataStore {
   // Local storage keys
   private static KEY_ATTENDEES = 'pars_attendees';
@@ -476,6 +484,7 @@ export class DataStore {
   private static KEY_ONESIGNAL = 'pars_config_onesignal';
   private static KEY_CONTACTS = 'pars_contacts';
   private static KEY_MARKETING_POSTS = 'pars_marketing_posts';
+  private static KEY_MARKETING_CHANNELS_CONFIG = 'pars_marketing_channels_config';
 
   // In-memory cache
   private attendees: Attendee[] = [];
@@ -505,6 +514,7 @@ export class DataStore {
   private virtualSections: VirtualSection[] = [];
   private contacts: Contact[] = [];
   private marketingPosts: MarketingPost[] = [];
+  private marketingChannelsConfig: MarketingChannelsConfig = DEFAULT_MARKETING_CHANNELS_CONFIG;
 
   constructor() {
     this.loadLocalStorage();
@@ -573,6 +583,7 @@ export class DataStore {
     this.oneSignalConfig = this.getLocalStorage(DataStore.KEY_ONESIGNAL, DEFAULT_ONESIGNAL_CONFIG);
     this.contacts = this.getLocalStorage(DataStore.KEY_CONTACTS, []);
     this.marketingPosts = this.getLocalStorage(DataStore.KEY_MARKETING_POSTS, []);
+    this.marketingChannelsConfig = this.getLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, DEFAULT_MARKETING_CHANNELS_CONFIG);
   }
 
   /**
@@ -756,6 +767,11 @@ export class DataStore {
         if (onesignal) {
           this.oneSignalConfig = onesignal.value;
           this.saveToLocalStorage(DataStore.KEY_ONESIGNAL, this.oneSignalConfig);
+        }
+        const mChannels = configs.find(c => c.key === 'marketing_channels_config');
+        if (mChannels) {
+          this.marketingChannelsConfig = mChannels.value;
+          this.saveToLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, this.marketingChannelsConfig);
         }
       }
 
@@ -1460,6 +1476,22 @@ export class DataStore {
     if (isSupabaseConfigured()) {
       supabase.from('marketing_posts').delete().eq('id', id).then(({ error }) => {
         if (error) console.error('Error deleting marketing post from Supabase:', error);
+      });
+    }
+  }
+
+  // Marketing Channels Config
+  getMarketingChannelsConfig(): MarketingChannelsConfig {
+    return { ...this.marketingChannelsConfig };
+  }
+
+  saveMarketingChannelsConfig(config: MarketingChannelsConfig): void {
+    this.marketingChannelsConfig = { ...config };
+    this.saveToLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, this.marketingChannelsConfig);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('system_config').upsert({ key: 'marketing_channels_config', value: config }).then(({ error }) => {
+        if (error) console.error('Error saving marketing channels config to Supabase:', error);
       });
     }
   }
@@ -2917,6 +2949,7 @@ export class DataStore {
     localStorage.removeItem(DataStore.KEY_BUSINESS_CONFIG);
     localStorage.removeItem(DataStore.KEY_EMBED_SCRIPTS);
     localStorage.removeItem(DataStore.KEY_MARKETING_POSTS);
+    localStorage.removeItem(DataStore.KEY_MARKETING_CHANNELS_CONFIG);
     this.loadLocalStorage();
 
     if (isSupabaseConfigured()) {
@@ -2930,6 +2963,7 @@ export class DataStore {
         supabase.from('finance_transactions').delete().neq('id', ''),
         supabase.from('notification_logs').delete().neq('id', ''),
         supabase.from('marketing_posts').delete().neq('id', ''),
+        supabase.from('system_config').delete().eq('key', 'marketing_channels_config'),
       ]).then(() => {
         console.log('Cleared Supabase tables on reset.');
       });
@@ -3218,7 +3252,8 @@ export class DataStore {
         shifts: this.shifts,
         virtualSections: this.virtualSections,
         contacts: this.contacts,
-        marketingPosts: this.marketingPosts
+        marketingPosts: this.marketingPosts,
+        marketingChannelsConfig: this.marketingChannelsConfig
       }
     };
     return JSON.stringify(backupObj, null, 2);
@@ -3258,6 +3293,7 @@ export class DataStore {
       if (d.virtualSections) this.virtualSections = d.virtualSections;
       if (d.contacts) this.contacts = d.contacts;
       if (d.marketingPosts) this.marketingPosts = d.marketingPosts;
+      if (d.marketingChannelsConfig) this.marketingChannelsConfig = d.marketingChannelsConfig;
 
       // Save all to localStorage
       this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
@@ -3284,6 +3320,7 @@ export class DataStore {
       this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
       this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
       this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+      this.saveToLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, this.marketingChannelsConfig);
 
       // Save to Supabase (if configured)
       if (isSupabaseConfigured()) {
@@ -3321,7 +3358,8 @@ export class DataStore {
           { key: 'resend_config', value: this.resendConfig },
           { key: 'whatsapp_config', value: this.whatsappConfig },
           { key: 'sepay_config', value: this.sepayConfig },
-          { key: 'onesignal_config', value: this.oneSignalConfig }
+          { key: 'onesignal_config', value: this.oneSignalConfig },
+          { key: 'marketing_channels_config', value: this.marketingChannelsConfig }
         ]));
 
         await Promise.all(promises);
