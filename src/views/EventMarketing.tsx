@@ -2885,62 +2885,6 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 </button>
               </div>
             </div>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-                    <Link className="w-5 h-5 shrink-0" />
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-slate-800 text-xs">Zalo Official Account (OA)</h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      {channelsConfig.zalo.isConfigured 
-                        ? channelsConfig.zalo.oaName 
-                        : 'Kênh tương tác và truyền tải tin'}
-                    </p>
-                  </div>
-                </div>
-                
-                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channelsConfig.zalo.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                }`}>
-                  {channelsConfig.zalo.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                {channelsConfig.zalo.isConfigured && (
-                  <>
-                    <button
-                      onClick={() => handleTestConnection('zalo')}
-                      disabled={testingConnection === 'zalo'}
-                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      {testingConnection === 'zalo' ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      )}
-                      Kiểm tra
-                    </button>
-                    
-                    <button
-                      onClick={() => handleDisconnectChannel('zalo')}
-                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
-                    >
-                      Hủy kết nối
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={() => handleOpenSettings('zalo')}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  {channelsConfig.zalo.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
-                </button>
-              </div>
-            </div>
 
             {/* TikTok */}
             <div className="border border-slate-200 rounded-2xl p-5 flex flex-col justify-between hover:shadow-xs transition-shadow gap-4">
@@ -3007,62 +2951,6 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => handleOpenSettings('tiktok')}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  {channelsConfig.tiktok.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
-                </button>
-              </div>
-            </div>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-800 flex items-center justify-center border border-slate-200">
-                    <Play className="w-5 h-5 shrink-0" />
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-slate-800 text-xs">TikTok Commercial Channel</h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      {channelsConfig.tiktok.isConfigured 
-                        ? channelsConfig.tiktok.accountName 
-                        : 'Phát hành Shorts Video truyền thông'}
-                    </p>
-                  </div>
-                </div>
-                
-                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channelsConfig.tiktok.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                }`}>
-                  {channelsConfig.tiktok.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                {channelsConfig.tiktok.isConfigured && (
-                  <>
-                    <button
-                      onClick={() => handleTestConnection('tiktok')}
-                      disabled={testingConnection === 'tiktok'}
-                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      {testingConnection === 'tiktok' ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      )}
-                      Kiểm tra
-                    </button>
-                    
-                    <button
-                      onClick={() => handleDisconnectChannel('tiktok')}
-                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
-                    >
-                      Hủy kết nối
-                    </button>
-                  </>
-                )}
-
                 <button
                   onClick={() => handleOpenSettings('tiktok')}
                   className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
@@ -3147,67 +3035,11 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 </button>
               </div>
             </div>
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-650 flex items-center justify-center border border-rose-100">
-                    <Video className="w-5 h-5 shrink-0" />
-                  </div>
-                  <div>
-                    <h4 className="font-extrabold text-slate-800 text-xs">YouTube Shorts API</h4>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
-                      {channelsConfig.youtube.isConfigured 
-                        ? channelsConfig.youtube.channelName 
-                        : 'Kênh video bài giảng khoa học'}
-                    </p>
-                  </div>
-                </div>
-                
-                <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${
-                  channelsConfig.youtube.isConfigured ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'
-                }`}>
-                  {channelsConfig.youtube.isConfigured ? 'Đang hoạt động' : 'Chưa liên kết'}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-3">
-                {channelsConfig.youtube.isConfigured && (
-                  <>
-                    <button
-                      onClick={() => handleTestConnection('youtube')}
-                      disabled={testingConnection === 'youtube'}
-                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-650 hover:bg-slate-50 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
-                    >
-                      {testingConnection === 'youtube' ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      )}
-                      Kiểm tra
-                    </button>
-                    
-                    <button
-                      onClick={() => handleDisconnectChannel('youtube')}
-                      className="px-2.5 py-1.5 rounded-lg border border-rose-250 bg-rose-50 text-rose-600 text-[10px] font-bold cursor-pointer"
-                    >
-                      Hủy kết nối
-                    </button>
-                  </>
-                )}
-
-                <button
-                  onClick={() => handleOpenSettings('youtube')}
-                  className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold border-0 cursor-pointer flex items-center gap-1"
-                >
-                  <Settings className="w-3.5 h-3.5" />
-                  {channelsConfig.youtube.isConfigured ? 'Cấu hình' : 'Liên kết kênh'}
-                </button>
-              </div>
-            </div>
           </div>
         </div>
       )}
 
-      {/* Editing Channel Credentials Settings Modal */}
+
       {editingChannel && (
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in-95 duration-200 text-slate-800">
