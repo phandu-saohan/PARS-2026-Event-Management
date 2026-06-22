@@ -92,6 +92,12 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [newsCustomTopic, setNewsCustomTopic] = useState('');
   const [newsIsCustomTopic, setNewsIsCustomTopic] = useState(false);
 
+  // Social Media Preview
+  const [showNewsFeedPreview, setShowNewsFeedPreview] = useState(false);
+  const [previewPlatform, setPreviewPlatform] = useState<'facebook' | 'zalo' | 'tiktok' | 'youtube'>('facebook');
+  const [showVideoPreview, setShowVideoPreview] = useState(false);
+  const [videoPreviewPlatform, setVideoPreviewPlatform] = useState<'tiktok' | 'youtube'>('tiktok');
+
   // Scheduling state for Video Script
   const [videoIsScheduled, setVideoIsScheduled] = useState(false);
   const [videoScheduledAt, setVideoScheduledAt] = useState('');
@@ -1659,12 +1665,32 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       )}
 
       {activeTab === 'news_feed' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${
+          showNewsFeedPreview
+            ? 'grid-cols-1 lg:grid-cols-5'
+            : 'grid-cols-1 lg:grid-cols-3'
+        }`}>
           {/* Main Editor */}
-          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4">
-            <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <FileText className="w-4 h-4 text-indigo-650" /> Trình soạn bài viết News Feed
-            </h2>
+          <div className={`${
+            showNewsFeedPreview ? 'lg:col-span-2' : 'lg:col-span-2'
+          } bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4`}>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <FileText className="w-4 h-4 text-indigo-650" /> Trình soạn bài viết News Feed
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowNewsFeedPreview(p => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                  showNewsFeedPreview
+                    ? 'bg-indigo-600 text-white border-indigo-600'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Eye className="w-3 h-3" />
+                {showNewsFeedPreview ? 'Ẩn Preview' : 'Xem Preview'}
+              </button>
+            </div>
             
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tiêu đề bài đăng *</label>
@@ -1781,6 +1807,248 @@ export default function EventMarketing({ role }: EventMarketingProps) {
             </div>
           </div>
 
+          {/* Real-time Social Preview Panel */}
+          {showNewsFeedPreview && (
+            <div className="lg:col-span-2 space-y-3">
+              {/* Platform selector */}
+              <div className="flex items-center gap-2">
+                {(['facebook', 'zalo', 'tiktok', 'youtube'] as const).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPreviewPlatform(p)}
+                    className={`flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                      previewPlatform === p
+                        ? p === 'facebook' ? 'bg-[#1877F2] text-white border-[#1877F2]'
+                          : p === 'zalo'    ? 'bg-sky-500 text-white border-sky-500'
+                          : p === 'tiktok'  ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-red-600 text-white border-red-600'
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {p === 'facebook' ? '🔵 FB' : p === 'zalo' ? '🟦 Zalo' : p === 'tiktok' ? '⬛ TikTok' : '🔴 YT'}
+                  </button>
+                ))}
+              </div>
+
+              {/* FACEBOOK PREVIEW */}
+              {previewPlatform === 'facebook' && (
+                <div className="bg-[#f0f2f5] rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                  {/* FB App bar */}
+                  <div className="bg-[#1877F2] px-3 py-2 flex items-center justify-between">
+                    <span className="text-white font-black text-sm tracking-tight">facebook</span>
+                    <div className="flex gap-2">
+                      <div className="w-6 h-6 rounded-full bg-white/20" />
+                      <div className="w-6 h-6 rounded-full bg-white/20" />
+                    </div>
+                  </div>
+                  {/* Post card */}
+                  <div className="bg-white mx-2 my-2 rounded-xl shadow-xs overflow-hidden">
+                    {/* Post header */}
+                    <div className="flex items-center gap-2.5 p-3 pb-2">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xs font-black shrink-0">P</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-black text-slate-900 leading-none">{channelsConfig.facebook.isConfigured ? channelsConfig.facebook.pageName : 'PARS 2026 Official Page'}</p>
+                        <p className="text-[9px] text-slate-500 mt-0.5 flex items-center gap-1">Vừa xong · 🌐</p>
+                      </div>
+                      <span className="text-slate-400 text-lg leading-none">···</span>
+                    </div>
+                    {/* Post content */}
+                    <div className="px-3 pb-2">
+                      <p className="text-[11.5px] text-slate-800 leading-relaxed whitespace-pre-wrap">
+                        {newsContent || <span className="text-slate-400 italic">Nội dung bài viết sẽ hiển thị ở đây...</span>}
+                      </p>
+                    </div>
+                    {/* Media */}
+                    {newsMediaUrl && (
+                      <div className="w-full bg-slate-100 aspect-video overflow-hidden">
+                        <img src={newsMediaUrl} alt="preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                      </div>
+                    )}
+                    {/* Link title */}
+                    {newsTitle && (
+                      <div className="bg-[#f0f2f5] px-3 py-2 border-t border-slate-100">
+                        <p className="text-[9px] text-slate-400 uppercase tracking-wider">pars2026.vercel.app</p>
+                        <p className="text-[11px] font-bold text-slate-800 leading-tight mt-0.5 line-clamp-2">{newsTitle}</p>
+                      </div>
+                    )}
+                    {/* Reaction bar */}
+                    <div className="px-3 py-1.5 border-t border-slate-100">
+                      <div className="flex items-center justify-between text-[10px] text-slate-500 mb-1.5">
+                        <span className="flex items-center gap-1">👍❤️😮 <span>128</span></span>
+                        <span>24 bình luận · 12 chia sẻ</span>
+                      </div>
+                      <div className="flex border-t border-slate-100 pt-1.5 gap-1">
+                        {[['👍','Thích'],['💬','Bình luận'],['↗️','Chia sẻ']].map(([icon,label]) => (
+                          <button key={label} className="flex-1 flex items-center justify-center gap-1 py-1 rounded-lg text-slate-500 text-[10px] font-bold hover:bg-slate-50 cursor-default">
+                            <span>{icon}</span>{label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-400 text-center pb-2">✦ Xem trước giao diện Facebook · Dữ liệu thực từ trình soạn thảo</p>
+                </div>
+              )}
+
+              {/* ZALO PREVIEW */}
+              {previewPlatform === 'zalo' && (
+                <div className="bg-[#e8edf2] rounded-2xl overflow-hidden shadow-sm border border-slate-200">
+                  {/* Zalo app bar */}
+                  <div className="bg-[#0068ff] px-3 py-2.5 flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center">
+                      <span className="text-[#0068ff] text-[8px] font-black">Z</span>
+                    </div>
+                    <span className="text-white font-black text-xs flex-1">Zalo</span>
+                    <div className="flex gap-1.5">
+                      <div className="w-5 h-5 rounded-full bg-white/20" />
+                      <div className="w-5 h-5 rounded-full bg-white/20" />
+                    </div>
+                  </div>
+                  {/* OA Post */}
+                  <div className="bg-white mx-2 my-2 rounded-xl shadow-xs overflow-hidden">
+                    <div className="flex items-center gap-2 p-3 pb-2">
+                      <div className="w-9 h-9 rounded-full bg-[#0068ff] flex items-center justify-center text-white text-xs font-black shrink-0">OA</div>
+                      <div>
+                        <p className="text-[11px] font-black text-slate-900">{channelsConfig.zalo.isConfigured ? channelsConfig.zalo.oaName : 'PARS 2026 Official OA'}</p>
+                        <p className="text-[9px] text-[#0068ff]">Official Account · Theo dõi</p>
+                      </div>
+                    </div>
+                    {newsTitle && (
+                      <div className="px-3 pb-1.5">
+                        <p className="text-[12px] font-black text-slate-900 leading-tight">{newsTitle}</p>
+                      </div>
+                    )}
+                    {newsMediaUrl && (
+                      <div className="w-full aspect-video bg-slate-100 overflow-hidden">
+                        <img src={newsMediaUrl} alt="preview" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                      </div>
+                    )}
+                    <div className="px-3 py-2">
+                      <p className="text-[11px] text-slate-700 leading-relaxed whitespace-pre-wrap line-clamp-5">
+                        {newsContent || <span className="text-slate-400 italic">Nội dung bài viết...</span>}
+                      </p>
+                    </div>
+                    <div className="flex border-t border-slate-100 mx-3">
+                      {[['❤️','Yêu thích'],['💬','Bình luận'],['↗️','Chia sẻ']].map(([icon,label]) => (
+                        <button key={label} className="flex-1 flex items-center justify-center gap-1 py-2 text-slate-500 text-[10px] font-semibold cursor-default">
+                          <span>{icon}</span>{label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-400 text-center pb-2">✦ Xem trước giao diện Zalo OA · Dữ liệu thực từ trình soạn thảo</p>
+                </div>
+              )}
+
+              {/* TIKTOK PREVIEW */}
+              {previewPlatform === 'tiktok' && (
+                <div className="bg-black rounded-2xl overflow-hidden shadow-sm relative" style={{minHeight: 480}}>
+                  {/* Background */}
+                  {newsMediaUrl
+                    ? <img src={newsMediaUrl} alt="bg" className="absolute inset-0 w-full h-full object-cover opacity-60" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                    : <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900" />
+                  }
+                  {/* TikTok UI overlay */}
+                  <div className="relative z-10 flex flex-col h-full" style={{minHeight:480}}>
+                    {/* Top bar */}
+                    <div className="flex items-center justify-between px-3 pt-3">
+                      <span className="text-white text-[10px] font-bold">Đang phát</span>
+                      <span className="text-white font-black text-xs tracking-wider">TikTok</span>
+                      <div className="w-5 h-5" />
+                    </div>
+                    {/* Bottom content */}
+                    <div className="mt-auto px-3 pb-16">
+                      <p className="text-white font-black text-[11px] mb-1">{channelsConfig.tiktok.isConfigured ? channelsConfig.tiktok.accountName : '@pars.2026.official'}</p>
+                      <p className="text-white/90 text-[10.5px] leading-relaxed line-clamp-4 whitespace-pre-wrap">
+                        {newsTitle || newsContent || <span className="opacity-50 italic">Nội dung video...</span>}
+                      </p>
+                      <div className="flex items-center gap-1 mt-2">
+                        {['#PARS2026','#ThẩmMỹ','#HộiNghị'].map(tag => (
+                          <span key={tag} className="text-[9px] text-white/80 font-bold">{tag}</span>
+                        ))}
+                      </div>
+                    </div>
+                    {/* Right side actions */}
+                    <div className="absolute right-2 bottom-14 flex flex-col items-center gap-4">
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center text-white font-black text-xs border-2 border-white">P</div>
+                      {[['❤️','12.4K'],['💬','328'],['↗️','1.2K'],['🔖','456']].map(([icon,count]) => (
+                        <div key={count} className="flex flex-col items-center">
+                          <span className="text-xl">{icon}</span>
+                          <span className="text-white text-[9px] font-bold mt-0.5">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Bottom nav */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm flex justify-around py-2 px-2">
+                      {[['🏠','For You'],['🔍','Khám phá'],['➕',''],['📥','Hộp thư'],['👤','Tôi']].map(([icon,label]) => (
+                        <div key={label||icon} className="flex flex-col items-center">
+                          {label ? <span className="text-base">{icon}</span> : <div className="w-8 h-6 rounded-lg bg-white flex items-center justify-center"><span className="text-black font-black text-base">+</span></div>}
+                          <span className="text-white text-[8px] mt-0.5">{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="absolute bottom-10 left-0 right-0 text-center text-[8px] text-white/40">✦ Xem trước giao diện TikTok · Dữ liệu thực</p>
+                </div>
+              )}
+
+              {/* YOUTUBE PREVIEW */}
+              {previewPlatform === 'youtube' && (
+                <div className="bg-[#0f0f0f] rounded-2xl overflow-hidden shadow-sm border border-slate-800">
+                  {/* YT App bar */}
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#0f0f0f]">
+                    <span className="text-white font-black text-xs"><span className="text-red-500">▶</span> YouTube</span>
+                    <div className="flex gap-2">
+                      <div className="w-5 h-5 rounded-full bg-slate-700" />
+                      <div className="w-5 h-5 rounded-sm bg-slate-700" />
+                    </div>
+                  </div>
+                  {/* Video thumbnail */}
+                  <div className="relative w-full aspect-video bg-slate-800">
+                    {newsMediaUrl
+                      ? <img src={newsMediaUrl} alt="thumb" className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                      : <div className="w-full h-full flex items-center justify-center"><span className="text-4xl">▶️</span></div>
+                    }
+                    <div className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[9px] font-bold px-1 rounded">#Shorts</div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                        <span className="text-white text-lg">▶</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Video info */}
+                  <div className="p-3 space-y-2">
+                    <p className="text-white font-bold text-[12px] leading-snug line-clamp-2">
+                      {newsTitle || 'Tiêu đề video sẽ hiển thị ở đây'}
+                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-7 h-7 rounded-full bg-red-600 flex items-center justify-center text-white text-[8px] font-black">PARS</div>
+                      <div>
+                        <p className="text-[10px] text-white font-semibold">{channelsConfig.youtube.isConfigured ? channelsConfig.youtube.channelName : 'PARS 2026 Official'}</p>
+                        <p className="text-[9px] text-slate-400">14K người đăng ký</p>
+                      </div>
+                      <button className="ml-auto bg-white text-black text-[9px] font-black px-2.5 py-1 rounded-full cursor-default">Đăng ký</button>
+                    </div>
+                    <p className="text-slate-400 text-[10px] leading-relaxed line-clamp-3 whitespace-pre-wrap">
+                      {newsContent || 'Mô tả video sẽ hiển thị ở đây...'}
+                    </p>
+                    {/* Action bar */}
+                    <div className="flex gap-2 pt-1">
+                      <div className="flex bg-[#272727] rounded-full overflow-hidden">
+                        <button className="flex items-center gap-1 px-2.5 py-1 text-white text-[10px] font-bold cursor-default">👍 3.2K</button>
+                        <div className="w-px bg-slate-600 my-1.5" />
+                        <button className="px-2.5 py-1 text-white text-[10px] cursor-default">👎</button>
+                      </div>
+                      <button className="flex items-center gap-1 bg-[#272727] rounded-full px-2.5 py-1 text-white text-[10px] font-bold cursor-default">↗️ Chia sẻ</button>
+                      <button className="flex items-center gap-1 bg-[#272727] rounded-full px-2.5 py-1 text-white text-[10px] font-bold cursor-default">🔖 Lưu</button>
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-500 text-center pb-2">✦ Xem trước giao diện YouTube Shorts · Dữ liệu thực</p>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* AI Helper Sidebar */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white space-y-4">
             <h3 className="text-xs font-black uppercase tracking-wider text-amber-500 flex items-center gap-1.5">
@@ -1870,12 +2138,28 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       )}
 
       {activeTab === 'video' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`grid gap-6 ${
+          showVideoPreview ? 'grid-cols-1 lg:grid-cols-5' : 'grid-cols-1 lg:grid-cols-3'
+        }`}>
           {/* Main Editor */}
           <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 space-y-4">
-            <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-              <Video className="w-4 h-4 text-pink-650" /> Trình soạn Kịch bản Video ngắn
-            </h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                <Video className="w-4 h-4 text-pink-650" /> Trình soạn Kịch bản Video ngắn
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowVideoPreview(p => !p)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all cursor-pointer ${
+                  showVideoPreview
+                    ? 'bg-pink-600 text-white border-pink-600'
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                }`}
+              >
+                <Eye className="w-3 h-3" />
+                {showVideoPreview ? 'Ẩn Preview' : 'Xem Preview'}
+              </button>
+            </div>
 
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Tiêu đề kịch bản *</label>
@@ -2135,6 +2419,245 @@ export default function EventMarketing({ role }: EventMarketingProps) {
               )}
             </div>
           </div>
+
+          {/* Video Real-time Preview Panel */}
+          {showVideoPreview && (
+            <div className="lg:col-span-2 space-y-3">
+              {/* Platform selector */}
+              <div className="flex gap-2">
+                {(['tiktok', 'youtube'] as const).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setVideoPreviewPlatform(p)}
+                    className={`flex-1 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all cursor-pointer ${
+                      videoPreviewPlatform === p
+                        ? p === 'tiktok'
+                          ? 'bg-slate-900 text-white border-slate-900'
+                          : 'bg-red-600 text-white border-red-600'
+                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {p === 'tiktok' ? '⬛ TikTok Shorts' : '🔴 YouTube Shorts'}
+                  </button>
+                ))}
+              </div>
+
+              {/* Composite video script for preview */}
+              {(() => {
+                const scriptText = [
+                  videoHook && `🎬 ${videoHook}`,
+                  videoBody && `📌 ${videoBody}`,
+                  videoCta  && `👉 ${videoCta}`,
+                ].filter(Boolean).join('\n\n') || 'Nội dung kịch bản sẽ hiển thị ở đây...';
+
+                return (
+                  <>
+                    {/* TIKTOK VIDEO PREVIEW */}
+                    {videoPreviewPlatform === 'tiktok' && (
+                      <div className="relative bg-black rounded-2xl overflow-hidden shadow-lg" style={{minHeight: 520}}>
+                        {/* Background */}
+                        {videoFileUrl
+                          ? <video src={videoFileUrl} className="absolute inset-0 w-full h-full object-cover opacity-70" muted loop autoPlay playsInline />
+                          : <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-950 to-pink-950" />
+                        }
+                        {/* TikTok Interface Overlay */}
+                        <div className="relative z-10 flex flex-col" style={{minHeight:520}}>
+                          {/* Status bar */}
+                          <div className="flex items-center justify-between px-4 pt-3">
+                            <span className="text-white text-[10px] font-bold">9:41</span>
+                            <span className="text-white font-black text-[11px] tracking-wider">TikTok</span>
+                            <div className="flex items-center gap-1">
+                              <div className="w-3 h-1.5 bg-white rounded-sm" />
+                              <div className="w-3 h-1.5 bg-white/40 rounded-sm" />
+                            </div>
+                          </div>
+                          {/* For You tabs */}
+                          <div className="flex justify-center gap-6 mt-1">
+                            <span className="text-white/50 text-[10px] font-bold">Đang theo dõi</span>
+                            <span className="text-white text-[10px] font-black border-b-2 border-white pb-0.5">Dành cho bạn</span>
+                          </div>
+                          {/* Content bottom area */}
+                          <div className="mt-auto px-3 pb-20">
+                            {/* Account */}
+                            <p className="text-white font-black text-[11px] mb-1 flex items-center gap-1.5">
+                              <span className="inline-flex w-6 h-6 rounded-full bg-gradient-to-br from-pink-500 to-red-500 items-center justify-center text-[9px] font-black border border-white/30">P</span>
+                              {channelsConfig.tiktok.isConfigured ? channelsConfig.tiktok.accountName : '@pars.2026.official'}
+                            </p>
+                            {/* Title */}
+                            {videoTitle && (
+                              <p className="text-white font-bold text-[12px] mb-1 leading-snug">{videoTitle}</p>
+                            )}
+                            {/* Script text */}
+                            <p className="text-white/90 text-[10.5px] leading-relaxed line-clamp-5 whitespace-pre-wrap">{scriptText}</p>
+                            {/* Tags */}
+                            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                              {['#PARS2026','#ThẩmMỹ','#HộiNghị','#KhoaHọc'].map(tag => (
+                                <span key={tag} className="text-[9px] text-white/80 font-bold">{tag}</span>
+                              ))}
+                            </div>
+                            {/* Sound bar */}
+                            <div className="flex items-center gap-1.5 mt-2">
+                              <span className="text-white/70 text-[9px]">♪</span>
+                              <div className="flex-1 bg-white/20 rounded-full h-0.5 overflow-hidden">
+                                <div className="w-2/3 h-full bg-white rounded-full animate-pulse" />
+                              </div>
+                              <span className="text-white/70 text-[9px]">PARS 2026 - Official Sound</span>
+                            </div>
+                          </div>
+                          {/* Right side actions */}
+                          <div className="absolute right-2.5 bottom-16 flex flex-col items-center gap-4">
+                            {/* Avatar */}
+                            <div className="relative">
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-red-500 flex items-center justify-center text-white font-black text-xs border-2 border-white">P</div>
+                              <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-red-500 border border-black flex items-center justify-center">
+                                <span className="text-white text-[7px] font-black">+</span>
+                              </div>
+                            </div>
+                            {[['❤️','12.4K'],['💬','328'],['↗️','1.2K'],['🔖','456'],['⬤⬤⬤','']].map(([icon,count]) => (
+                              <div key={count||icon} className="flex flex-col items-center">
+                                <span className="text-xl leading-none">{icon}</span>
+                                {count && <span className="text-white text-[9px] font-bold mt-0.5">{count}</span>}
+                              </div>
+                            ))}
+                          </div>
+                          {/* Bottom Nav */}
+                          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent pt-4 pb-2">
+                            <div className="flex justify-around px-2">
+                              {[['🏠','Trang chủ'],['🔍','Khám phá'],['',''],['📥','Hộp thư'],['👤','Hồ sơ']].map(([icon,label],i) => (
+                                <div key={i} className="flex flex-col items-center">
+                                  {i === 2
+                                    ? <div className="w-9 h-7 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center mb-0.5">
+                                        <span className="text-white font-black text-lg leading-none">+</span>
+                                      </div>
+                                    : <span className="text-lg leading-none">{icon}</span>
+                                  }
+                                  {label && <span className="text-white/70 text-[8px] mt-0.5">{label}</span>}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        {/* Preview label */}
+                        <div className="absolute top-10 left-3 bg-pink-600/80 backdrop-blur-sm text-white text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                          Live Preview
+                        </div>
+                      </div>
+                    )}
+
+                    {/* YOUTUBE SHORTS PREVIEW */}
+                    {videoPreviewPlatform === 'youtube' && (
+                      <div className="bg-[#0f0f0f] rounded-2xl overflow-hidden shadow-lg border border-slate-800">
+                        {/* App bar */}
+                        <div className="flex items-center justify-between px-3 py-2.5 bg-[#0f0f0f] border-b border-slate-800">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-red-500 text-lg leading-none">▶</span>
+                            <span className="text-white font-black text-xs">YouTube</span>
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="w-6 h-6 rounded-full bg-slate-700" />
+                            <div className="w-6 h-6 rounded-sm bg-slate-700" />
+                          </div>
+                        </div>
+                        {/* Shorts label */}
+                        <div className="flex items-center px-3 py-2 border-b border-slate-800">
+                          <span className="text-white font-black text-xs flex items-center gap-1">
+                            <span className="text-red-500">▶</span> Shorts
+                          </span>
+                          <div className="ml-auto flex items-center gap-2 text-slate-400 text-[10px]">
+                            <span>Mới nhất</span>
+                            <span>•</span>
+                            <span>Phổ biến</span>
+                          </div>
+                        </div>
+                        {/* Video card */}
+                        <div className="relative">
+                          {/* Thumbnail */}
+                          <div className="relative w-full bg-slate-800 overflow-hidden" style={{aspectRatio:'9/16', maxHeight:360}}>
+                            {videoFileUrl
+                              ? <video src={videoFileUrl} className="w-full h-full object-cover" muted loop autoPlay playsInline />
+                              : (
+                                <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-slate-900 to-red-950">
+                                  <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center">
+                                    <span className="text-white text-3xl">▶</span>
+                                  </div>
+                                  <span className="text-white/50 text-xs">Video sẽ hiển thị ở đây</span>
+                                </div>
+                              )
+                            }
+                            {/* Overlay controls */}
+                            <div className="absolute bottom-3 right-3 flex flex-col items-center gap-3">
+                              {[['❤️','3.2K'],['💬','148'],['↗️','892'],['🔖','']].map(([icon,count]) => (
+                                <div key={icon} className="flex flex-col items-center">
+                                  <div className="w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                                    <span className="text-lg leading-none">{icon}</span>
+                                  </div>
+                                  {count && <span className="text-white text-[9px] font-bold mt-0.5">{count}</span>}
+                                </div>
+                              ))}
+                            </div>
+                            {/* Bottom caption overlay */}
+                            <div className="absolute bottom-0 left-0 right-14 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                              <p className="text-white font-black text-[10px] leading-snug line-clamp-2">{videoTitle || 'Tiêu đề video...'}</p>
+                            </div>
+                            {/* #Shorts badge */}
+                            <div className="absolute top-2 right-2 bg-black/60 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">#Shorts</div>
+                          </div>
+                        </div>
+                        {/* Video metadata */}
+                        <div className="p-3 space-y-2">
+                          <p className="text-white font-bold text-[12px] leading-snug line-clamp-2">{videoTitle || 'Tiêu đề kịch bản sẽ hiển thị ở đây'}</p>
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white text-[9px] font-black shrink-0">PARS</div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[10px] text-white font-semibold truncate">{channelsConfig.youtube.isConfigured ? channelsConfig.youtube.channelName : 'PARS 2026 Official Channel'}</p>
+                              <p className="text-[9px] text-slate-400">14.2K người đăng ký</p>
+                            </div>
+                            <button className="shrink-0 bg-white text-black text-[9px] font-black px-3 py-1 rounded-full cursor-default">Đăng ký</button>
+                          </div>
+                          {/* Script preview */}
+                          <div className="bg-[#272727] rounded-xl p-3 space-y-2">
+                            {videoHook && (
+                              <div className="flex gap-2">
+                                <span className="text-pink-400 text-[9px] font-black uppercase shrink-0 mt-0.5">HOOK</span>
+                                <p className="text-slate-300 text-[10px] leading-relaxed line-clamp-2">{videoHook}</p>
+                              </div>
+                            )}
+                            {videoBody && (
+                              <div className="flex gap-2">
+                                <span className="text-indigo-400 text-[9px] font-black uppercase shrink-0 mt-0.5">BODY</span>
+                                <p className="text-slate-300 text-[10px] leading-relaxed line-clamp-2">{videoBody}</p>
+                              </div>
+                            )}
+                            {videoCta && (
+                              <div className="flex gap-2">
+                                <span className="text-emerald-400 text-[9px] font-black uppercase shrink-0 mt-0.5">CTA</span>
+                                <p className="text-slate-300 text-[10px] leading-relaxed line-clamp-2">{videoCta}</p>
+                              </div>
+                            )}
+                            {!videoHook && !videoBody && !videoCta && (
+                              <p className="text-slate-500 text-[10px] italic">Nhập Hook / Body / CTA để xem kịch bản...</p>
+                            )}
+                          </div>
+                          {/* Action buttons */}
+                          <div className="flex gap-1.5 flex-wrap">
+                            <div className="flex bg-[#272727] rounded-full overflow-hidden">
+                              <button className="flex items-center gap-1 px-2.5 py-1 text-white text-[10px] font-bold cursor-default">👍 3.2K</button>
+                              <div className="w-px bg-slate-600 my-1.5" />
+                              <button className="px-2.5 py-1 text-white text-[10px] cursor-default">👎</button>
+                            </div>
+                            <button className="flex items-center gap-1 bg-[#272727] rounded-full px-2.5 py-1 text-white text-[10px] font-bold cursor-default">↗️ Chia sẻ</button>
+                            <button className="flex items-center gap-1 bg-[#272727] rounded-full px-2.5 py-1 text-white text-[10px] font-bold cursor-default">🔖 Lưu</button>
+                            <button className="flex items-center gap-1 bg-[#272727] rounded-full px-2.5 py-1 text-white text-[10px] font-bold cursor-default">⋯</button>
+                          </div>
+                        </div>
+                        <p className="text-[9px] text-slate-500 text-center pb-2">✦ Xem trước giao diện YouTube Shorts · Dữ liệu thực từ kịch bản</p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          )}
 
           {/* AI Helper Sidebar */}
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 text-white space-y-4">
