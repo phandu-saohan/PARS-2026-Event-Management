@@ -7,7 +7,7 @@ import type {
   InternalTask, FinanceTransaction, RegistrationPackage, UserAccount,
   NotificationTemplate, SentNotificationLog, SpecialtyTrack,
   BusinessConfig, EmbedScript, ZaloConfig, EmailConfig, Contact,
-  MarketingPost, UserRole
+  MarketingPost, UserRole, SendingCampaign
 } from '../types';
 
 // ============================================================
@@ -611,5 +611,43 @@ export function mapDbToRole(row: any): UserRole {
     permissions: row.permissions || [],
     isSystem: row.is_system || false,
     createdAt: row.created_at || undefined
+  };
+}
+
+// ============================================================
+// SENDING CAMPAIGNS
+// ============================================================
+export function mapCampaignToDb(c: SendingCampaign): Record<string, any> {
+  return {
+    id: c.id,
+    name: c.name,
+    channel: c.channel,
+    template_id: c.templateId || null,
+    subject: c.subject || null,
+    body: c.body || null,
+    status: c.status,
+    total_recipients: c.totalRecipients,
+    success_count: c.successCount,
+    failed_count: c.failedCount,
+    recipients: c.recipients || [],
+    logs: c.logs || []
+  };
+}
+
+export function mapDbToCampaign(row: any): SendingCampaign {
+  return {
+    id: row.id,
+    name: row.name || '',
+    channel: row.channel || 'email',
+    templateId: row.template_id || undefined,
+    subject: row.subject || undefined,
+    body: row.body || undefined,
+    status: row.status || 'draft',
+    totalRecipients: Number(row.total_recipients) || 0,
+    successCount: Number(row.success_count) || 0,
+    failedCount: Number(row.failed_count) || 0,
+    recipients: row.recipients || [],
+    logs: row.logs || [],
+    createdAt: row.created_at || new Date().toISOString()
   };
 }

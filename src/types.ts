@@ -569,3 +569,30 @@ export interface MarketingChannelsConfig {
   };
 }
 
+export interface CampaignRecipient {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  isEmailValid: boolean;
+  isPhoneValid: boolean;
+  status: 'pending' | 'sending' | 'success' | 'failed';
+  error: string;
+  [key: string]: any;
+}
+
+export interface SendingCampaign {
+  id: string;
+  name: string;
+  channel: 'email' | 'zalo';
+  templateId?: string;
+  subject?: string;
+  body?: string;
+  status: 'draft' | 'sending' | 'paused' | 'completed';
+  totalRecipients: number;
+  successCount: number;
+  failedCount: number;
+  recipients: CampaignRecipient[];
+  logs: string[];
+  createdAt: string;
+}

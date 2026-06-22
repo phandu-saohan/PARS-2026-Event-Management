@@ -31,6 +31,7 @@ import {
   CmeTemplateConfig,
   MarketingPost,
   MarketingChannelsConfig,
+  SendingCampaign,
 } from './types';
 import { supabase, isSupabaseConfigured, uploadToSupabaseStorage } from './lib/supabase';
 import {
@@ -50,6 +51,7 @@ import {
   mapEmbedScriptToDb, mapDbToEmbedScript,
   mapContactToDb, mapDbToContact,
   mapMarketingPostToDb, mapDbToMarketingPost,
+  mapCampaignToDb, mapDbToCampaign,
 } from './lib/mappers';
 
 // Empty fallbacks to remove mock data from source code
@@ -489,6 +491,7 @@ export class DataStore {
   private static KEY_MARKETING_POSTS = 'pars_marketing_posts';
   private static KEY_MARKETING_CHANNELS_CONFIG = 'pars_marketing_channels_config';
   private static KEY_ROLES = 'pars_roles';
+  private static KEY_CAMPAIGNS = 'pars_sending_campaigns';
 
   // In-memory cache
   private attendees: Attendee[] = [];
@@ -520,6 +523,7 @@ export class DataStore {
   private marketingPosts: MarketingPost[] = [];
   private marketingChannelsConfig: MarketingChannelsConfig = DEFAULT_MARKETING_CHANNELS_CONFIG;
   private roles: UserRole[] = [];
+  private sendingCampaigns: SendingCampaign[] = [];
 
   constructor() {
     this.loadLocalStorage();
@@ -643,6 +647,7 @@ export class DataStore {
         isSystem: true
       }
     ]);
+    this.sendingCampaigns = this.getLocalStorage(DataStore.KEY_CAMPAIGNS, []);
   }
 
   /**
@@ -708,6 +713,7 @@ export class DataStore {
         Promise.resolve(supabase.from('virtual_sections').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('contacts').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('marketing_posts').select('*')).catch(() => ({ data: null })),
+        Promise.resolve(supabase.from('sending_campaigns').select('*')).catch(() => ({ data: null })),
       ]);
 
       if (pkgs) {
@@ -863,6 +869,10 @@ export class DataStore {
       if (dbMarketingPosts) {
         this.marketingPosts = dbMarketingPosts.map(mapDbToMarketingPost);
         this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
+      }
+      if (dbCampaigns) {
+        this.sendingCampaigns = dbCampaigns.map(mapDbToCampaign);
+        this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
       }
 
       console.log('✅ Supabase cache synchronization complete!');
@@ -1035,6 +1045,23 @@ export class DataStore {
         }
         this.saveToLocalStorage(DataStore.KEY_USERS, this.users);
         window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'user_accounts' } }));
+      })
+      .subscribe();
+
+    // Listen to sending campaigns updates
+    supabase.channel('db-campaigns')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sending_campaigns' }, (payload) => {
+        const { eventType, new: newRow, old: oldRow } = payload;
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const campaign = mapDbToCampaign(newRow);
+          const idx = this.sendingCampaigns.findIndex(c => c.id === campaign.id);
+          if (idx >= 0) this.sendingCampaigns[idx] = campaign;
+          else this.sendingCampaigns.push(campaign);
+        } else if (eventType === 'DELETE') {
+          this.sendingCampaigns = this.sendingCampaigns.filter(c => c.id !== oldRow.id);
+        }
+        this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
+        window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'sending_campaigns' } }));
       })
       .subscribe();
   }
@@ -1583,6 +1610,37 @@ export class DataStore {
       supabase.from('marketing_posts').delete().eq('id', id).then(({ error }) => {
         if (error) console.error('Error deleting marketing post from Supabase:', error);
       });
+    }
+  }
+
+  // Sending Campaigns
+  getCampaigns(): SendingCampaign[] {
+    return [...this.sendingCampaigns].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+  async saveCampaign(campaign: SendingCampaign): Promise<void> {
+    const idx = this.sendingCampaigns.findIndex(c => c.id === campaign.id);
+    if (idx >= 0) {
+      this.sendingCampaigns[idx] = campaign;
+    } else {
+      this.sendingCampaigns.push(campaign);
+    }
+    this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'sending_campaigns' } }));
+
+    if (isSupabaseConfigured()) {
+      const dbRow = mapCampaignToDb(campaign);
+      const { error } = await supabase.from('sending_campaigns').upsert(dbRow);
+      if (error) throw error;
+    }
+  }
+  async deleteCampaign(id: string): Promise<void> {
+    this.sendingCampaigns = this.sendingCampaigns.filter(c => c.id !== id);
+    this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'sending_campaigns' } }));
+
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase.from('sending_campaigns').delete().eq('id', id);
+      if (error) throw error;
     }
   }
 
@@ -3109,6 +3167,7 @@ export class DataStore {
     localStorage.removeItem(DataStore.KEY_EMBED_SCRIPTS);
     localStorage.removeItem(DataStore.KEY_MARKETING_POSTS);
     localStorage.removeItem(DataStore.KEY_MARKETING_CHANNELS_CONFIG);
+    localStorage.removeItem(DataStore.KEY_CAMPAIGNS);
     this.loadLocalStorage();
 
     if (isSupabaseConfigured()) {
@@ -3122,6 +3181,7 @@ export class DataStore {
         supabase.from('finance_transactions').delete().neq('id', ''),
         supabase.from('notification_logs').delete().neq('id', ''),
         supabase.from('marketing_posts').delete().neq('id', ''),
+        supabase.from('sending_campaigns').delete().neq('id', ''),
         supabase.from('system_config').delete().eq('key', 'marketing_channels_config'),
       ]).then(() => {
         console.log('Cleared Supabase tables on reset.');
@@ -3480,6 +3540,7 @@ export class DataStore {
       this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
       this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
       this.saveToLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, this.marketingChannelsConfig);
+      this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
 
       // Save to Supabase (if configured)
       if (isSupabaseConfigured()) {
@@ -3500,6 +3561,7 @@ export class DataStore {
           supabase.from('contacts').delete().neq('id', ''),
           supabase.from('notification_templates').delete().neq('id', ''),
           supabase.from('marketing_posts').delete().neq('id', ''),
+          supabase.from('sending_campaigns').delete().neq('id', ''),
         ]);
 
         // 2. Perform sequential insertions to respect constraints
@@ -3599,6 +3661,12 @@ export class DataStore {
         if (this.marketingPosts && this.marketingPosts.length > 0) {
           const mappedPosts = this.marketingPosts.map(p => mapMarketingPostToDb(p));
           corePromises.push(supabase.from('marketing_posts').insert(mappedPosts));
+        }
+
+        // Save sending campaigns
+        if (this.sendingCampaigns && this.sendingCampaigns.length > 0) {
+          const mappedCampaigns = this.sendingCampaigns.map(c => mapCampaignToDb(c));
+          corePromises.push(supabase.from('sending_campaigns').insert(mappedCampaigns));
         }
 
         // Save notification logs
