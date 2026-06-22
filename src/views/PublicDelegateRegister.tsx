@@ -432,7 +432,8 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
     try {
       // Generate a random unique ID to avoid collisions on public registration
       const randomSeq = Math.floor(Math.random() * 900000 + 100000);
-      const newId = `PARS2026-${randomSeq}`;
+      const prefix = store.getBusinessConfig().attendeeIdPrefix || 'PARS2026';
+      const newId = `${prefix}-${randomSeq}`;
       const qrCodeValue = `${newId}-${fullName.replace(/\s+/g, '').toUpperCase()}`;
 
       const fullAddress = `${address.trim()}${ward ? ', ' + ward : ''}${district ? ', ' + district : ''}`;

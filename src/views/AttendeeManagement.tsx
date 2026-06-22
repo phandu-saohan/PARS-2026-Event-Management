@@ -576,7 +576,8 @@ Ban Thư ký Hội nghị PARS 2026`
   // Direct USB / Hardware Scanner Checkin Handler
   const handleDirectScannerCheckIn = (scannedCode: string) => {
     const list = store.getAttendees();
-    const cleanCode = scannedCode.replace('PARS2026-', '').trim();
+    const prefix = store.getBusinessConfig().attendeeIdPrefix || 'PARS2026';
+    const cleanCode = scannedCode.replace(`${prefix}-`, '').trim();
     const found = list.find(a => 
       a.id.toLowerCase() === scannedCode.toLowerCase() || 
       a.id.toLowerCase() === cleanCode.toLowerCase() || 
@@ -694,7 +695,8 @@ Ban Thư ký Hội nghị PARS 2026`
 
         maxSeq++;
         const padSeq = String(maxSeq).padStart(3, '0');
-        const newId = `PARS2026-${padSeq}`;
+        const prefix = store.getBusinessConfig().attendeeIdPrefix || 'PARS2026';
+        const newId = `${prefix}-${padSeq}`;
         const autoAttendee: Attendee = {
           id: newId,
           title: titleVal,
@@ -711,7 +713,7 @@ Ban Thư ký Hội nghị PARS 2026`
           paymentStatus: 'paid', // invitees are pre-paid
           paymentMethod: 'bank_transfer',
           registrationDate: new Date().toISOString().split('T')[0],
-          qrCodeValue: `PARS2026-${newId}-${nameVal.replace(/\s+/g, '')}`,
+          qrCodeValue: `${newId}-${nameVal.replace(/\s+/g, '')}`,
           isCheckedIn: false,
           yearOfBirth: yob,
           gender: 'Nam',
@@ -938,7 +940,8 @@ Ban Thư ký Hội nghị PARS 2026`
     }, existingAttendees.length);
     const nextSeq = maxSeq + 1;
     const padSeq = String(nextSeq).padStart(3, '0');
-    const newId = `PARS2026-${padSeq}`;
+    const prefix = store.getBusinessConfig().attendeeIdPrefix || 'PARS2026';
+    const newId = `${prefix}-${padSeq}`;
     const packages = store.getPackages();
     const selectedPkg = packages.find(p => p.id === newPackage) || packages[0];
 
@@ -959,7 +962,7 @@ Ban Thư ký Hội nghị PARS 2026`
       paymentStatus: newPaymentStatus,
       paymentMethod: 'cash',
       registrationDate: new Date().toISOString().split('T')[0],
-      qrCodeValue: `PARS2026-${newId}-${newFullName.toUpperCase().replace(/\s+/g, '')}`,
+      qrCodeValue: `${newId}-${newFullName.toUpperCase().replace(/\s+/g, '')}`,
       isCheckedIn: false,
       gender: newGender,
       yearOfBirth: newYearOfBirth,
@@ -3843,7 +3846,7 @@ Ban Thư ký Hội nghị PARS 2026`
 
               <div className="bg-slate-50 p-2.5 rounded text-[10px] text-slate-500 space-y-1 w-full">
                 <p className="font-bold text-slate-700">• Quy tắc xử lý tự động:</p>
-                <p>• Hệ thống sẽ tự tạo các mã số đại biểu duy nhất dạng `PARS2026-XXX` và sinh mã QR bảo mật tương ứng.</p>
+                <p>• Hệ thống sẽ tự tạo các mã số đại biểu duy nhất dạng `{store.getBusinessConfig().attendeeIdPrefix || 'PARS2026'}-XXX` và sinh mã QR bảo mật tương ứng.</p>
                 <p>• Trạng thái thanh toán của khối import được kích hoạt thành <strong>Đã thanh toán (Paid)</strong> theo danh sách biểu mời sảnh.</p>
               </div>
 

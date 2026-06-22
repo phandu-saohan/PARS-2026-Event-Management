@@ -231,6 +231,8 @@ export function mapTaskToDb(t: InternalTask): Record<string, any> {
     deadline: t.deadline,
     progress: t.progress,
     notes: t.notes || null,
+    detailed_content: t.detailedContent || '',
+    checklist: t.checklist || [],
   };
 }
 
@@ -246,6 +248,8 @@ export function mapDbToTask(row: any): InternalTask {
     deadline: row.deadline || '',
     progress: Number(row.progress) || 0,
     notes: row.notes || undefined,
+    detailedContent: row.detailed_content || '',
+    checklist: Array.isArray(row.checklist) ? row.checklist : [],
   };
 }
 
@@ -445,6 +449,7 @@ export function mapBusinessConfigToDb(c: BusinessConfig): Record<string, any> {
     pwa_theme_color: c.pwaThemeColor || '',
     pwa_background_color: c.pwaBackgroundColor || '',
     app_url: c.appUrl || 'https://pars2026.vercel.app',
+    attendee_id_prefix: c.attendeeIdPrefix || 'PARS2026',
     delegate_form_config: c.delegateFormConfig || null,
     speaker_form_config: c.speakerFormConfig || null,
     sponsor_form_config: c.sponsorFormConfig || null,
@@ -471,6 +476,7 @@ export function mapDbToBusinessConfig(row: any): BusinessConfig {
     pwaThemeColor: row.pwa_theme_color || '',
     pwaBackgroundColor: row.pwa_background_color || '',
     appUrl: row.app_url || 'https://pars2026.vercel.app',
+    attendeeIdPrefix: row.attendee_id_prefix || 'PARS2026',
     delegateFormConfig: row.delegate_form_config || undefined,
     speakerFormConfig: row.speaker_form_config || undefined,
     sponsorFormConfig: row.sponsor_form_config || undefined,

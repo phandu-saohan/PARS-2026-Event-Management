@@ -122,6 +122,7 @@ export const DEFAULT_CME_TEMPLATE_CONFIG: CmeTemplateConfig = {
 
 const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   appUrl: 'https://pars2026.vercel.app',
+  attendeeIdPrefix: 'PARS2026',
   eventName: "Hội nghị Khoa học Thường niên PARS 2026",
   organizerName: "Hội Phẫu thuật Tạo hình Thẩm mỹ Việt Nam (PARS)",
   eventDate: "Ngày 14 - 15 tháng 11 năm 2026",

@@ -1499,6 +1499,18 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       className="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-indigo-500 outline-none font-mono font-bold text-slate-850"
                     />
                   </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Tiếp đầu ngữ mã ID Đại biểu *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ví dụ: PARS, PARS2026, ATT"
+                      value={businessConfig.attendeeIdPrefix || ''}
+                      onChange={(e) => setBusinessConfig({ ...businessConfig, attendeeIdPrefix: e.target.value.trim() })}
+                      className="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:ring-1 focus:ring-indigo-500 outline-none font-mono font-bold text-slate-850"
+                    />
+                  </div>
                 </div>
 
                 {/* App URL for embed generation */}

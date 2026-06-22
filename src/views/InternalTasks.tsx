@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Plus, CheckSquare, Clock, AlertTriangle, User, Play, CheckCircle, Trash, LayoutGrid, List, Edit2 } from 'lucide-react';
+import { Plus, CheckSquare, Clock, AlertTriangle, User, Play, CheckCircle, Trash, LayoutGrid, List, Edit2, Eye, X } from 'lucide-react';
 import { store } from '../dataStore';
 import { InternalTask, UserAccount, Role } from '../types';
 
@@ -29,6 +29,19 @@ export default function InternalTasks({ role }: InternalTasksProps) {
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editProgress, setEditProgress] = useState(0);
   const [editingTask, setEditingTask] = useState<InternalTask | null>(null);
+
+  // Detailed task view & checklist states
+  const [selectedDetailTask, setSelectedDetailTask] = useState<InternalTask | null>(null);
+  const [detailContentText, setDetailContentText] = useState('');
+  const [checklistText, setChecklistText] = useState('');
+
+  React.useEffect(() => {
+    if (selectedDetailTask) {
+      const task = store.getTasks().find(t => t.id === selectedDetailTask.id);
+      setDetailContentText(task?.detailedContent || '');
+      setChecklistText('');
+    }
+  }, [selectedDetailTask]);
 
   const loadAll = () => {
     setTasks([...store.getTasks()]);
@@ -120,8 +133,78 @@ export default function InternalTasks({ role }: InternalTasksProps) {
     if (window.confirm('Bạn có chắc muốn xóa nhiệm vụ nội bộ này?')) {
       store.deleteTask(id);
       loadAll();
+      if (selectedDetailTask?.id === id) {
+        setSelectedDetailTask(null);
+      }
     }
   };
+
+  const saveChecklistAndProgress = (task: InternalTask, updatedList: any[]) => {
+    const totalCount = updatedList.length;
+    const completedCount = updatedList.filter(item => item.completed).length;
+    
+    let progress = task.progress;
+    let status = task.status;
+    
+    if (totalCount > 0) {
+      progress = Math.round((completedCount / totalCount) * 100);
+      if (progress === 100) {
+        status = 'done';
+      } else if (progress > 0) {
+        status = 'in_progress';
+      } else {
+        status = 'todo';
+      }
+    }
+    
+    const updatedTask: InternalTask = {
+      ...task,
+      checklist: updatedList,
+      progress,
+      status
+    };
+    
+    store.saveTask(updatedTask);
+    loadAll();
+  };
+
+  const handleToggleChecklistItem = (task: InternalTask, itemId: string) => {
+    const list = task.checklist || [];
+    const updatedList = list.map(item =>
+      item.id === itemId ? { ...item, completed: !item.completed } : item
+    );
+    saveChecklistAndProgress(task, updatedList);
+  };
+
+  const handleDeleteChecklistItem = (task: InternalTask, itemId: string) => {
+    const list = task.checklist || [];
+    const updatedList = list.filter(item => item.id !== itemId);
+    saveChecklistAndProgress(task, updatedList);
+  };
+
+  const handleAddChecklistItem = (task: InternalTask) => {
+    if (!checklistText.trim()) return;
+    const newItem = {
+      id: 'CL-' + Math.floor(Math.random() * 900000 + 100000),
+      text: checklistText.trim(),
+      completed: false
+    };
+    const updatedList = [...(task.checklist || []), newItem];
+    saveChecklistAndProgress(task, updatedList);
+    setChecklistText('');
+  };
+
+  const handleSaveDetailedContent = (task: InternalTask) => {
+    const updatedTask: InternalTask = {
+      ...task,
+      detailedContent: detailContentText
+    };
+    store.saveTask(updatedTask);
+    loadAll();
+    alert('Đã lưu nội dung chi tiết công việc!');
+  };
+
+  const currentDetailTask = selectedDetailTask ? (tasks.find(t => t.id === selectedDetailTask.id) || selectedDetailTask) : null;
 
   return (
     <div className="space-y-6 font-sans">
@@ -199,7 +282,7 @@ export default function InternalTasks({ role }: InternalTasksProps) {
 
             <div className="space-y-3">
               {tasks.filter(t => t.status === 'todo').length === 0 ? (
-                <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl text-[11px] text-slate-400">Trống</div>
+                <div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-xl text-[11px] text-slate-450">Trống</div>
               ) : (
                 tasks.filter(t => t.status === 'todo').map(task => (
                   <TaskCard 
@@ -209,6 +292,7 @@ export default function InternalTasks({ role }: InternalTasksProps) {
                     onToggle={() => handleToggleStatus(task)}
                     onDelete={() => handleDeleteTask(task.id)}
                     onEdit={() => handleEditTask(task)}
+                    onViewDetails={() => setSelectedDetailTask(task)}
                     onUpdateProgress={(p) => handleUpdateProgress(task, p)}
                     editingTaskId={editingTaskId}
                     setEditingTaskId={setEditingTaskId}
@@ -241,6 +325,7 @@ export default function InternalTasks({ role }: InternalTasksProps) {
                     onToggle={() => handleToggleStatus(task)}
                     onDelete={() => handleDeleteTask(task.id)}
                     onEdit={() => handleEditTask(task)}
+                    onViewDetails={() => setSelectedDetailTask(task)}
                     onUpdateProgress={(p) => handleUpdateProgress(task, p)}
                     editingTaskId={editingTaskId}
                     setEditingTaskId={setEditingTaskId}
@@ -273,6 +358,7 @@ export default function InternalTasks({ role }: InternalTasksProps) {
                     onToggle={() => handleToggleStatus(task)}
                     onDelete={() => handleDeleteTask(task.id)}
                     onEdit={() => handleEditTask(task)}
+                    onViewDetails={() => setSelectedDetailTask(task)}
                     onUpdateProgress={(p) => handleUpdateProgress(task, p)}
                     editingTaskId={editingTaskId}
                     setEditingTaskId={setEditingTaskId}
@@ -426,6 +512,14 @@ export default function InternalTasks({ role }: InternalTasksProps) {
                               {task.status === 'done' ? <CheckCircle className="w-3 h-3 text-emerald-600" /> : <Play className="w-3 h-3 text-slate-400" />}
                               <span>{task.status === 'done' ? 'Làm lại' : 'Tiến hành'}</span>
                             </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedDetailTask(task)}
+                              className="p-1.5 bg-teal-50 hover:bg-teal-100 text-teal-600 hover:text-teal-800 rounded-lg transition-all border-none cursor-pointer"
+                              title="Xem chi tiết & Checklist"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
                             {role !== 'ctv' && (
                               <button
                                 type="button"
@@ -548,6 +642,191 @@ export default function InternalTasks({ role }: InternalTasksProps) {
           </div>
         </div>
       )}
+
+      {/* Detailed Task Modal Dialog */}
+      {selectedDetailTask && currentDetailTask && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-100 shadow-2xl overflow-hidden animate-fade-in text-slate-800 flex flex-col max-h-[90vh]">
+            {/* Header */}
+            <div className="bg-teal-600 p-5 text-white flex items-center justify-between">
+              <div>
+                <span className="font-mono text-[9px] bg-teal-800 px-2.5 py-1 rounded-md font-bold uppercase tracking-widest">{currentDetailTask.id}</span>
+                <h4 className="font-bold text-sm mt-2">{currentDetailTask.title}</h4>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedDetailTask(null)}
+                className="w-7 h-7 rounded-full bg-teal-850/40 hover:bg-teal-850/70 text-white flex items-center justify-center border-none cursor-pointer transition-all"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 space-y-5 overflow-y-auto flex-1 text-xs">
+              {/* Metadata row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200/50">
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block mb-0.5 uppercase">Phụ trách</span>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-full bg-teal-150 text-teal-700 flex items-center justify-center font-bold text-[9px]">
+                      {currentDetailTask.assignedToName.charAt(0)}
+                    </div>
+                    <span className="font-bold text-slate-700 truncate max-w-[90px]" title={currentDetailTask.assignedToName}>{currentDetailTask.assignedToName}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block mb-0.5 uppercase">Ưu tiên</span>
+                  <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider ${
+                    currentDetailTask.priority === 'high' ? 'bg-rose-50 text-rose-750 border border-rose-100' :
+                    currentDetailTask.priority === 'medium' ? 'bg-amber-50 text-amber-750 border border-amber-100' : 'bg-slate-100 text-slate-655'
+                  }`}>
+                    {currentDetailTask.priority === 'high' ? 'Khẩn cấp' : currentDetailTask.priority === 'medium' ? 'Trung bình' : 'Thấp'}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block mb-0.5 uppercase">Hạn chót</span>
+                  <span className="font-bold font-mono text-slate-700 flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-slate-400" />
+                    {currentDetailTask.deadline}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[9px] text-slate-400 font-bold block mb-0.5 uppercase">Trạng thái</span>
+                  <span className={`px-2 py-0.5 text-[8px] font-bold uppercase rounded-md tracking-wider border-none ${
+                    currentDetailTask.status === 'done' ? 'bg-emerald-55 text-emerald-800' :
+                    currentDetailTask.status === 'in_progress' ? 'bg-teal-55 text-teal-800' : 'bg-slate-100 text-slate-655'
+                  }`}>
+                    {currentDetailTask.status === 'done' ? 'Hoàn thành' :
+                     currentDetailTask.status === 'in_progress' ? 'Đang làm' : 'Cần làm'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Description summary */}
+              {currentDetailTask.description && (
+                <div className="space-y-1">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Yêu cầu công việc sơ bộ</span>
+                  <p className="p-3 bg-slate-50/50 rounded-lg text-slate-600 leading-relaxed border border-slate-150/60 italic">
+                    "{currentDetailTask.description}"
+                  </p>
+                </div>
+              )}
+
+              {/* Detailed Content editor */}
+              <div className="space-y-1.5">
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Chi tiết kế hoạch & Tài liệu đính kèm</span>
+                <textarea
+                  className="w-full p-3 border border-slate-200 rounded-xl focus:ring-1 focus:ring-teal-500 focus:outline-none text-xs leading-relaxed font-sans min-h-[100px] bg-slate-50/20"
+                  placeholder="Nhập quy trình thực hiện, đường dẫn tài liệu Google Drive, slide báo cáo, ghi chú bàn giao..."
+                  value={detailContentText}
+                  onChange={(e) => setDetailContentText(e.target.value)}
+                />
+              </div>
+
+              {/* Subtasks Checklist */}
+              <div className="space-y-3 pt-3.5 border-t border-slate-150">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Checklist việc con (Subtasks)</span>
+                    <span className="text-[9px] text-slate-455 mt-0.5 block">Tiến độ tổng sẽ tự động tính dựa trên các mục này.</span>
+                  </div>
+                  <span className="font-mono font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded text-[10px]">
+                    {currentDetailTask.progress}% ({(currentDetailTask.checklist || []).filter(c => c.completed).length}/{ (currentDetailTask.checklist || []).length })
+                  </span>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden border border-slate-150">
+                  <div
+                    className={`h-full rounded-full transition-all duration-300 ${currentDetailTask.status === 'done' ? 'bg-emerald-500' : 'bg-teal-500'}`}
+                    style={{ width: `${currentDetailTask.progress}%` }}
+                  />
+                </div>
+
+                {/* Checklist items list */}
+                <div className="space-y-1.5 max-h-[150px] overflow-y-auto pr-1">
+                  {(currentDetailTask.checklist || []).length === 0 ? (
+                    <p className="text-[10px] text-slate-400 italic py-1">Chưa có đầu việc con. Hãy thêm bên dưới để phân nhỏ công việc!</p>
+                  ) : (
+                    (currentDetailTask.checklist || []).map(item => (
+                      <div key={item.id} className="flex items-center justify-between p-2 bg-slate-50 hover:bg-slate-100/60 rounded-lg border border-slate-200 transition-all group">
+                        <label className="flex items-center gap-2 cursor-pointer select-none flex-1">
+                          <input
+                            type="checkbox"
+                            checked={item.completed}
+                            onChange={() => handleToggleChecklistItem(currentDetailTask, item.id)}
+                            className="w-3.5 h-3.5 accent-teal-650 cursor-pointer rounded"
+                          />
+                          <span className={`text-[11px] font-medium ${item.completed ? 'line-through text-slate-450 font-normal' : 'text-slate-700'}`}>
+                            {item.text}
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteChecklistItem(currentDetailTask, item.id)}
+                          className="text-slate-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer border-none bg-transparent"
+                          title="Xóa đầu việc"
+                        >
+                          <Trash className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {/* Add checklist input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 focus:outline-none text-xs"
+                    placeholder="ví dụ: Chuẩn bị nước uống, Set bàn đại biểu..."
+                    value={checklistText}
+                    onChange={(e) => setChecklistText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddChecklistItem(currentDetailTask);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddChecklistItem(currentDetailTask)}
+                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold cursor-pointer border-none text-[10px]"
+                  >
+                    Thêm việc
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="bg-slate-50 p-4 border-t border-slate-150 flex justify-between items-center text-[10px]">
+              <span className="text-slate-450 italic">Checklist được tự động lưu. Hãy bấm Lưu chi tiết để cập nhật Mô tả dài.</span>
+              <div className="flex gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setSelectedDetailTask(null)}
+                  className="px-3.5 py-2 font-bold text-slate-500 bg-slate-200 hover:bg-slate-300 rounded-lg cursor-pointer border-none"
+                >
+                  Đóng
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleSaveDetailedContent(currentDetailTask)}
+                  className="px-3.5 py-2 font-bold text-white bg-teal-600 hover:bg-teal-700 rounded-lg cursor-pointer border-none shadow-sm"
+                >
+                  Lưu chi tiết
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -560,6 +839,7 @@ interface TaskCardProps {
   onToggle: () => void;
   onDelete: () => void;
   onEdit: () => void;
+  onViewDetails: () => void;
   onUpdateProgress: (progress: number) => void;
   editingTaskId: string | null;
   setEditingTaskId: (id: string | null) => void;
@@ -568,7 +848,7 @@ interface TaskCardProps {
 }
 
 function TaskCard({ 
-  task, role, onToggle, onDelete, onEdit, onUpdateProgress,
+  task, role, onToggle, onDelete, onEdit, onViewDetails, onUpdateProgress,
   editingTaskId, setEditingTaskId, editProgress, setEditProgress 
 }: TaskCardProps) {
   
@@ -659,6 +939,14 @@ function TaskCard({
         </div>
 
         <div className="flex gap-1">
+          <button
+            title="Xem chi tiết & Checklist"
+            onClick={onViewDetails}
+            className="p-1 hover:bg-teal-50 text-teal-600 hover:text-teal-800 rounded transition-all cursor-pointer border border-transparent hover:border-teal-150"
+          >
+            <Eye className="w-3.5 h-3.5" />
+          </button>
+
           <button
             title="Chuyển đổi nhanh trạng thái"
             onClick={onToggle}

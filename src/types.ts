@@ -250,6 +250,8 @@ export interface InternalTask {
   deadline: string; // YYYY-MM-DD
   progress: number; // 0 - 100
   notes?: string;
+  detailedContent?: string;
+  checklist?: Array<{ id: string; text: string; completed: boolean }>;
 }
 
 export interface FinanceTransaction {
@@ -462,8 +464,10 @@ export interface BusinessConfig {
   pwaLogoUrl?: string;
   pwaThemeColor?: string;
   pwaBackgroundColor?: string;
-  /** URL domain production của app (dùng để tạo mã nhúng WordPress) */
+  /** URL domain production của app (dúng để tạo mã nhúng WordPress) */
   appUrl?: string;
+  /** Tiếp đầu ngữ của mã ID đại biểu (vd: PARS, PARS2026, ATT...) */
+  attendeeIdPrefix?: string;
   /** Cấu hình trang đăng ký đại biểu */
   delegateFormConfig?: PublicFormConfig;
   /** Cấu hình trang đăng ký báo cáo viên */
