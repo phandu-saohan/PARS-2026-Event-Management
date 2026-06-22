@@ -239,6 +239,14 @@ export interface Sponsor {
   contractFileName?: string;
 }
 
+export interface TaskComment {
+  id: string;
+  userId: string;
+  userName: string;
+  content: string;
+  createdAt: string; // YYYY-MM-DD HH:mm
+}
+
 export interface InternalTask {
   id: string;
   title: string;
@@ -252,6 +260,7 @@ export interface InternalTask {
   notes?: string;
   detailedContent?: string;
   checklist?: Array<{ id: string; text: string; completed: boolean }>;
+  comments?: TaskComment[];
 }
 
 export interface FinanceTransaction {

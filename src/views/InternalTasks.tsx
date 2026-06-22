@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Plus, CheckSquare, Clock, AlertTriangle, User, Play, CheckCircle, Trash, LayoutGrid, List, Edit2, Eye, X } from 'lucide-react';
 import { store } from '../dataStore';
 import { InternalTask, UserAccount, Role } from '../types';
+import { useAuth } from '../components/AuthProvider';
 
 interface InternalTasksProps {
   role: Role;
@@ -14,6 +15,7 @@ interface InternalTasksProps {
 
 export default function InternalTasks({ role }: InternalTasksProps) {
   const [tasks, setTasks] = useState<InternalTask[]>(store.getTasks());
+  const { user: loggedInUser } = useAuth();
   const users = store.getUsers().filter(u => u.status === 'active');
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState<'board' | 'list'>('board');
@@ -34,6 +36,7 @@ export default function InternalTasks({ role }: InternalTasksProps) {
   const [selectedDetailTask, setSelectedDetailTask] = useState<InternalTask | null>(null);
   const [detailContentText, setDetailContentText] = useState('');
   const [checklistText, setChecklistText] = useState('');
+  const [commentInput, setCommentInput] = useState('');
 
   React.useEffect(() => {
     if (selectedDetailTask) {
@@ -202,6 +205,46 @@ export default function InternalTasks({ role }: InternalTasksProps) {
     store.saveTask(updatedTask);
     loadAll();
     alert('Đã lưu nội dung chi tiết công việc!');
+  };
+
+  const handleAddComment = (task: InternalTask) => {
+    if (!commentInput.trim()) return;
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const formattedDate = `${yyyy}-${mm}-${dd} ${hh}:${min}`;
+
+    const newComment = {
+      id: 'CMT-' + Math.floor(Math.random() * 900000 + 100000),
+      userId: loggedInUser?.id || 'unknown',
+      userName: loggedInUser?.name || 'Nhân sự',
+      content: commentInput.trim(),
+      createdAt: formattedDate
+    };
+
+    const updatedTask: InternalTask = {
+      ...task,
+      comments: [...(task.comments || []), newComment]
+    };
+
+    store.saveTask(updatedTask);
+    loadAll();
+    setCommentInput('');
+  };
+
+  const handleDeleteComment = (task: InternalTask, commentId: string) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
+    
+    const updatedTask: InternalTask = {
+      ...task,
+      comments: (task.comments || []).filter(c => c.id !== commentId)
+    };
+
+    store.saveTask(updatedTask);
+    loadAll();
   };
 
   const currentDetailTask = selectedDetailTask ? (tasks.find(t => t.id === selectedDetailTask.id) || selectedDetailTask) : null;
@@ -799,6 +842,75 @@ export default function InternalTasks({ role }: InternalTasksProps) {
                     className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold cursor-pointer border-none text-[10px]"
                   >
                     Thêm việc
+                  </button>
+                </div>
+              </div>
+
+              {/* Thảo luận (Discussion / Comments) */}
+              <div className="space-y-3 pt-3.5 border-t border-slate-150">
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Thảo luận công việc ({(currentDetailTask.comments || []).length})</span>
+                </div>
+
+                {/* Comments list stream */}
+                <div className="space-y-3 max-h-[160px] overflow-y-auto pr-1">
+                  {(currentDetailTask.comments || []).length === 0 ? (
+                    <p className="text-[10px] text-slate-455 italic py-1">Chưa có thảo luận nào. Hãy gửi tin nhắn đầu tiên để trao đổi!</p>
+                  ) : (
+                    (currentDetailTask.comments || []).map(comment => {
+                      const isMyComment = comment.userId === loggedInUser?.id;
+                      return (
+                        <div key={comment.id} className="flex gap-2.5 items-start">
+                          <div className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center font-bold text-[9px] ${
+                            isMyComment ? 'bg-indigo-105 text-indigo-705' : 'bg-slate-100 text-slate-700'
+                          }`}>
+                            {comment.userName.charAt(0)}
+                          </div>
+                          <div className="flex-1 bg-slate-50/70 p-2.5 rounded-lg border border-slate-200 space-y-1 relative group">
+                            <div className="flex justify-between items-center text-[8px]">
+                              <span className={`font-bold ${isMyComment ? 'text-indigo-700' : 'text-slate-600'}`}>{comment.userName}</span>
+                              <span className="text-slate-400 font-mono">{comment.createdAt}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-700 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
+                            
+                            {isMyComment && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteComment(currentDetailTask, comment.id)}
+                                className="absolute right-2 top-2 text-slate-400 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity p-0.5 cursor-pointer border-none bg-transparent"
+                                title="Xóa bình luận"
+                              >
+                                <Trash className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                {/* Post comment input box */}
+                <div className="flex gap-2 items-end pt-1">
+                  <textarea
+                    rows={2}
+                    className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg focus:ring-1 focus:ring-teal-500 focus:outline-none text-xs resize-none bg-slate-50/20"
+                    placeholder="Viết bình luận... (Ctrl+Enter để gửi)"
+                    value={commentInput}
+                    onChange={(e) => setCommentInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+                        e.preventDefault();
+                        handleAddComment(currentDetailTask);
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleAddComment(currentDetailTask)}
+                    className="px-3.5 py-3.5 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold cursor-pointer border-none text-[10px] h-[46px] flex items-center justify-center shrink-0"
+                  >
+                    Gửi
                   </button>
                 </div>
               </div>

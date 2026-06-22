@@ -233,6 +233,7 @@ export function mapTaskToDb(t: InternalTask): Record<string, any> {
     notes: t.notes || null,
     detailed_content: t.detailedContent || '',
     checklist: t.checklist || [],
+    comments: t.comments || [],
   };
 }
 
@@ -250,6 +251,7 @@ export function mapDbToTask(row: any): InternalTask {
     notes: row.notes || undefined,
     detailedContent: row.detailed_content || '',
     checklist: Array.isArray(row.checklist) ? row.checklist : [],
+    comments: Array.isArray(row.comments) ? row.comments : [],
   };
 }
 
