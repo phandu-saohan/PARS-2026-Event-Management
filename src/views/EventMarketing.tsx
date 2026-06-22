@@ -68,6 +68,8 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [newsTitle, setNewsTitle] = useState('');
   const [newsContent, setNewsContent] = useState('');
   const [newsMediaUrl, setNewsMediaUrl] = useState('');
+  const [newsImageFile, setNewsImageFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [newsPlatforms, setNewsPlatforms] = useState<string[]>(['facebook', 'zalo']);
   const [newsAudience, setNewsAudience] = useState('doctors');
   const [newsTopic, setNewsTopic] = useState('masterclass');
@@ -507,6 +509,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
       setNewsTitle('');
       setNewsContent('');
       setNewsMediaUrl('');
+      setNewsImageFile(null);
     } else {
       setVideoTitle('');
       setVideoHook('');
@@ -1766,13 +1769,120 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hình ảnh đính kèm (Media Link URL)</label>
+              {/* ── Image Attachment ── */}
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Hình ảnh đính kèm</label>
+
+                {/* Drop-zone */}
+                <div
+                  className="relative border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-xl transition-all group bg-slate-50/50 hover:bg-white overflow-hidden"
+                  onDragOver={e => e.preventDefault()}
+                  onDrop={async e => {
+                    e.preventDefault();
+                    const file = e.dataTransfer.files?.[0];
+                    if (!file || !file.type.startsWith('image/')) return;
+                    setNewsImageFile(file);
+                    setIsUploadingImage(true);
+                    try {
+                      const path = `marketing/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                      let publicUrl: string | null = null;
+                      if (isSupabaseConfigured()) {
+                        publicUrl = await uploadToSupabaseStorage(path, file, 'assets');
+                      } else {
+                        publicUrl = URL.createObjectURL(file);
+                      }
+                      if (publicUrl) {
+                        setNewsMediaUrl(publicUrl);
+                        showToast('Upload hình ảnh thành công!', 'success');
+                      } else {
+                        showToast('Upload thất bại. Kiểm tra lại cấu hình Supabase Storage.', 'error');
+                      }
+                    } catch (err) {
+                      showToast('Lỗi khi upload hình ảnh', 'error');
+                    } finally {
+                      setIsUploadingImage(false);
+                    }
+                  }}
+                >
+                  <input
+                    id="news-image-upload-input"
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={async e => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setNewsImageFile(file);
+                      setIsUploadingImage(true);
+                      try {
+                        const path = `marketing/images/${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+                        let publicUrl: string | null = null;
+                        if (isSupabaseConfigured()) {
+                          publicUrl = await uploadToSupabaseStorage(path, file, 'assets');
+                        } else {
+                          publicUrl = URL.createObjectURL(file);
+                        }
+                        if (publicUrl) {
+                          setNewsMediaUrl(publicUrl);
+                          showToast('Upload hình ảnh thành công!', 'success');
+                        } else {
+                          showToast('Upload thất bại. Kiểm tra lại cấu hình Supabase Storage.', 'error');
+                        }
+                      } catch (err) {
+                        showToast('Lỗi khi upload hình ảnh', 'error');
+                      } finally {
+                        setIsUploadingImage(false);
+                        e.target.value = '';
+                      }
+                    }}
+                  />
+
+                  {newsMediaUrl && !isUploadingImage ? (
+                    /* Preview thumbnail */
+                    <div className="relative">
+                      <img
+                        src={newsMediaUrl}
+                        alt="preview"
+                        className="w-full max-h-48 object-cover rounded-xl"
+                        onError={e => { (e.target as HTMLImageElement).style.display='none'; }}
+                      />
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); setNewsMediaUrl(''); setNewsImageFile(null); }}
+                        className="absolute top-2 right-2 w-6 h-6 bg-rose-600 text-white rounded-full flex items-center justify-center shadow hover:bg-rose-700 transition-colors cursor-pointer z-10"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : isUploadingImage ? (
+                    /* Upload spinner */
+                    <div className="flex flex-col items-center gap-2 py-7">
+                      <Loader2 className="w-7 h-7 text-indigo-600 animate-spin" />
+                      <span className="text-xs font-bold text-slate-500">Đang upload lên Supabase Storage…</span>
+                    </div>
+                  ) : (
+                    /* Idle prompt */
+                    <div className="flex flex-col items-center gap-2 py-6 text-center">
+                      <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                        <Upload className="w-5 h-5" />
+                      </div>
+                      <div className="text-xs font-bold text-slate-700">Kéo ảnh vào đây hoặc click để chọn</div>
+                      <div className="text-[10px] text-slate-400">PNG, JPG, WEBP, GIF · Tối đa 10 MB</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* URL fallback */}
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span>hoặc nhập URL trực tiếp</span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
                 <input
                   type="text"
                   placeholder="https://imgur.com/example.png"
                   value={newsMediaUrl}
-                  onChange={e => setNewsMediaUrl(e.target.value)}
+                  onChange={e => { setNewsMediaUrl(e.target.value); setNewsImageFile(null); }}
                   className="w-full text-xs p-2.5 rounded-xl border border-slate-200 outline-none focus:border-indigo-600"
                 />
               </div>
