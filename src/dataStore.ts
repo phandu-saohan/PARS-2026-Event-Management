@@ -877,6 +877,13 @@ export class DataStore {
   private setupRealtimeSubscriptions() {
     if (!isSupabaseConfigured()) return;
 
+    // Clean up any existing subscriptions to prevent HMR / double-subscribe errors
+    try {
+      supabase.removeAllChannels();
+    } catch (e) {
+      console.warn('Error removing existing channels:', e);
+    }
+
     // Listen to attendees table updates
     supabase.channel('db-attendees')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'attendees' }, (payload) => {
@@ -3644,42 +3651,50 @@ interface DbVirtualSection {
   description: string | null;
 }
 
-const mapDbToRoom = (row: any): string => row.name;
-const mapRoomToDb = (roomName: string): DbRoom => ({ name: roomName });
+function mapDbToRoom(row: any): string { return row.name; }
+function mapRoomToDb(roomName: string): DbRoom { return { name: roomName }; }
 
-const mapDbToScheduleDate = (row: any): string => row.date_val;
-const mapScheduleDateToDb = (dVal: string): DbScheduleDate => ({ date_val: dVal });
+function mapDbToScheduleDate(row: any): string { return row.date_val; }
+function mapScheduleDateToDb(dVal: string): DbScheduleDate { return { date_val: dVal }; }
 
-const mapDbToShift = (row: any): ConferenceShift => ({
-  id: row.id,
-  name: row.name,
-  startTime: row.start_time,
-  endTime: row.end_time
-});
-const mapShiftToDb = (sh: ConferenceShift): DbShift => ({
-  id: sh.id,
-  name: sh.name,
-  start_time: sh.startTime,
-  end_time: sh.endTime
-});
+function mapDbToShift(row: any): ConferenceShift {
+  return {
+    id: row.id,
+    name: row.name,
+    startTime: row.start_time,
+    endTime: row.end_time
+  };
+}
+function mapShiftToDb(sh: ConferenceShift): DbShift {
+  return {
+    id: sh.id,
+    name: sh.name,
+    start_time: sh.startTime,
+    end_time: sh.endTime
+  };
+}
 
-const mapDbToVirtualSection = (row: any): VirtualSection => ({
-  id: row.id,
-  date: row.date,
-  roomName: row.room_name,
-  trackName: row.track_name,
-  buoiId: row.buoi_id,
-  startTime: row.start_time,
-  endTime: row.end_time,
-  description: row.description || undefined
-});
-const mapVirtualSectionToDb = (sec: VirtualSection): DbVirtualSection => ({
-  id: sec.id,
-  date: sec.date,
-  room_name: sec.roomName,
-  track_name: sec.trackName,
-  buoi_id: sec.buoiId || sec.buoi || 'sang',
-  start_time: sec.startTime,
-  end_time: sec.endTime,
-  description: sec.description || null
-});
+function mapDbToVirtualSection(row: any): VirtualSection {
+  return {
+    id: row.id,
+    date: row.date,
+    roomName: row.room_name,
+    trackName: row.track_name,
+    buoiId: row.buoi_id,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    description: row.description || undefined
+  };
+}
+function mapVirtualSectionToDb(sec: VirtualSection): DbVirtualSection {
+  return {
+    id: sec.id,
+    date: sec.date,
+    room_name: sec.roomName,
+    track_name: sec.trackName,
+    buoi_id: sec.buoiId || sec.buoi || 'sang',
+    start_time: sec.startTime,
+    end_time: sec.endTime,
+    description: sec.description || null
+  };
+}
