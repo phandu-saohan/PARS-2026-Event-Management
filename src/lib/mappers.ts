@@ -7,7 +7,7 @@ import type {
   InternalTask, FinanceTransaction, RegistrationPackage, UserAccount,
   NotificationTemplate, SentNotificationLog, SpecialtyTrack,
   BusinessConfig, EmbedScript, ZaloConfig, EmailConfig, Contact,
-  MarketingPost
+  MarketingPost, UserRole
 } from '../types';
 
 // ============================================================
@@ -576,5 +576,32 @@ export function mapDbToMarketingPost(row: any): MarketingPost {
     mediaUrl: row.media_url || undefined,
     videoScript: row.video_script || undefined,
     createdAt: row.created_at || new Date().toISOString(),
+  };
+}
+
+// ============================================================
+// USER ROLES
+// ============================================================
+export function mapRoleToDb(r: UserRole): Record<string, any> {
+  return {
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    description: r.description || null,
+    permissions: r.permissions || [],
+    is_system: r.isSystem || false,
+    created_at: r.createdAt || new Date().toISOString()
+  };
+}
+
+export function mapDbToRole(row: any): UserRole {
+  return {
+    id: row.id,
+    code: row.code || '',
+    name: row.name || '',
+    description: row.description || undefined,
+    permissions: row.permissions || [],
+    isSystem: row.is_system || false,
+    createdAt: row.created_at || undefined
   };
 }

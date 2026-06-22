@@ -42,6 +42,8 @@ import {
 import { store, DEFAULT_CME_TEMPLATE_CONFIG } from '../dataStore';
 import { 
   UserAccount, 
+  UserRole,
+  PERMISSION_GROUPS,
   RegistrationPackage, 
   SponsorPackage, 
   ZaloConfig, 
@@ -64,7 +66,7 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ role }: SettingsPanelProps) {
   // Navigation tab state
-  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup'>('business');
+  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'roles' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup'>('business');
   const [formActiveSection, setFormActiveSection] = useState<'delegate' | 'speaker' | 'sponsor'>('delegate');
 
   // Printer config states (saved to localStorage for device-specific setup)
@@ -146,6 +148,16 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [formUserStatus, setFormUserStatus] = useState<'active' | 'inactive'>('active');
   const [formUserPermissions, setFormUserPermissions] = useState<string[]>([]);
 
+  // Roles management states
+  const [rolesList, setRolesList] = useState<UserRole[]>(store.getRoles());
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [isRoleEdit, setIsRoleEdit] = useState(false);
+  const [formRoleId, setFormRoleId] = useState('');
+  const [formRoleCode, setFormRoleCode] = useState('');
+  const [formRoleName, setFormRoleName] = useState('');
+  const [formRoleDescription, setFormRoleDescription] = useState('');
+  const [formRolePermissions, setFormRolePermissions] = useState<string[]>([]);
+
   // Embed Scripts states
   const [embedScripts, setEmbedScripts] = useState<EmbedScript[]>(store.getEmbedScripts());
   const [showEmbedModal, setShowEmbedModal] = useState(false);
@@ -175,6 +187,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   // Reload caches helper
   const reloadData = () => {
     setUsers([...store.getUsers()]);
+    setRolesList([...store.getRoles()]);
     setPackages([...store.getPackages()]);
     setSponsorPackages([...(store.getSponsorPackages ? store.getSponsorPackages() : [])]);
     setEmbedScripts([...store.getEmbedScripts()]);
@@ -1051,6 +1064,97 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
     }
   };
 
+  // --- Handlers for Roles CRUD ---
+  const handleOpenAddRole = () => {
+    if (role !== 'admin') {
+      alert('Không đủ quyền hạn!');
+      return;
+    }
+    setIsRoleEdit(false);
+    setFormRoleId('role-' + Math.floor(Math.random() * 900 + 100));
+    setFormRoleCode('');
+    setFormRoleName('');
+    setFormRoleDescription('');
+    setFormRolePermissions([]);
+    setShowRoleModal(true);
+  };
+
+  const handleOpenEditRole = (r: UserRole) => {
+    if (role !== 'admin') {
+      alert('Không đủ quyền hạn!');
+      return;
+    }
+    setIsRoleEdit(true);
+    setFormRoleId(r.id);
+    setFormRoleCode(r.code);
+    setFormRoleName(r.name);
+    setFormRoleDescription(r.description || '');
+    setFormRolePermissions(r.permissions || []);
+    setShowRoleModal(true);
+  };
+
+  const handleSaveRoleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formRoleCode || !formRoleName) {
+      alert('Vui lòng điền đủ Mã vai trò và Tên vai trò.');
+      return;
+    }
+
+    const cleanCode = formRoleCode.trim().toLowerCase();
+    
+    // Check duplicate code if adding new
+    if (!isRoleEdit && rolesList.some(r => r.code === cleanCode)) {
+      alert('Mã vai trò này đã tồn tại trong hệ thống!');
+      return;
+    }
+
+    const payload: UserRole = {
+      id: formRoleId,
+      code: cleanCode,
+      name: formRoleName.trim(),
+      description: formRoleDescription.trim(),
+      permissions: formRolePermissions,
+      isSystem: isRoleEdit ? rolesList.find(r => r.id === formRoleId)?.isSystem : false
+    };
+
+    store.saveRole(payload);
+    setShowRoleModal(false);
+    reloadData();
+  };
+
+  const handleDeleteRole = (id: string) => {
+    if (role !== 'admin') {
+      alert('Chỉ quản trị viên mới được xóa vai trò!');
+      return;
+    }
+    const target = rolesList.find(r => r.id === id);
+    if (!target) return;
+    if (target.isSystem) {
+      alert('Không thể xóa vai trò hệ thống mặc định.');
+      return;
+    }
+
+    // Check if any user is currently assigned to this role
+    const usersWithRole = users.filter(u => u.role === target.code);
+    if (usersWithRole.length > 0) {
+      alert(`Không thể xóa vai trò này vì đang có ${usersWithRole.length} nhân sự thuộc vai trò này. Vui lòng chuyển vai trò của họ trước.`);
+      return;
+    }
+
+    if (window.confirm(`Bạn có chắc muốn xóa vai trò "${target.name}" khỏi hệ thống?`)) {
+      store.deleteRole(id);
+      reloadData();
+    }
+  };
+
+  const handleToggleRolePermission = (permCode: string) => {
+    if (formRolePermissions.includes(permCode)) {
+      setFormRolePermissions(formRolePermissions.filter(p => p !== permCode));
+    } else {
+      setFormRolePermissions([...formRolePermissions, permCode]);
+    }
+  };
+
   // --- Handlers for Embed Scripts CRUD ---
   const handleOpenAddEmbed = () => {
     setIsEmbedEdit(false);
@@ -1212,7 +1316,19 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
             }`}
           >
             <Users className="w-4 h-4 shrink-0" />
-            <span>👥 Phân Quyền Vận Hành</span>
+            <span>👥 Nhân Sự Vận Hành</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab('roles')}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border-none ${
+              activeSubTab === 'roles'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-150 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            <Shield className="w-4 h-4 shrink-0" />
+            <span>🛡️ Vai Trò & Phân Quyền</span>
           </button>
 
           <button
@@ -2736,6 +2852,121 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* ================= SECTION 4B: CUSTOM USER ROLES & GRANULAR PERMISSIONS MATRIX ================= */}
+          {activeSubTab === 'roles' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Cấu hình vai trò & Phân quyền</h3>
+                  <p className="text-[11px] text-slate-450 mt-0.5">Thiết lập các vai trò vận hành và định nghĩa danh sách quyền chi tiết tương ứng.</p>
+                </div>
+                {role === 'admin' && (
+                  <button
+                    onClick={handleOpenAddRole}
+                    className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-none"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Thêm vai trò mới
+                  </button>
+                )}
+              </div>
+
+              {/* Roles table list */}
+              <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 font-bold border-b border-slate-250 transition-all font-sans text-[10.5px]">
+                      <th className="p-3.5 pl-5">Tên vai trò</th>
+                      <th className="p-3.5">Mã vai trò</th>
+                      <th className="p-3.5">Mô tả chi tiết</th>
+                      <th className="p-3.5 text-center">Số lượng quyền</th>
+                      <th className="p-3.5 text-center">Loại vai trò</th>
+                      {role === 'admin' && <th className="p-3.5 pr-5 text-right">Thao tác</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                    {rolesList.map(r => (
+                      <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                        <td className="p-3.5 pl-5 font-bold text-slate-900">{r.name}</td>
+                        <td className="p-3.5">
+                          <span className="font-mono text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded-md">
+                            {r.code}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-slate-500 max-w-xs truncate" title={r.description}>{r.description || 'Không có mô tả'}</td>
+                        <td className="p-3.5 text-center font-semibold">
+                          <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full border border-slate-200 text-[10px]">
+                            {r.permissions?.length || 0} quyền
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-center">
+                          {r.isSystem ? (
+                            <span className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-full text-[9px] font-bold">
+                              Hệ thống
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-250 rounded-full text-[9px] font-bold">
+                              Tùy chỉnh
+                            </span>
+                          )}
+                        </td>
+                        {role === 'admin' && (
+                          <td className="p-3.5 pr-5 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleOpenEditRole(r)}
+                                className="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 border-none bg-transparent cursor-pointer"
+                                title="Chỉnh sửa quyền"
+                              >
+                                <Edit2 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteRole(r.id)}
+                                disabled={r.isSystem}
+                                className="p-1 hover:bg-rose-50 rounded text-rose-450 hover:text-rose-705 border-none bg-transparent cursor-pointer disabled:opacity-20"
+                                title="Xóa vai trò"
+                              >
+                                <Trash className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Database sync guide for custom roles */}
+              <div className="bg-slate-900 border border-slate-900 rounded-2xl p-5 text-white space-y-3">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-slate-300">Đồng bộ mã SQL cài đặt vai trò</h4>
+                  <button
+                    onClick={() => {
+                      const sql = `
+-- Định nghĩa bảng và phân quyền vai trò tùy chỉnh
+INSERT INTO public.roles (code, name, description, permissions, is_system) VALUES
+${rolesList.map(r => `('${r.code}', '${r.name}', '${r.description || ''}', ARRAY[${(r.permissions || []).map(p => `'${p}'`).join(', ')}], ${r.isSystem ? 'TRUE' : 'FALSE'})`).join(',\n')}
+ON CONFLICT (code) DO UPDATE SET 
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  permissions = EXCLUDED.permissions;
+`;
+                      navigator.clipboard.writeText(sql);
+                      alert('Đã sao chép SQL cấu hình vai trò vào Clipboard!');
+                    }}
+                    className="px-2.5 py-1 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white rounded-lg transition-all text-[10px] font-black cursor-pointer border border-slate-700"
+                  >
+                    COPY SQL CẤU HÌNH VAI TRÒ
+                  </button>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-normal">
+                  Khi bạn thêm vai trò mới hoặc cập nhật quyền trên ứng dụng, thông tin sẽ tự động đồng bộ vào bảng <code className="text-indigo-400 font-mono">public.roles</code> của Supabase. Bạn có thể sử dụng đoạn mã SQL ở trên để đồng bộ nhanh sang môi trường production hoặc backup.
+                </p>
               </div>
             </div>
           )}
@@ -4945,12 +5176,12 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                   <label className="text-[10.5px] font-black text-slate-500 block mb-1">Vai trò Vận hành *</label>
                   <select
                     value={formUserRole}
-                    onChange={(e) => setFormUserRole(e.target.value as Role)}
+                    onChange={(e) => setFormUserRole(e.target.value)}
                     className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold bg-white"
                   >
-                    <option value="ctv">Cộng tác viên (CTV)</option>
-                    <option value="btc">Thành viên BTC</option>
-                    <option value="admin">Trưởng ban BTC (Admin)</option>
+                    {rolesList.map(r => (
+                      <option key={r.id} value={r.code}>{r.name} ({r.code})</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -5153,6 +5384,124 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                   className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-lg cursor-pointer transition-all border-none shadow-sm"
                 >
                   Lưu trữ Mã Nhúng DB
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL: CUSTOM ROLE & PERMISSION MATRIX CRUD ================= */}
+      {showRoleModal && (
+        <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full overflow-hidden border border-slate-150 shadow-2xl animate-fade-in text-slate-900">
+            <div className="bg-slate-900 p-4 border-b border-slate-950 flex justify-between items-center text-white">
+              <span className="font-extrabold text-xs tracking-wider uppercase">
+                {isRoleEdit ? 'Cấu Hình Chi Tiết Vai Trò' : 'Tạo Vai Trò Vận Hành Mới'}
+              </span>
+              <button 
+                onClick={() => setShowRoleModal(false)}
+                className="text-slate-400 hover:text-white font-bold text-sm cursor-pointer border-none bg-transparent"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveRoleSubmit} className="p-6 space-y-4 text-xs font-sans max-h-[80vh] overflow-y-auto">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-[10.5px] font-black text-slate-500 block mb-1">Mã ID *</label>
+                  <input
+                    type="text"
+                    required
+                    disabled
+                    value={formRoleId}
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-400 bg-slate-50"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10.5px] font-black text-slate-500 block mb-1">Mã vai trò (code) *</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={isRoleEdit && ['admin', 'btc', 'ctv'].includes(formRoleCode)}
+                    value={formRoleCode}
+                    onChange={(e) => setFormRoleCode(e.target.value)}
+                    placeholder="vd: coordinator"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 disabled:bg-slate-50 disabled:text-slate-400"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10.5px] font-black text-slate-500 block mb-1">Tên vai trò *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formRoleName}
+                    onChange={(e) => setFormRoleName(e.target.value)}
+                    placeholder="vd: Điều Phối Viên"
+                    className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10.5px] font-black text-slate-500 block mb-1">Mô tả vai trò</label>
+                <textarea
+                  value={formRoleDescription}
+                  onChange={(e) => setFormRoleDescription(e.target.value)}
+                  placeholder="Mô tả chức năng nhiệm vụ của vai trò này..."
+                  rows={2}
+                  className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs text-slate-900"
+                />
+              </div>
+
+              {/* Granular Permission Matrix */}
+              <div className="space-y-3 pt-2 border-t border-slate-100">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">
+                  Ma Trận Phân Quyền Chi Tiết (Permission Matrix):
+                </span>
+                
+                <div className="space-y-4 max-h-64 overflow-y-auto bg-slate-50 p-4 rounded-xl border border-slate-150">
+                  {PERMISSION_GROUPS.map(group => (
+                    <div key={group.module} className="space-y-1.5 pb-3 border-b border-slate-200 last:border-0 last:pb-0">
+                      <span className="font-extrabold text-[10.5px] text-indigo-700 block uppercase tracking-wide">
+                        {group.name}
+                      </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        {group.permissions.map(perm => (
+                          <label key={perm.code} className="flex items-start gap-2.5 cursor-pointer selection-none">
+                            <input
+                              type="checkbox"
+                              checked={formRolePermissions.includes(perm.code) || formRoleCode === 'admin'}
+                              onChange={() => handleToggleRolePermission(perm.code)}
+                              disabled={formRoleCode === 'admin'} // Admin has all permissions
+                              className="w-4 h-4 rounded text-indigo-600 outline-none cursor-pointer mt-0.5"
+                            />
+                            <div>
+                              <span className="font-bold text-slate-800 text-[11px] block">{perm.name}</span>
+                              <span className="text-[9px] text-slate-400 block -mt-0.5 leading-normal">{perm.description}</span>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-150 flex justify-end gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowRoleModal(false)}
+                  className="px-4 py-2 bg-slate-100 font-bold rounded-lg cursor-pointer hover:bg-slate-200 text-slate-600 transition-all border-none"
+                >
+                  Thoát ra
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-lg cursor-pointer transition-all border-none shadow-sm"
+                >
+                  Lưu vai trò & Phân quyền
                 </button>
               </div>
             </form>

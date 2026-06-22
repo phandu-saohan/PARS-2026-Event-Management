@@ -37,20 +37,19 @@ const PublicSpeakerRegister = lazy(() => import('./views/PublicSpeakerRegister')
 const PublicSponsorRegister = lazy(() => import('./views/PublicSponsorRegister'));
 const PublicCheckRegistration = lazy(() => import('./views/PublicCheckRegistration'));
 
-// Middleware permission mapping for views
-const VIEW_ROLE_PERMISSIONS: Record<string, Role[]> = {
-  overview: ['admin', 'btc', 'ctv'],
-  attendees: ['admin', 'btc', 'ctv'],
-  speakers: ['admin', 'btc', 'ctv'],
-  schedule: ['admin', 'btc', 'ctv'],
-  tasks: ['admin', 'btc', 'ctv'],
-  finances: ['admin', 'btc'],
-  sponsors: ['admin', 'btc'],
-  notifications: ['admin', 'btc'],
-  'bulk-send': ['admin', 'btc'],
-  settings: ['admin', 'btc'],
-  'user-guide': ['admin', 'btc', 'ctv'],
-  marketing: ['admin', 'btc'],
+// Required permission for each view
+const VIEW_REQUIRED_PERMISSIONS: Record<string, string> = {
+  overview: 'overview.view',
+  attendees: 'attendees.view',
+  speakers: 'speakers.view',
+  schedule: 'schedule.view',
+  tasks: 'tasks.view',
+  finances: 'finances.view',
+  sponsors: 'sponsors.view',
+  notifications: 'notifications.view',
+  'bulk-send': 'notifications.send',
+  settings: 'settings.view',
+  marketing: 'marketing.view',
 };
 
 function AppContent() {
@@ -260,10 +259,10 @@ function AppContent() {
 
   // Middleware effect: watch role and view changes, block and redirect unauthorized access
   useEffect(() => {
-    if (isPublicView) return;
+    if (isPublicView || !user) return;
 
-    const allowedRoles = VIEW_ROLE_PERMISSIONS[currentView];
-    if (allowedRoles && !allowedRoles.includes(role)) {
+    const requiredPermission = VIEW_REQUIRED_PERMISSIONS[currentView];
+    if (requiredPermission && !store.hasPermission(user, requiredPermission)) {
       // Set notice and redirect smoothly
       setAuthError(`Bạn không có quyền truy cập chuyên phân hệ "${currentView.toUpperCase()}". Đang chuyển hướng về Bảng điều khiển.`);
       setCurrentView('overview');
@@ -273,14 +272,14 @@ function AppContent() {
       }, 4000);
       return () => clearTimeout(timer);
     }
-  }, [currentView, role, isPublicView]);
+  }, [currentView, user, isPublicView]);
 
   const handleNavigate = (view: string) => {
     const isPublic = ['event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration'].includes(view);
-    if (!isPublic) {
-      const allowedRoles = VIEW_ROLE_PERMISSIONS[view];
-      if (allowedRoles && !allowedRoles.includes(role)) {
-        alert(`Tài khoản phân quyền của bạn (${role.toUpperCase()}) không được phép truy cập phân hệ này!`);
+    if (!isPublic && user) {
+      const requiredPermission = VIEW_REQUIRED_PERMISSIONS[view];
+      if (requiredPermission && !store.hasPermission(user, requiredPermission)) {
+        alert(`Tài khoản phân quyền của bạn không được phép truy cập phân hệ này!`);
         return;
       }
     }

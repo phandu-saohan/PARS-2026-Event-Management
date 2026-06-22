@@ -3,7 +3,115 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type Role = 'admin' | 'btc' | 'ctv';
+export type Role = string;
+
+export interface UserRole {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
+  permissions: string[];
+  isSystem?: boolean;
+  createdAt?: string;
+}
+
+export interface PermissionDefinition {
+  code: string;
+  name: string;
+  description: string;
+}
+
+export interface PermissionGroup {
+  module: string;
+  name: string;
+  permissions: PermissionDefinition[];
+}
+
+export const PERMISSION_GROUPS: PermissionGroup[] = [
+  {
+    module: 'overview',
+    name: 'Tổng Quan & Báo Cáo',
+    permissions: [
+      { code: 'overview.view', name: 'Xem tổng quan', description: 'Xem biểu đồ, thống kê, hoạt động gần đây' }
+    ]
+  },
+  {
+    module: 'schedule',
+    name: 'Lịch Trình Hội Nghị',
+    permissions: [
+      { code: 'schedule.view', name: 'Xem lịch trình', description: 'Xem danh sách ca, phòng, buổi và phiên' },
+      { code: 'schedule.edit', name: 'Quản lý lịch trình', description: 'Thêm, sửa, xóa các phòng, ca và phiên báo cáo' }
+    ]
+  },
+  {
+    module: 'speakers',
+    name: 'Báo Cáo Viên',
+    permissions: [
+      { code: 'speakers.view', name: 'Xem báo cáo viên', description: 'Xem hồ sơ và tài liệu của báo cáo viên' },
+      { code: 'speakers.edit', name: 'Quản lý báo cáo viên', description: 'Phê duyệt đăng ký, sửa đổi thông tin báo cáo viên' }
+    ]
+  },
+  {
+    module: 'attendees',
+    name: 'Đại Biểu',
+    permissions: [
+      { code: 'attendees.view', name: 'Xem đại biểu', description: 'Xem danh sách và chi tiết đại biểu' },
+      { code: 'attendees.edit', name: 'Quản lý đại biểu', description: 'Thêm mới, sửa đổi thông tin đại biểu' },
+      { code: 'attendees.checkin', name: 'Quản lý check-in', description: 'Check-in đại biểu tại quầy hoặc qua QR code' }
+    ]
+  },
+  {
+    module: 'sponsors',
+    name: 'Nhà Tài Trợ',
+    permissions: [
+      { code: 'sponsors.view', name: 'Xem nhà tài trợ', description: 'Xem danh sách nhà tài trợ và gian hàng' },
+      { code: 'sponsors.edit', name: 'Quản lý nhà tài trợ', description: 'Thêm mới, duyệt và sửa thông tin tài trợ' }
+    ]
+  },
+  {
+    module: 'notifications',
+    name: 'Thông Báo Tự Động',
+    permissions: [
+      { code: 'notifications.view', name: 'Xem cấu hình thông báo', description: 'Xem mẫu tin nhắn và nhật ký gửi' },
+      { code: 'notifications.edit', name: 'Cấu hình mẫu tin', description: 'Chỉnh sửa mẫu tin ZNS, Email, SMS' },
+      { code: 'notifications.send', name: 'Gửi tin hàng loạt', description: 'Gửi chiến dịch tin nhắn hàng loạt cho các đối tượng' }
+    ]
+  },
+  {
+    module: 'tasks',
+    name: 'Công Việc Nội Bộ',
+    permissions: [
+      { code: 'tasks.view', name: 'Xem công việc', description: 'Xem danh sách công việc được giao' },
+      { code: 'tasks.edit', name: 'Quản lý công việc', description: 'Tạo công việc mới, phân công nhiệm vụ, cập nhật tiến độ' }
+    ]
+  },
+  {
+    module: 'finances',
+    name: 'Đối Soát Tài Chính',
+    permissions: [
+      { code: 'finances.view', name: 'Xem báo cáo tài chính', description: 'Xem số dư tài khoản, giao dịch, đối soát ngân hàng' },
+      { code: 'finances.edit', name: 'Xử lý giao dịch', description: 'Phê duyệt giao dịch, đối soát thủ công và hoàn tiền' }
+    ]
+  },
+  {
+    module: 'marketing',
+    name: 'Marketing Sự Kiện',
+    permissions: [
+      { code: 'marketing.view', name: 'Xem marketing', description: 'Xem bài viết, video short và kênh liên kết' },
+      { code: 'marketing.edit', name: 'Soạn thảo nội dung', description: 'Tạo bài viết mới, kịch bản video, xem trước (preview) tin bài' },
+      { code: 'marketing.publish', name: 'Liên kết & Xuất bản', description: 'Liên kết tài khoản mạng xã hội, làm mới token, xuất bản bài viết' }
+    ]
+  },
+  {
+    module: 'settings',
+    name: 'Cài Đặt Hệ Thống',
+    permissions: [
+      { code: 'settings.view', name: 'Truy cập cài đặt', description: 'Xem cấu hình chung của hệ thống' },
+      { code: 'settings.edit', name: 'Sửa cấu hình hệ thống', description: 'Thay đổi cấu hình nghiệp vụ, gói đăng ký, cấu hình CME, sao lưu dữ liệu' },
+      { code: 'settings.roles', name: 'Quản lý phân quyền', description: 'Tạo vai trò mới và phân quyền chi tiết cho vai trò' }
+    ]
+  }
+];
 
 export interface UserAccount {
   id: string;

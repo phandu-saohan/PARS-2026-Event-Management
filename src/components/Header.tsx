@@ -212,35 +212,45 @@ export default function Header({
               .join('')
               .toUpperCase() || 'US';
 
-            switch (roleVal) {
-              case 'admin':
-                return {
-                  name: nameVal,
-                  email: emailVal,
-                  roleLabel: 'Toàn Trị',
-                  badgeClass: 'bg-rose-50 border-rose-200 text-rose-700',
-                  avatarInitials: initials,
-                  avatarClass: 'bg-gradient-to-br from-rose-500 to-rose-600 text-white'
-                };
-              case 'btc':
-                return {
-                  name: nameVal,
-                  email: emailVal,
-                  roleLabel: 'Ban Tổ Chức',
-                  badgeClass: 'bg-indigo-50 border-indigo-200 text-indigo-700',
-                  avatarInitials: initials,
-                  avatarClass: 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white'
-                };
-              case 'ctv':
-              default:
-                return {
-                  name: nameVal,
-                  email: emailVal,
-                  roleLabel: 'Cộng Tác Viên',
-                  badgeClass: 'bg-emerald-50 border-emerald-200 text-emerald-700',
-                  avatarInitials: initials,
-                  avatarClass: 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white'
-                };
+            const dbRole = store.getRoles().find(r => r.code === roleVal);
+            const roleLabelVal = dbRole ? dbRole.name : (roleVal === 'admin' ? 'Toàn Trị' : roleVal === 'btc' ? 'Ban Tổ Chức' : roleVal === 'ctv' ? 'Cộng Tác Viên' : roleVal.toUpperCase());
+
+            if (roleVal === 'admin') {
+              return {
+                name: nameVal,
+                email: emailVal,
+                roleLabel: 'Toàn Trị',
+                badgeClass: 'bg-rose-50 border-rose-200 text-rose-700',
+                avatarInitials: initials,
+                avatarClass: 'bg-gradient-to-br from-rose-500 to-rose-600 text-white'
+              };
+            } else if (roleVal === 'btc') {
+              return {
+                name: nameVal,
+                email: emailVal,
+                roleLabel: 'Ban Tổ Chức',
+                badgeClass: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+                avatarInitials: initials,
+                avatarClass: 'bg-gradient-to-br from-indigo-500 to-indigo-600 text-white'
+              };
+            } else if (roleVal === 'ctv') {
+              return {
+                name: nameVal,
+                email: emailVal,
+                roleLabel: 'Cộng Tác Viên',
+                badgeClass: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+                avatarInitials: initials,
+                avatarClass: 'bg-gradient-to-br from-emerald-500 to-emerald-600 text-white'
+              };
+            } else {
+              return {
+                name: nameVal,
+                email: emailVal,
+                roleLabel: roleLabelVal,
+                badgeClass: 'bg-amber-50 border-amber-200 text-amber-700',
+                avatarInitials: initials,
+                avatarClass: 'bg-gradient-to-br from-amber-500 to-amber-600 text-white'
+              };
             }
           };
           const userProfile = getUserProfile();

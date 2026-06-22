@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Role } from '../types';
 import { useAuth } from './AuthProvider';
+import { store } from '../dataStore';
 
 interface SidebarProps {
   currentView: string;
@@ -23,18 +24,18 @@ interface SidebarProps {
 export default function Sidebar({ currentView, onNavigate, currentRole, isOpen, onClose }: SidebarProps) {
   const { user, signOut } = useAuth();
   const menuItems = [
-    { id: 'overview', name: 'Tổng Quan', icon: BarChart2, roles: ['admin', 'btc', 'ctv'] },
-    { id: 'schedule', name: 'Lịch Trình Hội Nghị', icon: Calendar, roles: ['admin', 'btc', 'ctv'] },
-    { id: 'speakers', name: 'Báo Cáo Viên', icon: FileText, roles: ['admin', 'btc', 'ctv'] },
-    { id: 'attendees', name: 'Đại Biểu', icon: Users, roles: ['admin', 'btc', 'ctv'] },
-    { id: 'sponsors', name: 'Nhà Tài Trợ', icon: Award, roles: ['admin', 'btc'] },
-    { id: 'notifications', name: 'Thông Báo Tự Động', icon: Megaphone, roles: ['admin', 'btc'] },
-    { id: 'bulk-send', name: 'Gửi Tin Hàng Loạt', icon: Send, roles: ['admin', 'btc'] },
-    { id: 'tasks', name: 'Công Việc Nội Bộ', icon: CheckSquare, roles: ['admin', 'btc', 'ctv'] },
-    { id: 'finances', name: 'Đối Soát Tài Chính', icon: Coins, roles: ['admin', 'btc'] },
-    { id: 'marketing', name: 'Marketing Sự Kiện', icon: Share2, roles: ['admin', 'btc'] },
-    { id: 'settings', name: 'Cài Đặt Hệ Thống', icon: Settings, roles: ['admin', 'btc'] },
-    { id: 'user-guide', name: 'Hướng Dẫn Sử Dụng', icon: HelpCircle, roles: ['admin', 'btc', 'ctv'] },
+    { id: 'overview', name: 'Tổng Quan', icon: BarChart2, permission: 'overview.view' },
+    { id: 'schedule', name: 'Lịch Trình Hội Nghị', icon: Calendar, permission: 'schedule.view' },
+    { id: 'speakers', name: 'Báo Cáo Viên', icon: FileText, permission: 'speakers.view' },
+    { id: 'attendees', name: 'Đại Biểu', icon: Users, permission: 'attendees.view' },
+    { id: 'sponsors', name: 'Nhà Tài Trợ', icon: Award, permission: 'sponsors.view' },
+    { id: 'notifications', name: 'Thông Báo Tự Động', icon: Megaphone, permission: 'notifications.view' },
+    { id: 'bulk-send', name: 'Gửi Tin Hàng Loạt', icon: Send, permission: 'notifications.send' },
+    { id: 'tasks', name: 'Công Việc Nội Bộ', icon: CheckSquare, permission: 'tasks.view' },
+    { id: 'finances', name: 'Đối Soát Tài Chính', icon: Coins, permission: 'finances.view' },
+    { id: 'marketing', name: 'Marketing Sự Kiện', icon: Share2, permission: 'marketing.view' },
+    { id: 'settings', name: 'Cài Đặt Hệ Thống', icon: Settings, permission: 'settings.view' },
+    { id: 'user-guide', name: 'Hướng Dẫn Sử Dụng', icon: HelpCircle },
   ];
 
 
@@ -88,7 +89,7 @@ export default function Sidebar({ currentView, onNavigate, currentRole, isOpen, 
         <div className="space-y-1">
           <span className="text-[9px] font-black uppercase text-indigo-400/80 block mb-3.5 tracking-widest px-1">PHÂN HỆ NGHIỆP VỤ</span>
           {menuItems.map((item) => {
-            const hasAccess = item.roles.includes(currentRole);
+            const hasAccess = !item.permission || (user && store.hasPermission(user, item.permission));
             const Icon = item.icon;
             
             if (!hasAccess) return null;

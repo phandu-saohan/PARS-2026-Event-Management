@@ -4,6 +4,7 @@
  */
 import {
   UserAccount,
+  UserRole,
   Attendee,
   SpeakerRegistration,
   ConferenceSession,
@@ -41,6 +42,7 @@ import {
   mapFinanceToDb, mapDbToFinance,
   mapPackageToDb, mapDbToPackage,
   mapUserToDb, mapDbToUser,
+  mapRoleToDb, mapDbToRole,
   mapTemplateToDb, mapDbToTemplate,
   mapNotifLogToDb, mapDbToNotifLog,
   mapTrackToDb, mapDbToTrack,
@@ -451,9 +453,9 @@ const DEFAULT_ONESIGNAL_CONFIG: OneSignalConfig = {
 
 const DEFAULT_MARKETING_CHANNELS_CONFIG: MarketingChannelsConfig = {
   facebook: { appId: '', pageId: '', pageAccessToken: '', pageName: '', isConfigured: false },
-  zalo: { appId: '', secretKey: '', oaId: '', accessToken: '', oaName: '', isConfigured: false },
-  tiktok: { clientKey: '', clientSecret: '', accessToken: '', accountName: '', isConfigured: false },
-  youtube: { clientId: '', clientSecret: '', accessToken: '', channelName: '', isConfigured: false }
+  zalo: { appId: '', secretKey: '', oaId: '', accessToken: '', refreshToken: '', oaName: '', isConfigured: false },
+  tiktok: { clientKey: '', clientSecret: '', accessToken: '', refreshToken: '', accountName: '', isConfigured: false },
+  youtube: { clientId: '', clientSecret: '', accessToken: '', refreshToken: '', channelName: '', isConfigured: false }
 };
 
 export class DataStore {
@@ -485,6 +487,7 @@ export class DataStore {
   private static KEY_CONTACTS = 'pars_contacts';
   private static KEY_MARKETING_POSTS = 'pars_marketing_posts';
   private static KEY_MARKETING_CHANNELS_CONFIG = 'pars_marketing_channels_config';
+  private static KEY_ROLES = 'pars_roles';
 
   // In-memory cache
   private attendees: Attendee[] = [];
@@ -515,6 +518,7 @@ export class DataStore {
   private contacts: Contact[] = [];
   private marketingPosts: MarketingPost[] = [];
   private marketingChannelsConfig: MarketingChannelsConfig = DEFAULT_MARKETING_CHANNELS_CONFIG;
+  private roles: UserRole[] = [];
 
   constructor() {
     this.loadLocalStorage();
@@ -584,6 +588,60 @@ export class DataStore {
     this.contacts = this.getLocalStorage(DataStore.KEY_CONTACTS, []);
     this.marketingPosts = this.getLocalStorage(DataStore.KEY_MARKETING_POSTS, []);
     this.marketingChannelsConfig = this.getLocalStorage(DataStore.KEY_MARKETING_CHANNELS_CONFIG, DEFAULT_MARKETING_CHANNELS_CONFIG);
+    this.roles = this.getLocalStorage(DataStore.KEY_ROLES, [
+      {
+        id: 'role-admin',
+        code: 'admin',
+        name: 'Toàn Trị',
+        description: 'Quyền quản trị viên tối cao, có thể quản lý tất cả các phân hệ và cấu hình hệ thống.',
+        permissions: [
+          'overview.view', 
+          'schedule.view', 'schedule.edit', 
+          'speakers.view', 'speakers.edit', 
+          'attendees.view', 'attendees.edit', 
+          'sponsors.view', 'sponsors.edit', 
+          'notifications.view', 'notifications.edit', 'notifications.send',
+          'tasks.view', 'tasks.edit',
+          'finances.view', 'finances.edit', 
+          'marketing.view', 'marketing.edit', 'marketing.publish',
+          'settings.view', 'settings.edit', 'settings.roles'
+        ],
+        isSystem: true
+      },
+      {
+        id: 'role-btc',
+        code: 'btc',
+        name: 'Ban Tổ Chức',
+        description: 'Thành viên Ban Tổ Chức, có quyền quản lý đại biểu, lịch trình, báo cáo viên, gửi thông báo và công việc nội bộ.',
+        permissions: [
+          'overview.view', 
+          'schedule.view', 'schedule.edit', 
+          'speakers.view', 'speakers.edit', 
+          'attendees.view', 'attendees.edit', 
+          'sponsors.view', 'sponsors.edit', 
+          'notifications.view', 'notifications.edit', 'notifications.send',
+          'tasks.view', 'tasks.edit',
+          'finances.view',
+          'marketing.view', 'marketing.edit',
+          'settings.view'
+        ],
+        isSystem: true
+      },
+      {
+        id: 'role-ctv',
+        code: 'ctv',
+        name: 'Cộng Tác Viên',
+        description: 'Cộng tác viên hỗ trợ sự kiện, chủ yếu hỗ trợ check-in đại biểu, xem lịch trình và thực hiện các nhiệm vụ được giao.',
+        permissions: [
+          'overview.view', 
+          'schedule.view', 
+          'speakers.view', 
+          'attendees.view', 'attendees.checkin',
+          'tasks.view', 'tasks.edit'
+        ],
+        isSystem: true
+      }
+    ]);
   }
 
   /**
@@ -610,6 +668,7 @@ export class DataStore {
         { data: tracks },
         { data: bConfig },
         { data: users },
+        { data: dbRoles },
         { data: sessions },
         { data: attendees },
         { data: speakers },
@@ -631,6 +690,7 @@ export class DataStore {
         supabase.from('specialty_tracks').select('*'),
         supabase.from('business_config').select('*').eq('id', 'default').maybeSingle(),
         supabase.from('user_accounts').select('*'),
+        supabase.from('roles').select('*'),
         supabase.from('sessions').select('*'),
         supabase.from('attendees').select('*'),
         supabase.from('speakers').select('*'),
@@ -682,6 +742,10 @@ export class DataStore {
       if (users) {
         this.users = users.map(mapDbToUser);
         this.saveToLocalStorage(DataStore.KEY_USERS, this.users);
+      }
+      if (dbRoles) {
+        this.roles = dbRoles.map(mapDbToRole);
+        this.saveToLocalStorage(DataStore.KEY_ROLES, this.roles);
       }
       if (sessions) {
         this.sessions = sessions.map(mapDbToSession);
@@ -929,6 +993,40 @@ export class DataStore {
         }
         this.saveToLocalStorage(DataStore.KEY_MARKETING_POSTS, this.marketingPosts);
         window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'marketing_posts' } }));
+      })
+      .subscribe();
+
+    // Listen to roles table updates
+    supabase.channel('db-roles')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'roles' }, (payload) => {
+        const { eventType, new: newRow, old: oldRow } = payload;
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const role = mapDbToRole(newRow);
+          const idx = this.roles.findIndex(r => r.id === role.id);
+          if (idx >= 0) this.roles[idx] = role;
+          else this.roles.push(role);
+        } else if (eventType === 'DELETE') {
+          this.roles = this.roles.filter(r => r.id !== oldRow.id);
+        }
+        this.saveToLocalStorage(DataStore.KEY_ROLES, this.roles);
+        window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'roles' } }));
+      })
+      .subscribe();
+
+    // Listen to user_accounts table updates
+    supabase.channel('db-user-accounts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_accounts' }, (payload) => {
+        const { eventType, new: newRow, old: oldRow } = payload;
+        if (eventType === 'INSERT' || eventType === 'UPDATE') {
+          const user = mapDbToUser(newRow);
+          const idx = this.users.findIndex(u => u.id === user.id);
+          if (idx >= 0) this.users[idx] = user;
+          else this.users.push(user);
+        } else if (eventType === 'DELETE') {
+          this.users = this.users.filter(u => u.id !== oldRow.id);
+        }
+        this.saveToLocalStorage(DataStore.KEY_USERS, this.users);
+        window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'user_accounts' } }));
       })
       .subscribe();
   }
@@ -1869,6 +1967,59 @@ export class DataStore {
       }
     }
     window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'packages' } }));
+  }
+
+  // Roles
+  getRoles() { return this.roles; }
+
+  saveRole(role: UserRole) {
+    const idx = this.roles.findIndex(r => r.id === role.id);
+    if (idx >= 0) {
+      this.roles[idx] = role;
+    } else {
+      this.roles.push(role);
+    }
+    this.saveToLocalStorage(DataStore.KEY_ROLES, this.roles);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('roles').upsert(mapRoleToDb(role)).then(({ error }) => {
+        if (error) console.error('Error syncing role to Supabase:', error);
+      });
+    }
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'roles' } }));
+    return role;
+  }
+
+  deleteRole(id: string) {
+    const target = this.roles.find(r => r.id === id);
+    if (target?.isSystem) {
+      throw new Error('Không thể xóa vai trò hệ thống!');
+    }
+    this.roles = this.roles.filter(r => r.id !== id);
+    this.saveToLocalStorage(DataStore.KEY_ROLES, this.roles);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('roles').delete().eq('id', id).then(({ error }) => {
+        if (error) console.error('Error deleting role from Supabase:', error);
+      });
+    }
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'roles' } }));
+  }
+
+  hasPermission(user: { role: string; email?: string; permissions?: string[] } | null, permission: string): boolean {
+    if (!user) return false;
+    
+    // Admin user has all permissions
+    if (user.role === 'admin' || user.email?.trim().toLowerCase() === 'admin@admin.com') return true;
+
+    // Check custom individual permissions
+    if (user.permissions && user.permissions.includes(permission)) return true;
+
+    // Check role permissions
+    const userRole = this.roles.find(r => r.code === user.role);
+    if (userRole && userRole.permissions.includes(permission)) return true;
+
+    return false;
   }
 
   // Users

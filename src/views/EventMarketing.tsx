@@ -148,11 +148,11 @@ export default function EventMarketing({ role }: EventMarketingProps) {
         if (channel === 'facebook') {
           updated.facebook = { appId: 'fb_app_92837', pageId: 'fb_page_10293', pageAccessToken: token, pageName: name, isConfigured: true };
         } else if (channel === 'zalo') {
-          updated.zalo = { appId: 'zalo_app_739', secretKey: 'zalo_sec_382', oaId: 'zalo_oa_102', accessToken: token, oaName: name, isConfigured: true };
+          updated.zalo = { appId: 'zalo_app_739', secretKey: 'zalo_sec_382', oaId: 'zalo_oa_102', accessToken: token, refreshToken: 'mock_zalo_refresh_token', oaName: name, isConfigured: true };
         } else if (channel === 'tiktok') {
-          updated.tiktok = { clientKey: 'tik_client_829', clientSecret: 'tik_sec_102', accessToken: token, accountName: name, isConfigured: true };
+          updated.tiktok = { clientKey: 'tik_client_829', clientSecret: 'tik_sec_102', accessToken: token, refreshToken: 'mock_tiktok_refresh_token', accountName: name, isConfigured: true };
         } else if (channel === 'youtube') {
-          updated.youtube = { clientId: 'google_cli_102', clientSecret: 'google_sec_38', accessToken: token, channelName: name, isConfigured: true };
+          updated.youtube = { clientId: 'google_cli_102', clientSecret: 'google_sec_38', accessToken: token, refreshToken: 'mock_youtube_refresh_token', channelName: name, isConfigured: true };
         }
         
         store.saveMarketingChannelsConfig(updated);
