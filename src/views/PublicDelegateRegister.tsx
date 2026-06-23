@@ -102,6 +102,7 @@ function FormStepper({ currentStep, isSubmitted, L }: FormStepperProps) {
 
 interface PublicDelegateRegisterProps {
   onNavigate: (view: string) => void;
+  isInline?: boolean;
 }
 
 const getInitialLang = (): 'vietname' | 'foreign' => {
@@ -115,7 +116,7 @@ const getInitialLang = (): 'vietname' | 'foreign' => {
   return 'vietname'; // mặc định tiếng Việt
 };
 
-export default function PublicDelegateRegister({ onNavigate }: PublicDelegateRegisterProps) {
+export default function PublicDelegateRegister({ onNavigate, isInline = false }: PublicDelegateRegisterProps) {
   const packages = store.getPackages().filter(p => p.isActive);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -530,8 +531,8 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
     const vietQrSuccessUrl = `https://img.vietqr.io/image/VCB-0331000516283-compact.png?amount=${createdAttendee.packageFee}&addInfo=${encodeURIComponent(transferMessageSub)}&accountName=HOI%20PHAU%20THUAT%2520TAO%2520HINH%2520THAM%2520MY%2520VIET%2520NAM`;
 
     return (
-      <div className="bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans">
-        <div className="max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden">
+      <div className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans"}>
+        <div className={isInline ? "bg-white rounded-3xl border border-slate-250 shadow-md overflow-hidden" : "max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden"}>
           {/* FormStepper indicating step 4 is active */}
           <FormStepper currentStep={4} isSubmitted={true} L={L} />
 
@@ -746,12 +747,12 @@ export default function PublicDelegateRegister({ onNavigate }: PublicDelegateReg
   }
 
   return (
-    <div ref={containerRef} className="bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans">
-      <div className="max-w-4xl mx-auto">
+    <div ref={containerRef} className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans"}>
+      <div className={isInline ? "w-full" : "max-w-4xl mx-auto"}>
 
 
         {/* Form Container with Premium aesthetic */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden">
+        <div className={isInline ? "bg-white rounded-3xl border border-slate-200 shadow-md overflow-hidden" : "bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden"}>
 
           {/* CLOSED FORM SCREEN */}
           {formCfg?.isOpen === false && (
