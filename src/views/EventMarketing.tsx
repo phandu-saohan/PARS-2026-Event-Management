@@ -14,6 +14,18 @@ import { MarketingPost, MarketingChannelsConfig } from '../types';
 import { store } from '../dataStore';
 import { uploadToSupabaseStorage, isSupabaseConfigured } from '../lib/supabase';
 
+const getPlatformLabel = (platform: string): string => {
+  switch (platform) {
+    case 'facebook': return 'Facebook Feed';
+    case 'zalo': return 'Zalo OA';
+    case 'tiktok': return 'TikTok';
+    case 'youtube': return 'YouTube Shorts';
+    case 'facebook_reel': return 'Facebook Reels';
+    case 'facebook_story': return 'Facebook Story';
+    default: return platform;
+  }
+};
+
 interface EventMarketingProps {
   role: string;
 }
@@ -98,7 +110,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [showNewsFeedPreview, setShowNewsFeedPreview] = useState(false);
   const [previewPlatform, setPreviewPlatform] = useState<'facebook' | 'zalo' | 'tiktok' | 'youtube'>('facebook');
   const [showVideoPreview, setShowVideoPreview] = useState(false);
-  const [videoPreviewPlatform, setVideoPreviewPlatform] = useState<'tiktok' | 'youtube'>('tiktok');
+  const [videoPreviewPlatform, setVideoPreviewPlatform] = useState<'tiktok' | 'youtube' | 'facebook_reel' | 'facebook_story'>('tiktok');
 
   // Scheduling state for Video Script
   const [videoIsScheduled, setVideoIsScheduled] = useState(false);
@@ -480,7 +492,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           }
         }
       } catch (err: any) {
-        addLog(`❌ Kênh ${plat.toUpperCase()}: Lỗi truyền dẫn: ${err.message}`);
+        addLog(`❌ Kênh ${getPlatformLabel(plat).toUpperCase()}: Lỗi truyền dẫn: ${err.message}`);
         hasError = true;
       }
       
@@ -557,9 +569,12 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     }
 
     // Check configuration status of channels
-    const missingChannels = platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
+    const missingChannels = platforms.filter(p => {
+      const configKey = (p === 'facebook_reel' || p === 'facebook_story') ? 'facebook' : p;
+      return !channelsConfig[configKey as keyof typeof channelsConfig]?.isConfigured;
+    });
     if (publishImmediately && missingChannels.length > 0) {
-      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
+      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => getPlatformLabel(c).toUpperCase()).join(', ')}`, 'error');
       return;
     }
 
@@ -1285,9 +1300,12 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                         <button
                           onClick={() => {
                             // Check configuration status of channels
-                            const missingChannels = post.platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
+                            const missingChannels = post.platforms.filter(p => {
+                              const configKey = (p === 'facebook_reel' || p === 'facebook_story') ? 'facebook' : p;
+                              return !channelsConfig[configKey as keyof typeof channelsConfig]?.isConfigured;
+                            });
                             if (missingChannels.length > 0) {
-                              showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
+                              showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => getPlatformLabel(c).toUpperCase()).join(', ')}`, 'error');
                               return;
                             }
 
@@ -1627,9 +1645,12 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    const missingChannels = selectedPostForPreview.platforms.filter(p => !channelsConfig[p as keyof typeof channelsConfig]?.isConfigured);
+                    const missingChannels = selectedPostForPreview.platforms.filter(p => {
+                      const configKey = (p === 'facebook_reel' || p === 'facebook_story') ? 'facebook' : p;
+                      return !channelsConfig[configKey as keyof typeof channelsConfig]?.isConfigured;
+                    });
                     if (missingChannels.length > 0) {
-                      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => c.toUpperCase()).join(', ')}`, 'error');
+                      showToast(`Không thể đăng tự động. Vui lòng hoàn tất cấu hình API cho các nền tảng: ${missingChannels.map(c => getPlatformLabel(c).toUpperCase()).join(', ')}`, 'error');
                       return;
                     }
                     
