@@ -238,3 +238,9 @@ aside.w-64 .bg-rose-950\/20 svg {
   color: #f43f5e !important;
 }
 
+@supports (color:color-mix(in lab,red,red)) {
+  .bg-amber-500\/20 {
+    background-color: #ffffff;
+  }
+}
+
