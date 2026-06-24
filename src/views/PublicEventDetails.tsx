@@ -811,9 +811,10 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           
           {/* Conference name and tag */}
           <div className="flex flex-col items-center space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2">
-              <Sparkles className="w-3 h-3 animate-pulse" />
+            <div className="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-amber-500/20 border-2 border-amber-400/60 text-amber-300 text-sm md:text-base font-black uppercase tracking-[0.25em] mb-3 shadow-lg shadow-amber-500/20 backdrop-blur-sm">
+              <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
               {heroTag}
+              <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
             </div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline justify-center">
