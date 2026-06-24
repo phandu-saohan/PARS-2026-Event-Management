@@ -58,12 +58,13 @@ const ROOMS_CONFIG = [
 const FOREIGN_SPEAKERS = [
   {
     name: 'Arturo Ramírez Montañana, MD, PhD',
-    title: 'TS.BS. Arturo Ramírez Montañana, MD, PhD',
-    role: 'Aesthetic & Reconstructive Surgeon – Monterrey, Mexico',
-    highlight: 'Chủ tịch ISAPS (International Society of Aesthetic Plastic Surgery)',
+    title: 'Arturo Ramírez Montañana, MD, PhD',
+    role: 'President, International Society of Aesthetic Plastic Surgery (ISAPS)',
+    highlight: 'Plastic, Aesthetic & Reconstructive Surgeon – Monterrey, Mexico',
     country: 'Mexico',
     initials: 'AR',
-    avatarBg: 'from-amber-600 via-red-700 to-rose-900'
+    avatarBg: 'from-amber-600 via-red-700 to-rose-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/arturo-ramirez-montanana-md-phd-(1).png'
   },
   {
     name: 'Prof. Kotaro Yoshimura, MD, PhD',
@@ -72,147 +73,144 @@ const FOREIGN_SPEAKERS = [
     highlight: 'Trưởng khoa Phẫu thuật Tạo hình, Đại học Y khoa Jichi, Nhật Bản',
     country: 'Nhật Bản',
     initials: 'KY',
-    avatarBg: 'from-teal-600 via-sky-700 to-indigo-900'
+    avatarBg: 'from-teal-600 via-sky-700 to-indigo-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/prof-kotaro-yoshimura-md-phd-(1).png'
   },
   {
     name: 'Bertha Torres Gómez, MD, PhD',
     title: 'Bertha Torres Gómez, MD, PhD',
-    role: 'Mexican Association of Plastic Surgeons (AMCPer)',
-    highlight: 'Thư ký Quốc gia của ISAPS',
+    role: 'Chair, National Secretary of ISAPS',
+    highlight: 'Mexican Association of Plastic, Aesthetic, and Reconstructive Surgery (AMCPER)',
     country: 'Mexico',
     initials: 'BG',
-    avatarBg: 'from-pink-600 via-rose-700 to-purple-900'
-  },
-  {
-    name: 'C. Bob Basu, MD, MBA, MPh, FAS',
-    title: 'C. Bob Basu, MD, MBA, MPh, FAS',
-    role: 'President, American Society of Plastic Surgeons',
-    highlight: 'Board-Certified Plastic Surgeon, American Board of Plastic Surgery',
-    country: 'Mỹ',
-    initials: 'BB',
-    avatarBg: 'from-blue-600 via-indigo-700 to-slate-900'
+    avatarBg: 'from-pink-600 via-rose-700 to-purple-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/bertha-torres-gomez-md-phd.png'
   },
   {
     name: 'Prof. Fabio Santanelli, MD',
     title: 'Prof. Fabio Santanelli, MD',
-    role: 'Secretary General of European Association of Plastic Surgeons (EURAPS)',
+    role: 'Secretary General of the European Association of Plastic Surgeons',
     highlight: 'Lecturer at Sapienza University of Rome, Italy',
     country: 'Ý',
     initials: 'FS',
-    avatarBg: 'from-emerald-600 via-teal-700 to-cyan-900'
+    avatarBg: 'from-emerald-600 via-teal-700 to-cyan-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/prof-fabio-santanelli-md-(1).png'
+  },
+  {
+    name: 'C. Bob Basu, MD, MBA, MPH, FACS',
+    title: 'C. Bob Basu, MD, MBA, MPH, FACS',
+    role: 'President, American Society of Plastic Surgeons',
+    highlight: 'Board-Certified Plastic Surgeon, American Board of Plastic Surgery',
+    country: 'Mỹ',
+    initials: 'BB',
+    avatarBg: 'from-blue-600 via-indigo-700 to-slate-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/c-bob-basu-md-mba-mph-facs.png'
   },
   {
     name: 'Constantin Stan, MD, PhD',
-    title: 'TS. BS. Constantin Stan M.D., Ph.D',
-    role: 'Founder of The Cronus Med Group Of Clinics',
-    highlight: 'Chuyên khoa Phẫu thuật Thẩm mỹ, Tạo hình, Tái tạo & Tai Mũi Họng',
+    title: 'Constantin Stan, MD, PhD',
+    role: 'Founder Of The Cronos Med Group Of Clinics',
+    highlight: 'Medic specialist Chirurgie Estetica, Plastica si Reconstructiva si Medic primar ORL',
     country: 'Romania',
     initials: 'CS',
-    avatarBg: 'from-indigo-600 via-purple-700 to-pink-900'
+    avatarBg: 'from-indigo-600 via-purple-700 to-pink-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/constantin-stan-md-phd.png'
   },
   {
     name: 'Robert Francis Parkyn, MD',
-    title: 'TS. BS. Robert Francis Parkyn, MD',
-    role: 'Clinical Associate Professor, Adelaide University',
+    title: 'Robert Francis Parkyn, MD',
+    role: 'Clinical Associate Professor, Discipline of Surgery, since 2009;Adelaide University',
     highlight: 'Trung tâm Phẫu thuật Tuyến vú và Nội tiết Norwood',
     country: 'Úc',
     initials: 'RP',
-    avatarBg: 'from-slate-700 via-slate-800 to-teal-950'
+    avatarBg: 'from-slate-700 via-slate-800 to-teal-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/robert-francis-parkyn-md-(1).png'
   },
   {
-    name: 'TS. Amin Kalaji, MD',
-    title: 'TS. Amin Kalaji, MD',
-    role: 'Chair of the Membership Committee for IBRES',
+    name: 'Amin Kalaji, MD',
+    title: 'Amin Kalaji, MD',
+    role: 'Chair of the Membership Committee for the International Society of Regenerative Plastic Surgery (ISPRES)',
     highlight: 'Chủ tịch Nhóm Tổng thư ký ISAPS',
     country: 'Thụy Điển',
     initials: 'AK',
-    avatarBg: 'from-orange-600 via-rose-700 to-amber-950'
+    avatarBg: 'from-orange-600 via-rose-700 to-amber-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/amin-kalaji-md.png'
   },
   {
     name: 'Prof. Mark W. Clemens, MD, MBA, FACS',
-    title: 'GS. BS. Mark W. Clemens, MD, MBA, FACS, FACH',
+    title: 'Prof. Mark W. Clemens, MD, MBA, FACS',
     role: 'Professor, Department of Plastic Surgery, The University of Texas MD Anderson Cancer Center, Houston',
     highlight: 'Chuyên gia đầu ngành về tái tạo tuyến vú và an toàn túi ngực (BIA-ALCL)',
     country: 'Mỹ',
     initials: 'MC',
-    avatarBg: 'from-sky-600 via-indigo-750 to-slate-900'
+    avatarBg: 'from-sky-600 via-indigo-750 to-slate-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/prof-mark-w-clemens-md-mba-facs.png'
   },
   {
-    name: 'Assoc. Prof. Yuko ASANO, MD',
-    title: 'PGS. BS. Yuko Asano, MD',
-    role: 'Director of the Breast Center, Kameda Medical Hospital in Japan',
+    name: 'Assoc. Prof. Yuko, MD',
+    title: 'Assoc. Prof. Yuko, MD',
+    role: 'Breast Center Director – Kameda Medical Hospital',
     highlight: 'Chuyên gia hàng đầu về phẫu thuật robot và cấy ghép mỡ tự thân tái tạo ngực',
     country: 'Nhật Bản',
     initials: 'YA',
-    avatarBg: 'from-rose-500 via-pink-700 to-violet-950'
+    avatarBg: 'from-rose-500 via-pink-700 to-violet-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/assoc-prof-yuko-md.png'
   }
 ];
 
 const DOMESTIC_SPEAKERS = [
   {
-    name: 'PGS.TS.BS. Vũ Ngọc Lâm',
-    title: 'Assoc. Prof. Vu Ngoc Lam, MD, PhD',
-    role: 'Director of the Aesthetic Center, 108 Military Central Hospital',
-    highlight: 'Director of the Vietnam - Japan Medical Research Center',
+    name: 'Major General, Assoc. Prof. Dr. Meritorious Physician Vu Ngoc Lam',
+    title: 'Major General, Assoc. Prof. Dr. Meritorious Physician Vu Ngoc Lam',
+    role: 'Director of the Craniofacial and Plastic Surgery Center, Military Central Hospital 108',
+    highlight: 'Giám đốc Trung tâm Phẫu thuật Sọ mặt và Tạo hình, Bệnh viện Trung ương Quân đội 108',
     country: 'Việt Nam',
     initials: 'VL',
-    avatarBg: 'from-emerald-700 via-teal-850 to-indigo-950'
+    avatarBg: 'from-emerald-700 via-teal-850 to-indigo-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/assoc-prof-vu-ngoc-lam-md-phd.png'
   },
   {
-    name: 'PGS.TS.BS. Nguyễn Hồng Hà',
-    title: 'Assoc. Prof. Nguyen Hong Ha, MD, PhD',
-    role: 'Head of Department of Maxillofacial, Plastic and Aesthetic Surgery, Viet Duc University Hospital',
-    highlight: 'Trưởng khoa Phẫu thuật Tạo hình Hàm mặt & Thẩm mỹ Bệnh viện Việt Đức',
-    country: 'Việt Nam',
-    initials: 'NH',
-    avatarBg: 'from-sky-750 via-teal-800 to-slate-950'
-  },
-  {
-    name: 'PGS.TS.BS. Phạm Hiếu Liêm',
-    title: 'Assoc. Prof. Pham Hieu Liem, MD, PhD',
-    role: 'Head of the Department of Plastic and Aesthetic Surgery, Pham Ngoc Thach University of Medicine',
-    highlight: 'Trưởng Bộ môn Phẫu thuật Tạo hình Thẩm mỹ Đại học Y khoa Phạm Ngọc Thạch',
+    name: 'Assoc. Prof. Dr. Pham Hieu Liem',
+    title: 'Assoc. Prof. Dr. Pham Hieu Liem',
+    role: 'Head of Plastic Surgery Department, Pham Ngoc Thach University of Medicine',
+    highlight: 'Trưởng Bộ môn Phẫu thuật Tạo hình Thẩm mỹ Đại học Y khoa Phạm Ngọc Thạch & Trưởng khoa PTTM Đại học Y Dược TP.HCM',
     country: 'Việt Nam',
     initials: 'PL',
-    avatarBg: 'from-indigo-700 via-rose-800 to-amber-950'
+    avatarBg: 'from-indigo-700 via-rose-800 to-amber-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/assoc-prof-pham-hieu-liem-phd.png'
   },
   {
-    name: 'PGS.TS. Phạm Văn Phúc',
+    name: 'Assoc. Prof. Pham Van Phuc, PhD',
     title: 'Assoc. Prof. Pham Van Phuc, PhD',
-    role: 'Editor-in-Chief of Biomedical Research and Therapy and Progress in Stem Cell',
+    role: 'Director of the Stem Cell Institute, Ho Chi Minh City National University',
     highlight: 'Viện trưởng Viện Tế bào gốc, Đại học Quốc gia TP.HCM',
     country: 'Việt Nam',
     initials: 'VP',
-    avatarBg: 'from-cyan-700 via-sky-800 to-slate-950'
+    avatarBg: 'from-cyan-700 via-sky-800 to-slate-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/assoc-prof-pham-van-phuc-phd.png'
   },
   {
-    name: 'PGS.TS.BS. Nguyễn Đình Tùng',
+    name: 'Assoc. Prof. Nguyen Dinh Tung, MD, PhD',
     title: 'Assoc. Prof. Nguyen Dinh Tung, MD, PhD',
-    role: 'Medical Director – EMCAS Cosmetic Plastic Surgery Hospital',
-    highlight: 'Giám đốc chuyên môn Bệnh viện Thẩm mỹ EMCAS',
+    role: 'Medical Director of EMCAS Plastic Surgery Hospital',
+    highlight: 'Thư ký Quốc gia ISAPS Việt Nam',
     country: 'Việt Nam',
     initials: 'NT',
-    avatarBg: 'from-amber-600 via-orange-850 to-stone-900'
+    avatarBg: 'from-amber-600 via-orange-850 to-stone-900',
+    photoUrl: 'https://parsvn.com/uploads/speaker/assoc-prof-nguyen-dinh-tung-md-phd.png'
   },
   {
-    name: 'TS. Phạm Lê Bửu Trúc',
-    title: 'Pham Le Buu Truc, PhD',
+    name: 'Pham Le Buu Truc, MD, PhD',
+    title: 'Pham Le Buu Truc, MD, PhD',
     role: 'Ho Chi Minh City Biotechnology Center',
     highlight: 'Trung tâm Công nghệ Sinh học TP.HCM',
     country: 'Việt Nam',
-    initials: 'BT',
-    avatarBg: 'from-violet-750 via-purple-900 to-slate-950'
-  },
-  {
-    name: 'PGS.TS.BS. Đỗ Quang Hùng',
-    title: 'PGS.TS.BS Đỗ Quang Hùng',
-    role: 'Phó chủ tịch Hội Phẫu thuật Tạo hình Thẩm mỹ Việt Nam (VSAPS)',
-    highlight: 'Nguyên Trưởng khoa PTTM Bệnh viện Chợ Rẫy',
-    country: 'Việt Nam',
-    initials: 'QH',
-    avatarBg: 'from-teal-700 via-cyan-850 to-slate-900'
+    initials: 'PT',
+    avatarBg: 'from-violet-750 via-purple-900 to-slate-950',
+    photoUrl: 'https://parsvn.com/uploads/speaker/pham-le-buu-truc-md-phd.png'
   }
 ];
+
 
 // Helper to get professional speaker avatar SVGs
 function getSpeakerAvatar(name: string) {

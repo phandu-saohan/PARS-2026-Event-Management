@@ -16,12 +16,13 @@ SET landing_page_sections = COALESCE(landing_page_sections, '{}'::jsonb) || json
       {
         "id": "spk-f1",
         "name": "Arturo Ramírez Montañana, MD, PhD",
-        "role": "Aesthetic & Reconstructive Surgeon – Monterrey, Mexico",
-        "highlight": "Chủ tịch ISAPS (International Society of Aesthetic Plastic Surgery)",
+        "role": "President, International Society of Aesthetic Plastic Surgery (ISAPS)",
+        "highlight": "Plastic, Aesthetic & Reconstructive Surgeon – Monterrey, Mexico",
         "country": "Mexico",
         "type": "foreign",
         "initials": "AR",
-        "avatarBg": "from-amber-600 via-red-700 to-rose-900"
+        "avatarBg": "from-amber-600 via-red-700 to-rose-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/arturo-ramirez-montanana-md-phd-(1).png"
       },
       {
         "id": "spk-f2",
@@ -31,67 +32,74 @@ SET landing_page_sections = COALESCE(landing_page_sections, '{}'::jsonb) || json
         "country": "Nhật Bản",
         "type": "foreign",
         "initials": "KY",
-        "avatarBg": "from-teal-600 via-sky-700 to-indigo-900"
+        "avatarBg": "from-teal-600 via-sky-700 to-indigo-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/prof-kotaro-yoshimura-md-phd-(1).png"
       },
       {
         "id": "spk-f3",
         "name": "Bertha Torres Gómez, MD, PhD",
-        "role": "Mexican Association of Plastic Surgeons (AMCPer)",
-        "highlight": "Thư ký Quốc gia của ISAPS",
+        "role": "Chair, National Secretary of ISAPS",
+        "highlight": "Mexican Association of Plastic, Aesthetic, and Reconstructive Surgery (AMCPER)",
         "country": "Mexico",
         "type": "foreign",
         "initials": "BG",
-        "avatarBg": "from-pink-600 via-rose-700 to-purple-900"
+        "avatarBg": "from-pink-600 via-rose-700 to-purple-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/bertha-torres-gomez-md-phd.png"
       },
       {
         "id": "spk-f4",
-        "name": "C. Bob Basu, MD, MBA, MPh, FAS",
+        "name": "Prof. Fabio Santanelli, MD",
+        "role": "Secretary General of the European Association of Plastic Surgeons",
+        "highlight": "Lecturer at Sapienza University of Rome, Italy",
+        "country": "Ý",
+        "type": "foreign",
+        "initials": "FS",
+        "avatarBg": "from-emerald-600 via-teal-700 to-cyan-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/prof-fabio-santanelli-md-(1).png"
+      },
+      {
+        "id": "spk-f5",
+        "name": "C. Bob Basu, MD, MBA, MPH, FACS",
         "role": "President, American Society of Plastic Surgeons",
         "highlight": "Board-Certified Plastic Surgeon, American Board of Plastic Surgery",
         "country": "Mỹ",
         "type": "foreign",
         "initials": "BB",
-        "avatarBg": "from-blue-600 via-indigo-700 to-slate-900"
-      },
-      {
-        "id": "spk-f5",
-        "name": "Prof. Fabio Santanelli, MD",
-        "role": "Secretary General of European Association of Plastic Surgeons (EURAPS)",
-        "highlight": "Lecturer at Sapienza University of Rome, Italy",
-        "country": "Ý",
-        "type": "foreign",
-        "initials": "FS",
-        "avatarBg": "from-emerald-600 via-teal-700 to-cyan-900"
+        "avatarBg": "from-blue-600 via-indigo-700 to-slate-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/c-bob-basu-md-mba-mph-facs.png"
       },
       {
         "id": "spk-f6",
         "name": "Constantin Stan, MD, PhD",
-        "role": "Founder of The Cronus Med Group Of Clinics",
-        "highlight": "Chuyên khoa Phẫu thuật Thẩm mỹ, Tạo hình, Tái tạo & Tai Mũi Họng",
+        "role": "Founder Of The Cronos Med Group Of Clinics",
+        "highlight": "Medic specialist Chirurgie Estetica, Plastica si Reconstructiva si Medic primar ORL",
         "country": "Romania",
         "type": "foreign",
         "initials": "CS",
-        "avatarBg": "from-indigo-600 via-purple-700 to-pink-900"
+        "avatarBg": "from-indigo-600 via-purple-700 to-pink-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/constantin-stan-md-phd.png"
       },
       {
         "id": "spk-f7",
         "name": "Robert Francis Parkyn, MD",
-        "role": "Clinical Associate Professor, Adelaide University",
+        "role": "Clinical Associate Professor, Discipline of Surgery, since 2009;Adelaide University",
         "highlight": "Trung tâm Phẫu thuật Tuyến vú và Nội tiết Norwood",
         "country": "Úc",
         "type": "foreign",
         "initials": "RP",
-        "avatarBg": "from-slate-700 via-slate-800 to-teal-950"
+        "avatarBg": "from-slate-700 via-slate-800 to-teal-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/robert-francis-parkyn-md-(1).png"
       },
       {
         "id": "spk-f8",
-        "name": "TS. Amin Kalaji, MD",
-        "role": "Chair of the Membership Committee for IBRES",
+        "name": "Amin Kalaji, MD",
+        "role": "Chair of the Membership Committee for the International Society of Regenerative Plastic Surgery (ISPRES)",
         "highlight": "Chủ tịch Nhóm Tổng thư ký ISAPS",
         "country": "Thụy Điển",
         "type": "foreign",
         "initials": "AK",
-        "avatarBg": "from-orange-600 via-rose-700 to-amber-950"
+        "avatarBg": "from-orange-600 via-rose-700 to-amber-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/amin-kalaji-md.png"
       },
       {
         "id": "spk-f9",
@@ -101,49 +109,76 @@ SET landing_page_sections = COALESCE(landing_page_sections, '{}'::jsonb) || json
         "country": "Mỹ",
         "type": "foreign",
         "initials": "MC",
-        "avatarBg": "from-sky-600 via-indigo-750 to-slate-900"
+        "avatarBg": "from-sky-600 via-indigo-750 to-slate-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/prof-mark-w-clemens-md-mba-facs.png"
       },
       {
         "id": "spk-f10",
-        "name": "Assoc. Prof. Yuko ASANO, MD",
-        "role": "Director of the Breast Center, Kameda Medical Hospital in Japan",
+        "name": "Assoc. Prof. Yuko, MD",
+        "role": "Breast Center Director – Kameda Medical Hospital",
         "highlight": "Chuyên gia hàng đầu về phẫu thuật robot và cấy ghép mỡ tự thân tái tạo ngực",
         "country": "Nhật Bản",
         "type": "foreign",
         "initials": "YA",
-        "avatarBg": "from-rose-500 via-pink-700 to-violet-950"
+        "avatarBg": "from-rose-500 via-pink-700 to-violet-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/assoc-prof-yuko-md.png"
       }
     ],
     "domestic": [
       {
         "id": "spk-d1",
-        "name": "PGS.TS.BS. Vũ Ngọc Lâm",
-        "role": "Director of the Aesthetic Center, 108 Military Central Hospital",
-        "highlight": "Director of the Vietnam - Japan Medical Research Center",
+        "name": "Major General, Assoc. Prof. Dr. Meritorious Physician Vu Ngoc Lam",
+        "role": "Director of the Craniofacial and Plastic Surgery Center, Military Central Hospital 108",
+        "highlight": "Giám đốc Trung tâm Phẫu thuật Sọ mặt và Tạo hình, Bệnh viện Trung ương Quân đội 108",
         "country": "Việt Nam",
         "type": "domestic",
         "initials": "VL",
-        "avatarBg": "from-emerald-700 via-teal-850 to-indigo-950"
+        "avatarBg": "from-emerald-700 via-teal-850 to-indigo-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/assoc-prof-vu-ngoc-lam-md-phd.png"
       },
       {
         "id": "spk-d2",
-        "name": "PGS.TS.BS. Nguyễn Hồng Hà",
-        "role": "Head of Department of Maxillofacial, Plastic and Aesthetic Surgery, Viet Duc University Hospital",
-        "highlight": "Trưởng khoa Phẫu thuật Tạo hình Hàm mặt & Thẩm mỹ Bệnh viện Việt Đức",
-        "country": "Việt Nam",
-        "type": "domestic",
-        "initials": "NH",
-        "avatarBg": "from-sky-750 via-teal-800 to-slate-950"
-      },
-      {
-        "id": "spk-d3",
-        "name": "PGS.TS.BS. Phạm Hiếu Liêm",
-        "role": "Head of the Department of Plastic and Aesthetic Surgery, Pham Ngoc Thach University of Medicine",
-        "highlight": "Trưởng Bộ môn Phẫu thuật Tạo hình Thẩm mỹ Đại học Y khoa Phạm Ngọc Thạch",
+        "name": "Assoc. Prof. Dr. Pham Hieu Liem",
+        "role": "Head of Plastic Surgery Department, Pham Ngoc Thach University of Medicine",
+        "highlight": "Trưởng Bộ môn Phẫu thuật Tạo hình Thẩm mỹ Đại học Y khoa Phạm Ngọc Thạch & Trưởng khoa PTTM Đại học Y Dược TP.HCM",
         "country": "Việt Nam",
         "type": "domestic",
         "initials": "PL",
-        "avatarBg": "from-indigo-700 via-rose-800 to-amber-950"
+        "avatarBg": "from-indigo-700 via-rose-800 to-amber-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/assoc-prof-pham-hieu-liem-phd.png"
+      },
+      {
+        "id": "spk-d3",
+        "name": "Assoc. Prof. Pham Van Phuc, PhD",
+        "role": "Director of the Stem Cell Institute, Ho Chi Minh City National University",
+        "highlight": "Viện trưởng Viện Tế bào gốc, Đại học Quốc gia TP.HCM",
+        "country": "Việt Nam",
+        "type": "domestic",
+        "initials": "VP",
+        "avatarBg": "from-cyan-700 via-sky-800 to-slate-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/assoc-prof-pham-van-phuc-phd.png"
+      },
+      {
+        "id": "spk-d4",
+        "name": "Assoc. Prof. Nguyen Dinh Tung, MD, PhD",
+        "role": "Medical Director of EMCAS Plastic Surgery Hospital",
+        "highlight": "Thư ký Quốc gia ISAPS Việt Nam",
+        "country": "Việt Nam",
+        "type": "domestic",
+        "initials": "NT",
+        "avatarBg": "from-amber-600 via-orange-850 to-stone-900",
+        "photoUrl": "https://parsvn.com/uploads/speaker/assoc-prof-nguyen-dinh-tung-md-phd.png"
+      },
+      {
+        "id": "spk-d5",
+        "name": "Pham Le Buu Truc, MD, PhD",
+        "role": "Ho Chi Minh City Biotechnology Center",
+        "highlight": "Trung tâm Công nghệ Sinh học TP.HCM",
+        "country": "Việt Nam",
+        "type": "domestic",
+        "initials": "PT",
+        "avatarBg": "from-violet-750 via-purple-900 to-slate-950",
+        "photoUrl": "https://parsvn.com/uploads/speaker/pham-le-buu-truc-md-phd.png"
       }
     ]
   }'::jsonb,
