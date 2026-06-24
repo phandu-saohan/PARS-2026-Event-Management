@@ -497,6 +497,18 @@ export interface BusinessConfig {
   landingPageSections?: LandingPageSections;
 }
 
+export interface SpeakerConfig {
+  id: string;
+  name: string;
+  role: string;
+  highlight: string;
+  country: string;
+  type: 'foreign' | 'domestic';
+  photoUrl?: string;
+  initials?: string;
+  avatarBg?: string;
+}
+
 export interface LandingPageSections {
   hero?: {
     tag?: string;
@@ -519,6 +531,10 @@ export interface LandingPageSections {
     highlight2Desc?: string;
     highlight3Title?: string;
     highlight3Desc?: string;
+  };
+  speakers?: {
+    foreign: SpeakerConfig[];
+    domestic: SpeakerConfig[];
   };
 }
 

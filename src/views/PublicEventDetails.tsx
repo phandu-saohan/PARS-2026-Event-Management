@@ -418,6 +418,15 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Resolve configured images or fall back to defaults
   const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
   const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1782198647752.png';
+
+  // Speaker lists: read from DB config, fallback to hardcoded arrays
+  const configSpeakers = businessConfig.landingPageSections?.speakers;
+  const foreignSpeakers = (configSpeakers?.foreign && configSpeakers.foreign.length > 0)
+    ? configSpeakers.foreign
+    : FOREIGN_SPEAKERS;
+  const domesticSpeakers = (configSpeakers?.domestic && configSpeakers.domestic.length > 0)
+    ? configSpeakers.domestic
+    : DOMESTIC_SPEAKERS;
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -1015,15 +1024,18 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             ref={foreignSliderRef}
             className="flex gap-6 overflow-x-auto pb-6 pt-2 scrollbar-none snap-x snap-mandatory scroll-smooth"
           >
-            {FOREIGN_SPEAKERS.map((spk, idx) => (
+            {foreignSpeakers.map((spk, idx) => (
               <div 
                 key={idx} 
                 className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-5 shrink-0 snap-start flex flex-col hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in text-center"
               >
                 <div className="space-y-3 flex flex-col items-center">
-                  {/* Speaker Avatar - Extra Large and at the top */}
+                  {/* Speaker Avatar - photo or SVG fallback */}
                   <div className="w-28 h-28 md:w-32 h-32 rounded-full border-2 border-teal-500/30 overflow-hidden shrink-0 bg-slate-800 shadow-lg group-hover:scale-105 transition-transform duration-200">
-                    {getSpeakerAvatar(spk.name)}
+                    {spk.photoUrl
+                      ? <img src={spk.photoUrl} alt={spk.name} className="w-full h-full object-cover" />
+                      : getSpeakerAvatar(spk.name)
+                    }
                   </div>
 
                   {/* Country & Flag pill badge */}
@@ -1091,15 +1103,18 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             ref={domesticSliderRef}
             className="flex gap-6 overflow-x-auto pb-6 pt-2 scrollbar-none snap-x snap-mandatory scroll-smooth"
           >
-            {DOMESTIC_SPEAKERS.map((spk, idx) => (
+            {domesticSpeakers.map((spk, idx) => (
               <div 
                 key={idx} 
                 className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-5 shrink-0 snap-start flex flex-col hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group text-center"
               >
                 <div className="space-y-3 flex flex-col items-center">
-                  {/* Speaker Avatar - Extra Large and at the top */}
+                  {/* Speaker Avatar - photo or SVG fallback */}
                   <div className="w-28 h-28 md:w-32 h-32 rounded-full border-2 border-teal-500/20 overflow-hidden shrink-0 bg-slate-100 shadow-lg group-hover:scale-105 transition-transform duration-200">
-                    {getSpeakerAvatar(spk.name)}
+                    {spk.photoUrl
+                      ? <img src={spk.photoUrl} alt={spk.name} className="w-full h-full object-cover" />
+                      : getSpeakerAvatar(spk.name)
+                    }
                   </div>
 
                   {/* Country & Flag pill badge */}

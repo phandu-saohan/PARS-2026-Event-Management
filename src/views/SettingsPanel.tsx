@@ -56,7 +56,8 @@ import {
   BusinessConfig,
   EmbedScript,
   AddOnService,
-  CmeTemplateConfig
+  CmeTemplateConfig,
+  SpeakerConfig
 } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 
@@ -173,6 +174,82 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   // OneSignal config states
   const [onesignalConfig, setOnesignalConfig] = useState(store.getOneSignalConfig());
   const [isOnesignalTesting, setIsOnesignalTesting] = useState(false);
+
+  // ===== Speaker Management States =====
+  const [speakerTab, setSpeakerTab] = useState<'foreign' | 'domestic'>('foreign');
+  const [showSpeakerForm, setShowSpeakerForm] = useState(false);
+  const [editingSpeakerId, setEditingSpeakerId] = useState<string | null>(null);
+  const [spkName, setSpkName] = useState('');
+  const [spkRole, setSpkRole] = useState('');
+  const [spkHighlight, setSpkHighlight] = useState('');
+  const [spkCountry, setSpkCountry] = useState('');
+  const [spkType, setSpkType] = useState<'foreign' | 'domestic'>('foreign');
+  const [spkPhotoUrl, setSpkPhotoUrl] = useState('');
+
+  const getSpeakers = (type: 'foreign' | 'domestic'): SpeakerConfig[] => {
+    return businessConfig.landingPageSections?.speakers?.[type] || [];
+  };
+
+  const updateSpeakersInConfig = (type: 'foreign' | 'domestic', list: SpeakerConfig[]) => {
+    const sections = businessConfig.landingPageSections || {};
+    const speakers = sections.speakers || { foreign: [], domestic: [] };
+    setBusinessConfig({
+      ...businessConfig,
+      landingPageSections: {
+        ...sections,
+        speakers: { ...speakers, [type]: list }
+      }
+    });
+  };
+
+  const openAddSpeaker = (type: 'foreign' | 'domestic') => {
+    setEditingSpeakerId(null);
+    setSpkName(''); setSpkRole(''); setSpkHighlight('');
+    setSpkCountry(type === 'domestic' ? 'Việt Nam' : '');
+    setSpkType(type);
+    setSpkPhotoUrl('');
+    setShowSpeakerForm(true);
+  };
+
+  const openEditSpeaker = (spk: SpeakerConfig) => {
+    setEditingSpeakerId(spk.id);
+    setSpkName(spk.name); setSpkRole(spk.role);
+    setSpkHighlight(spk.highlight); setSpkCountry(spk.country);
+    setSpkType(spk.type); setSpkPhotoUrl(spk.photoUrl || '');
+    setShowSpeakerForm(true);
+  };
+
+  const saveSpeaker = () => {
+    if (!spkName.trim() || !spkRole.trim() || !spkCountry.trim()) {
+      alert('Vui lòng điền đầy đủ: Họ tên, Chức vụ, Quốc gia.');
+      return;
+    }
+    const list = getSpeakers(spkType);
+    if (editingSpeakerId) {
+      // Update existing
+      const updated = list.map(s => s.id === editingSpeakerId
+        ? { ...s, name: spkName, role: spkRole, highlight: spkHighlight, country: spkCountry, photoUrl: spkPhotoUrl || undefined }
+        : s
+      );
+      updateSpeakersInConfig(spkType, updated);
+    } else {
+      // Add new
+      const newSpk: SpeakerConfig = {
+        id: `spk_${Date.now()}`,
+        name: spkName, role: spkRole, highlight: spkHighlight,
+        country: spkCountry, type: spkType,
+        photoUrl: spkPhotoUrl || undefined,
+      };
+      updateSpeakersInConfig(spkType, [...list, newSpk]);
+    }
+    setShowSpeakerForm(false);
+  };
+
+  const deleteSpeaker = (type: 'foreign' | 'domestic', id: string) => {
+    if (!confirm('Xóa báo cáo viên này?')) return;
+    updateSpeakersInConfig(type, getSpeakers(type).filter(s => s.id !== id));
+  };
+  // ===== End Speaker Management =====
   const [onesignalTestResult, setOnesignalTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [formEmbedTarget, setFormEmbedTarget] = useState<'delegate' | 'speaker' | 'sponsor' | 'analytics' | 'custom'>('delegate');
   const [formEmbedCode, setFormEmbedCode] = useState('');
@@ -5797,6 +5874,214 @@ ON CONFLICT (code) DO UPDATE SET
                     </div>
                   </div>
                 </div>
+              </div>
+
+
+              {/* 4. SPEAKER MANAGEMENT SECTION CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold">
+                    🎤
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 4: Quản Lý Báo Cáo Viên</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Thêm, sửa, xóa danh sách báo cáo viên hiển thị trên trang sự kiện. Nhấn "Lưu Toàn Bộ" để đồng bộ lên database.</p>
+                  </div>
+                </div>
+
+                {/* Type tabs */}
+                <div className="flex gap-2">
+                  {(['foreign', 'domestic'] as const).map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => { setSpeakerTab(t); setShowSpeakerForm(false); }}
+                      className={`px-4 py-1.5 rounded-lg text-[11px] font-extrabold border transition-all cursor-pointer ${
+                        speakerTab === t
+                          ? 'bg-teal-600 text-white border-teal-600 shadow-sm'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                      }`}
+                    >
+                      {t === 'foreign' ? '🌍 Quốc Tế' : '🇻🇳 Trong Nước'}
+                      <span className="ml-1.5 bg-white/20 text-current px-1.5 py-0.5 rounded-md text-[9px]">
+                        {getSpeakers(t).length}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Speaker list */}
+                <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                  {getSpeakers(speakerTab).length === 0 && (
+                    <div className="text-center py-8 text-slate-400 text-xs font-semibold border border-dashed border-slate-200 rounded-xl">
+                      Chưa có báo cáo viên. Nhấn "+" để thêm mới hoặc bỏ trống để dùng danh sách mặc định.
+                    </div>
+                  )}
+                  {getSpeakers(speakerTab).map((spk) => (
+                    <div key={spk.id} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-150 hover:border-slate-300 transition-colors">
+                      {/* Avatar preview */}
+                      <div className="w-10 h-10 rounded-full border border-slate-200 bg-slate-200 overflow-hidden shrink-0">
+                        {spk.photoUrl
+                          ? <img src={spk.photoUrl} alt={spk.name} className="w-full h-full object-cover" />
+                          : <div className="w-full h-full bg-gradient-to-br from-teal-400 to-indigo-600 flex items-center justify-center text-white text-[11px] font-black">
+                              {spk.name.split(' ').slice(-2).map(w => w[0]).join('').toUpperCase().slice(0,2)}
+                            </div>
+                        }
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[11px] font-black text-slate-800 truncate">{spk.name}</p>
+                        <p className="text-[10px] text-slate-455 truncate">{spk.role}</p>
+                        <p className="text-[9px] text-teal-600 font-bold">{spk.country}</p>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => openEditSpeaker(spk)}
+                          className="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-indigo-50 hover:border-indigo-300 flex items-center justify-center text-slate-500 hover:text-indigo-600 transition-all cursor-pointer"
+                          title="Sửa"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteSpeaker(speakerTab, spk.id)}
+                          className="w-7 h-7 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-300 flex items-center justify-center text-slate-500 hover:text-rose-600 transition-all cursor-pointer"
+                          title="Xóa"
+                        >
+                          <Trash className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Add button */}
+                {!showSpeakerForm && (
+                  <button
+                    type="button"
+                    onClick={() => openAddSpeaker(speakerTab)}
+                    className="w-full py-2.5 border-2 border-dashed border-teal-300 hover:border-teal-500 hover:bg-teal-50 rounded-xl text-[11px] font-extrabold text-teal-600 hover:text-teal-700 transition-all cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Thêm Báo Cáo Viên {speakerTab === 'foreign' ? 'Quốc Tế' : 'Trong Nước'}
+                  </button>
+                )}
+
+                {/* Inline Add/Edit Form */}
+                {showSpeakerForm && (
+                  <div className="bg-slate-50 border border-teal-200 rounded-2xl p-4 space-y-3 animate-fade-in">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-black text-teal-700 uppercase tracking-wide">
+                        {editingSpeakerId ? '✏️ Chỉnh Sửa Báo Cáo Viên' : '➕ Thêm Báo Cáo Viên Mới'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowSpeakerForm(false)}
+                        className="w-6 h-6 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-500 cursor-pointer border-none"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {/* Type selector */}
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Loại báo cáo viên *</label>
+                        <div className="flex gap-2">
+                          {(['foreign', 'domestic'] as const).map(t => (
+                            <label key={t} className="flex items-center gap-1.5 cursor-pointer">
+                              <input type="radio" name="spk-type" value={t} checked={spkType === t}
+                                onChange={() => setSpkType(t)}
+                                className="w-3.5 h-3.5 accent-teal-600"
+                              />
+                              <span className="text-[11px] font-bold text-slate-700">{t === 'foreign' ? '🌍 Quốc tế' : '🇻🇳 Trong nước'}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Name */}
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Họ và tên đầy đủ *</label>
+                        <input
+                          type="text"
+                          value={spkName}
+                          onChange={e => setSpkName(e.target.value)}
+                          placeholder="VD: Prof. Kotaro Yoshimura, MD, PhD"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800 focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+
+                      {/* Role */}
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Chức vụ / Chuyên khoa *</label>
+                        <input
+                          type="text"
+                          value={spkRole}
+                          onChange={e => setSpkRole(e.target.value)}
+                          placeholder="VD: Chairman of Department of Plastic Surgery, Jichi Medical University"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+
+                      {/* Highlight */}
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Nội dung highlight (hộp phía dưới card)</label>
+                        <textarea
+                          rows={2}
+                          value={spkHighlight}
+                          onChange={e => setSpkHighlight(e.target.value)}
+                          placeholder="VD: Chủ tịch ISAPS, chuyên gia hàng đầu phẫu thuật thẩm mỹ tạo hình..."
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[11px] font-semibold text-slate-600 leading-relaxed resize-none focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+
+                      {/* Country */}
+                      <div className="space-y-1">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Quốc gia *</label>
+                        <input
+                          type="text"
+                          value={spkCountry}
+                          onChange={e => setSpkCountry(e.target.value)}
+                          placeholder="VD: Việt Nam, Nhật Bản, Mỹ..."
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800 focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+
+                      {/* Photo URL */}
+                      <div className="space-y-1">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">URL ảnh (tuỳ chọn)</label>
+                        <input
+                          type="url"
+                          value={spkPhotoUrl}
+                          onChange={e => setSpkPhotoUrl(e.target.value)}
+                          placeholder="https://... hoặc để trống dùng avatar"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[10.5px] font-mono text-slate-600 focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Form action buttons */}
+                    <div className="flex gap-2 justify-end pt-1 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => setShowSpeakerForm(false)}
+                        className="px-4 py-2 bg-white border border-slate-200 text-slate-600 text-[11px] font-bold rounded-lg cursor-pointer hover:bg-slate-50 transition-all"
+                      >
+                        Huỷ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={saveSpeaker}
+                        className="px-5 py-2 bg-teal-600 hover:bg-teal-700 text-white text-[11px] font-black rounded-lg cursor-pointer transition-all shadow-sm"
+                      >
+                        {editingSpeakerId ? '💾 Cập nhật' : '➕ Thêm vào danh sách'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Bottom Action Button */}
