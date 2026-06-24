@@ -275,6 +275,35 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const [selectedSessionDetail, setSelectedSessionDetail] = useState<ConferenceSession | null>(null);
   const [modalTab, setModalTab] = useState<'abstract' | 'bio'>('abstract');
 
+  // Carousel & header dropdown states
+  const [currentSlide, setCurrentSlide] = useState<number>(0);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const [showTicketDropdown, setShowTicketDropdown] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const ticketDropdownRef = useRef<HTMLDivElement>(null);
+  const totalSlides = 5;
+
+  // Auto-play slideshow every 6 seconds
+  useEffect(() => {
+    if (isHovered) return;
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % totalSlides);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isHovered]);
+
+  // Close ticket dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ticketDropdownRef.current && !ticketDropdownRef.current.contains(event.target as Node)) {
+        setShowTicketDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const [personalAgenda, setPersonalAgenda] = useState<string[]>(() => {
     try {
       return JSON.parse(localStorage.getItem('pars2026_my_agenda') || '[]');
@@ -318,131 +347,443 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Extract unique tracks for filters
   const uniqueTracks = ['All', ...Array.from(new Set(sessions.map(s => s.track))).filter(Boolean)];
 
+  // Carousel slide definitions
+  const slides = [
+    { id: 0, type: 'custom' },
+    { id: 1, type: 'image', image: '/media__1782198647776.png', title: 'Foreign Speakers' },
+    { id: 2, type: 'image', image: '/media__1782198647541.png', title: 'Domestic Speakers' },
+    { id: 3, type: 'image', image: '/media__1782198647504.png', title: 'Agenda' },
+    { id: 4, type: 'image', image: '/media__1782198647557.png', title: 'Invitation Letter' }
+  ];
+
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 font-sans scroll-smooth">
       
       {/* 1. STICKY HEADER */}
-      <header className="sticky top-0 bg-white/85 backdrop-blur-md border-b border-slate-200 z-40 shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-650 flex items-center justify-center text-white font-black shadow-md shadow-teal-500/10">
-              P
-            </div>
-            <div>
-              <span className="text-[14px] md:text-[16px] font-black tracking-tight text-slate-900 block leading-tight uppercase">PARS 2026</span>
-              <span className="text-[9px] font-bold text-slate-400 tracking-wider block uppercase">Bệnh viện Thẩm mỹ EMCAS</span>
-            </div>
+      <header className="sticky top-0 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-slate-200 z-40 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 flex items-center justify-between h-20">
+          
+          {/* Logo Icon and Text */}
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img 
+              src="/media__1782106316692.png" 
+              alt="PARS Logo" 
+              className="h-10 md:h-12 w-auto object-contain"
+            />
           </div>
 
-          {/* Navigation links */}
-          <nav className="hidden md:flex items-center gap-6">
-            <button onClick={() => scrollToSection('intro')} className="text-sm font-bold text-slate-650 hover:text-teal-600 transition-colors cursor-pointer border-none bg-transparent">Giới thiệu</button>
-            <button onClick={() => scrollToSection('speakers')} className="text-sm font-bold text-slate-650 hover:text-teal-600 transition-colors cursor-pointer border-none bg-transparent">Diễn giả</button>
-            <button onClick={() => scrollToSection('program')} className="text-sm font-bold text-slate-650 hover:text-teal-600 transition-colors cursor-pointer border-none bg-transparent">Chương trình</button>
-            <button onClick={() => scrollToSection('sponsors')} className="text-sm font-bold text-slate-650 hover:text-teal-600 transition-colors cursor-pointer border-none bg-transparent">Nhà tài trợ</button>
-            <button onClick={() => scrollToSection('register')} className="text-sm font-black px-4 py-2 rounded-xl bg-teal-50 text-teal-700 border border-teal-200/60 hover:bg-teal-100 transition-all cursor-pointer">Đăng ký ngay</button>
-          </nav>
-
-          {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onNavigate('check-registration')}
-              className="px-3.5 py-1.5 md:px-4 md:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] md:text-xs transition-all shadow-md cursor-pointer flex items-center gap-1.5 border-none"
+          {/* Navigation Links - Centered */}
+          <nav className="hidden lg:flex items-center gap-6">
+            <button 
+              onClick={() => scrollToSection('intro')} 
+              className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              <Search className="w-3.5 h-3.5" />
-              Tra cứu đăng ký
+              INTRODUCE
+            </button>
+            
+            {/* PARS Dropdown Menu */}
+            <div className="relative group">
+              <button 
+                className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent flex items-center uppercase tracking-wider"
+              >
+                PARS
+                <svg className="w-3 h-3 ml-1 opacity-70 transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-56 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/80 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-250 z-50">
+                <button 
+                  onClick={() => scrollToSection('program')}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Chương trình khoa học
+                </button>
+                <button 
+                  onClick={() => scrollToSection('speakers')}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Báo cáo viên nước ngoài
+                </button>
+                <button 
+                  onClick={() => scrollToSection('speakers')}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Báo cáo viên trong nước
+                </button>
+              </div>
+            </div>
+
+            {/* NEWS Dropdown Menu */}
+            <div className="relative group">
+              <button 
+                className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent flex items-center uppercase tracking-wider"
+              >
+                NEWS
+                <svg className="w-3 h-3 ml-1 opacity-70 transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <div className="absolute left-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-slate-200/80 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-250 z-50">
+                <button 
+                  onClick={() => scrollToSection('program')}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Tin tức sự kiện
+                </button>
+                <button 
+                  onClick={() => scrollToSection('program')}
+                  className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                >
+                  Ấn phẩm y khoa
+                </button>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => scrollToSection('register')} 
+              className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
+            >
+              REGISTER
             </button>
             <button 
-              onClick={() => onNavigate('overview')} 
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 md:hidden border-none cursor-pointer"
-              title="Admin Portal"
+              onClick={() => scrollToSection('sponsors')} 
+              className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              <Building className="w-4 h-4" />
+              SPONSORS
             </button>
+            <button 
+              onClick={() => scrollToSection('footer')} 
+              className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
+            >
+              CONTACT US
+            </button>
+          </nav>
+
+          {/* Right Section: Flags & Action Button */}
+          <div className="flex items-center gap-4">
+            
+            {/* Language Flags Selector */}
+            <div className="hidden sm:flex items-center gap-2">
+              <button 
+                title="English" 
+                className="focus:outline-none transition-transform hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7410 3900" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
+                  <rect width="7410" height="3900" fill="#b22234"/>
+                  <path d="M0,300H7410M0,900H7410M0,1500H7410M0,2100H7410M0,2700H7410M0,3300H7410" stroke="#fff" strokeWidth="300"/>
+                  <rect width="2964" height="2100" fill="#3c3b6e"/>
+                  <g fill="#fff">
+                    <circle cx="400" cy="300" r="80" />
+                    <circle cx="900" cy="300" r="80" />
+                    <circle cx="1400" cy="300" r="80" />
+                    <circle cx="1900" cy="300" r="80" />
+                    <circle cx="2400" cy="300" r="80" />
+                    <circle cx="650" cy="600" r="80" />
+                    <circle cx="1150" cy="600" r="80" />
+                    <circle cx="1650" cy="600" r="80" />
+                    <circle cx="2150" cy="600" r="80" />
+                    <circle cx="400" cy="900" r="80" />
+                    <circle cx="900" cy="900" r="80" />
+                    <circle cx="1400" cy="900" r="80" />
+                    <circle cx="1900" cy="900" r="80" />
+                    <circle cx="2400" cy="900" r="80" />
+                    <circle cx="650" cy="1200" r="80" />
+                    <circle cx="1150" cy="1200" r="80" />
+                    <circle cx="1650" cy="1200" r="80" />
+                    <circle cx="2150" cy="1200" r="80" />
+                    <circle cx="400" cy="1500" r="80" />
+                    <circle cx="900" cy="1500" r="80" />
+                    <circle cx="1400" cy="1500" r="80" />
+                    <circle cx="1900" cy="1500" r="80" />
+                    <circle cx="2400" cy="1500" r="80" />
+                    <circle cx="650" cy="1800" r="80" />
+                    <circle cx="1150" cy="1800" r="80" />
+                    <circle cx="1650" cy="1800" r="80" />
+                    <circle cx="2150" cy="1800" r="80" />
+                  </g>
+                </svg>
+              </button>
+              <button 
+                title="Tiếng Việt" 
+                className="focus:outline-none transition-transform hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
+                  <rect width="3" height="2" fill="#da251d"/>
+                  <polygon points="1.5,0.4 1.62,0.78 2.01,0.78 1.7,1.02 1.82,1.4 1.5,1.16 1.18,1.4 1.3,1.02 0.99,0.78 1.38,0.78" fill="#ffff00"/>
+                </svg>
+              </button>
+            </div>
+
+            {/* Red outlined action button (Tra cứu vé / Đăng nhập) */}
+            <div className="relative" ref={ticketDropdownRef}>
+              <button
+                onClick={() => setShowTicketDropdown(!showTicketDropdown)}
+                className="px-4 py-2.5 rounded-full border border-red-550 hover:bg-red-500/5 text-red-600 font-black text-[10px] md:text-[11px] transition-all tracking-wider uppercase cursor-pointer flex items-center gap-1.5"
+              >
+                TRA CỨU VÉ / ĐĂNG NHẬP
+                <svg className={`w-3.5 h-3.5 transition-transform ${showTicketDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              {showTicketDropdown && (
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-200/80 py-2 z-50 animate-fade-in">
+                  <button
+                    onClick={() => {
+                      setShowTicketDropdown(false);
+                      onNavigate('check-registration');
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                  >
+                    <Search className="w-3.5 h-3.5 text-slate-400" />
+                    Tra cứu vé đại biểu
+                  </button>
+                  <div className="h-px bg-slate-100 my-1" />
+                  <button
+                    onClick={() => {
+                      setShowTicketDropdown(false);
+                      onNavigate('overview');
+                    }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
+                  >
+                    <Building className="w-3.5 h-3.5 text-slate-400" />
+                    Đăng nhập Ban tổ chức
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Menu Toggle */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+              className="lg:hidden p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border-none cursor-pointer"
+              title="Toggle Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
           </div>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-50 flex justify-end animate-fade-in">
+            <div className="w-72 bg-white h-full p-6 shadow-2xl flex flex-col justify-between animate-slide-in">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <span className="font-extrabold text-slate-900 text-sm">MENU ĐIỀU HƯỚNG</span>
+                  <button 
+                    onClick={() => setIsMobileMenuOpen(false)} 
+                    className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer border-none bg-transparent"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                
+                <div className="flex flex-col gap-4">
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('intro'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    INTRODUCE
+                  </button>
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('program'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    PROGRAMS (PARS)
+                  </button>
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('speakers'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    SPEAKERS
+                  </button>
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('register'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    REGISTER
+                  </button>
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('sponsors'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    SPONSORS
+                  </button>
+                  <button 
+                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('footer'); }} 
+                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
+                  >
+                    CONTACT US
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100 pt-6 space-y-4">
+                {/* Flags in Mobile */}
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-bold text-slate-400">Ngôn ngữ:</span>
+                  <button className="w-7 h-5 rounded border border-slate-200 flex items-center justify-center p-0 cursor-pointer bg-transparent">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" className="w-full h-full">
+                      <rect width="3" height="2" fill="#da251d"/>
+                      <polygon points="1.5,0.4 1.62,0.78 2.01,0.78 1.7,1.02 1.82,1.4 1.5,1.16 1.18,1.4 1.3,1.02 0.99,0.78 1.38,0.78" fill="#ffff00"/>
+                    </svg>
+                  </button>
+                  <button className="w-7 h-5 rounded border border-slate-200 flex items-center justify-center p-0 cursor-pointer bg-transparent">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7410 3900" className="w-full h-full">
+                      <rect width="7410" height="3900" fill="#b22234"/>
+                      <path d="M0,300H7410M0,900H7410M0,1500H7410M0,2100H7410M0,2700H7410M0,3300H7410" stroke="#fff" strokeWidth="300"/>
+                      <rect width="2964" height="2100" fill="#3c3b6e"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* 2. HERO BANNER */}
-      <section className="relative bg-gradient-to-br from-teal-950 via-slate-950 to-indigo-950 text-white py-16 md:py-28 px-4 overflow-hidden border-b border-teal-500/20">
-        {/* Decorative ambient lights */}
-        <div className="absolute top-0 right-0 w-[40vw] h-[40vh] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[30vw] h-[30vh] bg-teal-500/10 rounded-full blur-[100px] pointer-events-none" />
-        
-        <div className="max-w-6xl mx-auto relative z-10 text-center md:text-left">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/35 text-teal-300 text-xs font-bold mb-6 select-none">
-            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
-            <span>HỘI NGHỊ KHOA HỌC QUỐC TẾ THƯỜNG NIÊN</span>
-          </div>
+      {/* 2. WIDESCREEN SLIDESHOW (HERO BANNER CAROUSEL) */}
+      <section 
+        className="relative w-full overflow-hidden border-b border-slate-200"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Slides Container */}
+        <div className="relative w-full h-[380px] md:h-[480px]">
+          {slides.map((slide, index) => {
+            const isActive = index === currentSlide;
+            
+            return (
+              <div 
+                key={slide.id}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
+                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                }`}
+              >
+                {slide.type === 'custom' ? (
+                  /* Custom main slide representing Slide 0 matching screenshot */
+                  <div className="w-full h-full relative overflow-hidden flex flex-col md:flex-row items-center bg-gradient-to-r from-[#FAF8F2] via-[#EBF4FC] to-[#D6EBFE] px-6 md:px-16 py-8">
+                    
+                    {/* Left Column: Text Content */}
+                    <div className="w-full md:w-[55%] z-20 flex flex-col justify-center text-[#4E2A14] space-y-4 md:space-y-6">
+                      
+                      {/* Logo image in banner */}
+                      <img 
+                        src="/media__1782106316692.png" 
+                        alt="PARS Logo" 
+                        className="h-14 md:h-20 w-auto object-contain self-start" 
+                      />
+                      
+                      {/* Custom Date Layout with superscript day tags */}
+                      <div className="flex items-end font-serif tracking-tight select-none">
+                        <span className="text-3xl md:text-5xl font-extrabold leading-none mr-3 mb-0.5">SEP.</span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SAT</span>
+                          <span className="text-6xl md:text-8xl font-black leading-none">12</span>
+                        </div>
+                        <span className="text-3xl md:text-5xl font-extrabold mx-3 leading-none pb-1.5">-</span>
+                        <div className="flex flex-col items-center">
+                          <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SUN</span>
+                          <span className="text-6xl md:text-8xl font-black leading-none">13</span>
+                        </div>
+                      </div>
 
-          <h1 className="text-3xl md:text-6xl font-black tracking-tight leading-tight uppercase mb-4 text-transparent bg-clip-text bg-gradient-to-r from-teal-50 via-white to-indigo-100">
-            PARS 2026
-          </h1>
-          <h2 className="text-xl md:text-3xl font-black tracking-tight text-teal-300 mb-6 uppercase max-w-4xl leading-snug">
-            Cập nhật xu hướng mới trong phẫu thuật tạo hình thẩm mỹ và phẫu thuật tái sinh
-          </h2>
-          <p className="text-slate-300 text-sm md:text-md max-w-3xl mb-10 leading-relaxed font-semibold">
-            Được tổ chức bởi <strong className="text-white">Bệnh viện Thẩm mỹ EMCAS</strong> - Điểm hẹn học thuật quy tụ hơn 500 Bác sĩ và chuyên gia đầu ngành trong nước & quốc tế, kết hợp báo cáo khoa học và cấp chứng nhận CME uy tín.
-          </p>
+                      {/* Heading labels */}
+                      <div className="space-y-1.5 md:space-y-2.5">
+                        <p className="text-[11px] md:text-[15px] font-sans font-bold tracking-[0.06em] uppercase text-[#4E2A14] opacity-95">
+                          PLASTIC & AESTHETIC REGENERATIVE SURGERY
+                        </p>
+                        
+                        {/* Huge serif PARS 2026 title */}
+                        <h1 className="text-6xl md:text-[90px] font-black font-serif leading-none tracking-normal flex items-baseline">
+                          <span className="tracking-[0.08em] text-[#4E2A14]">PARS</span>
+                          <span className="text-4xl md:text-6xl font-black text-[#C59B27] ml-2 font-sans">2026</span>
+                        </h1>
+                      </div>
 
-          {/* Quick Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 max-w-3xl mb-10">
-            <div className="flex items-center gap-3.5 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shrink-0">
-                <Calendar className="w-5 h-5 text-teal-400" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Thời gian tổ chức</p>
-                <p className="text-sm font-extrabold text-white">12 - 13 Tháng 09, 2026</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3.5 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shrink-0">
-                <MapPin className="w-5 h-5 text-teal-400" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Địa điểm</p>
-                <p className="text-sm font-extrabold text-white">Melia Hotels, Hanoi</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3.5 bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shrink-0">
-                <Award className="w-5 h-5 text-teal-400" />
-              </div>
-              <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider font-mono">Chứng chỉ CME</p>
-                <p className="text-sm font-extrabold text-white">Cấp bởi EMCAS (4.5h)</p>
-              </div>
-            </div>
-          </div>
+                      {/* Divider line */}
+                      <div className="w-full max-w-[500px] h-1 bg-[#4E2A14] opacity-90 rounded-full" />
 
-          {/* CTA Buttons */}
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-            <button
-              onClick={() => scrollToSection('register')}
-              className="px-6 py-3.5 rounded-xl bg-teal-500 hover:bg-teal-650 font-extrabold text-xs text-white transition-all shadow-lg shadow-teal-500/15 inline-flex items-center gap-2 cursor-pointer border-none"
-            >
-              Đăng Ký Tham Dự Ngay
-              <ArrowRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => scrollToSection('program')}
-              className="px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 font-extrabold text-xs text-white border border-white/20 transition-all inline-flex items-center gap-2 cursor-pointer"
-            >
-              Xem Lịch Trình Khoa Học
-              <Clock className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onNavigate('check-registration')}
-              className="px-6 py-3.5 rounded-xl bg-transparent hover:bg-white/5 font-extrabold text-xs text-teal-300 border border-teal-500/30 transition-all inline-flex items-center gap-2 cursor-pointer"
-            >
-              Tra cứu hồ sơ
-              <Search className="w-4 h-4" />
-            </button>
+                      {/* Location text */}
+                      <p className="text-[11px] md:text-[16px] font-sans font-extrabold tracking-[0.02em] uppercase text-[#4E2A14] leading-snug">
+                        MELIÀ HANOI - 44B.LY THUONG KIET. HANOI. VIETNAM
+                      </p>
+                    </div>
+
+                    {/* Right Column: Landmarks Image with Fade-out Overlay */}
+                    <div className="absolute right-0 bottom-0 top-0 w-full md:w-[48%] h-full pointer-events-none z-10 hidden md:block">
+                      <img 
+                        src="/media__1782198647752.png" 
+                        alt="Landmarks" 
+                        className="w-full h-full object-cover object-bottom" 
+                      />
+                      {/* Left blending gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#EBF4FC] via-[#EBF4FC]/60 to-transparent w-[35%]" />
+                    </div>
+
+                  </div>
+                ) : (
+                  /* Standard high-fidelity image slide for posters */
+                  <div className="w-full h-full relative overflow-hidden flex items-center justify-center bg-[#0d0f12]">
+                    {/* Blurred poster background for cinematic aesthetic */}
+                    <div 
+                      className="absolute inset-0 bg-cover bg-center opacity-25 blur-2xl scale-110 pointer-events-none"
+                      style={{ backgroundImage: `url(${slide.image})` }}
+                    />
+                    
+                    {/* Actual slide poster centering */}
+                    <div className="relative z-10 h-full py-5 px-6 flex items-center justify-center max-h-full">
+                      <img 
+                        src={slide.image} 
+                        alt={slide.title} 
+                        className="max-h-[340px] md:max-h-[440px] w-auto object-contain shadow-2xl rounded-xl border border-white/10"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Carousel Arrow Controls */}
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)}
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/20 hover:bg-black/35 backdrop-blur-xs border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer z-20"
+          title="Previous slide"
+        >
+          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % totalSlides)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/20 hover:bg-black/35 backdrop-blur-xs border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer z-20"
+          title="Next slide"
+        >
+          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
+        </button>
+
+        {/* Carousel Pagination Dots */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
+          <div className="bg-black/25 backdrop-blur-xs px-3.5 py-2 rounded-full flex gap-2.5">
+            {slides.map((_, index) => {
+              const isActive = index === currentSlide;
+              return (
+                <button
+                  key={index}
+                  onClick={() => setCurrentSlide(index)}
+                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer p-0 border-none ${
+                    isActive ? 'bg-white w-5' : 'bg-white/45 w-2 hover:bg-white/70'
+                  }`}
+                  title={`Go to slide ${index + 1}`}
+                />
+              );
+            })}
           </div>
         </div>
+
       </section>
+
 
       {/* 3. EVENT INFO & 4 BLOCKS SECTION */}
       <section id="intro" className="py-16 md:py-24 max-w-6xl mx-auto px-4 scroll-mt-20">
