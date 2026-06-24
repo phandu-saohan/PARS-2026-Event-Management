@@ -6050,16 +6050,64 @@ ON CONFLICT (code) DO UPDATE SET
                         />
                       </div>
 
-                      {/* Photo URL */}
-                      <div className="space-y-1">
-                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">URL ảnh (tuỳ chọn)</label>
-                        <input
-                          type="url"
-                          value={spkPhotoUrl}
-                          onChange={e => setSpkPhotoUrl(e.target.value)}
-                          placeholder="https://... hoặc để trống dùng avatar"
-                          className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[10.5px] font-mono text-slate-600 focus:outline-none focus:border-teal-400"
-                        />
+                      {/* Photo Upload */}
+                      <div className="space-y-2 md:col-span-2">
+                        <label className="text-[9.5px] font-black text-slate-500 uppercase tracking-wide block">Ảnh báo cáo viên (tuỳ chọn)</label>
+                        <div className="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl">
+                          {/* Preview */}
+                          <div className="w-16 h-16 rounded-full border-2 border-slate-200 bg-slate-100 overflow-hidden shrink-0 flex items-center justify-center">
+                            {spkPhotoUrl ? (
+                              <img src={spkPhotoUrl} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                              <svg viewBox="0 0 64 64" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="32" fill="#e2e8f0"/>
+                                <circle cx="32" cy="25" r="10" fill="#94a3b8"/>
+                                <ellipse cx="32" cy="52" rx="16" ry="10" fill="#94a3b8"/>
+                              </svg>
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            {/* Upload button */}
+                            <label className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 text-[10px] font-extrabold rounded-lg cursor-pointer transition-all inline-flex items-center gap-1.5 select-none">
+                              📁 Tải ảnh lên
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (!file) return;
+                                  if (file.size > 2 * 1024 * 1024) {
+                                    alert('Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+                                    return;
+                                  }
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => setSpkPhotoUrl(reader.result as string);
+                                  reader.readAsDataURL(file);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </label>
+                            {spkPhotoUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setSpkPhotoUrl('')}
+                                className="ml-2 px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-600 text-[10px] font-bold rounded-lg cursor-pointer transition-all"
+                              >
+                                Xoá ảnh
+                              </button>
+                            )}
+                            {/* Fallback URL input */}
+                            <input
+                              type="url"
+                              value={spkPhotoUrl.startsWith('data:') ? '' : spkPhotoUrl}
+                              onChange={e => setSpkPhotoUrl(e.target.value)}
+                              placeholder="hoặc dán link URL ảnh..."
+                              className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10px] font-mono text-slate-500 focus:outline-none focus:border-teal-400"
+                            />
+                            <p className="text-[9px] text-slate-400 leading-tight">Ảnh JPG/PNG, tối đa 2MB. Nếu không có sẽ dùng avatar tự động.</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
