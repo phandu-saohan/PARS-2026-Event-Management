@@ -1018,7 +1018,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {FOREIGN_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-5 shrink-0 snap-start flex flex-col justify-between h-[410px] md:h-[445px] hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in text-center"
+                className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-5 shrink-0 snap-start flex flex-col hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in text-center"
               >
                 <div className="space-y-3 flex flex-col items-center">
                   {/* Speaker Avatar - Extra Large and at the top */}
@@ -1044,7 +1044,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 </div>
 
                 {/* Highlight box */}
-                <div className="bg-white/5 border border-white/5 p-3.5 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-3 text-left">
+                <div className="bg-white/5 border border-white/5 p-3.5 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-4 text-left">
                   {spk.highlight}
                 </div>
               </div>
@@ -1094,7 +1094,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {DOMESTIC_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-5 shrink-0 snap-start flex flex-col justify-between h-[410px] md:h-[445px] hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group text-center"
+                className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-5 shrink-0 snap-start flex flex-col hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group text-center"
               >
                 <div className="space-y-3 flex flex-col items-center">
                   {/* Speaker Avatar - Extra Large and at the top */}
@@ -1120,7 +1120,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 </div>
 
                 {/* Highlight box */}
-                <div className="bg-teal-50/45 border border-teal-100/40 p-3.5 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-3 text-left">
+                <div className="bg-teal-50/45 border border-teal-100/40 p-3.5 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-4 text-left">
                   {spk.highlight}
                 </div>
               </div>
