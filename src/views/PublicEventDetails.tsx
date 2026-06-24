@@ -214,6 +214,131 @@ const DOMESTIC_SPEAKERS = [
   }
 ];
 
+// Helper to get professional speaker avatar SVGs
+function getSpeakerAvatar(name: string) {
+  const isFemale = name.includes('Bertha') || name.includes('Yuko') || name.includes('ASANO') || name.includes('Bửu Trúc');
+  if (isFemale) {
+    return (
+      <svg viewBox="0 0 64 64" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="32" fill="#fdf2f8"/>
+        <circle cx="32" cy="25" r="11" fill="#fdd1e8"/>
+        <path d="M18 25c0-9 7-11 14-11s14 2 14 11c0 8-2 12-4 12s-3-5-10-5-8 5-10 5-4-4-4-12z" fill="#475569"/>
+        <circle cx="28" cy="24" r="1.5" fill="#1e293b"/>
+        <circle cx="36" cy="24" r="1.5" fill="#1e293b"/>
+        <path d="M29 30c2 1.2 4 1.2 6 0" stroke="#1e293b" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
+        <path d="M16 49c0-9 8-11 16-11s16 2 16 11v15H16V49z" fill="#0891b2"/>
+        <path d="M27 38l5 12 5-12" fill="none" stroke="#f8fafc" strokeWidth="2"/>
+        <path d="M16 49c2-5 6-7 10-7M48 49c-2-5-6-7-10-7" stroke="#f8fafc" strokeWidth="3" fill="none"/>
+        <path d="M25 39c0 7 14 7 14 0" fill="none" stroke="#64748b" strokeWidth="2"/>
+        <circle cx="32" cy="45" r="2.5" fill="#94a3b8" stroke="#64748b" strokeWidth="1.5"/>
+      </svg>
+    );
+  } else {
+    return (
+      <svg viewBox="0 0 64 64" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="32" cy="32" r="32" fill="#f0f9ff"/>
+        <circle cx="32" cy="24" r="12" fill="#ffedd5"/>
+        <path d="M20 24c0-8 6-10 12-10s12 2 12 10c0 2-2 3-4 3s-4-2-8-2-4 2-8 2-4-1-4-3z" fill="#334155"/>
+        <circle cx="28" cy="23" r="1.5" fill="#1e293b"/>
+        <circle cx="36" cy="23" r="1.5" fill="#1e293b"/>
+        <path d="M29 29c2 1.5 4 1.5 6 0" stroke="#1e293b" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+        <path d="M16 48c0-10 8-12 16-12s16 2 16 12v16H16V48z" fill="#0d9488"/>
+        <path d="M26 36l6 14 6-14" fill="none" stroke="#f8fafc" strokeWidth="2"/>
+        <path d="M16 48c2-6 6-8 10-8M48 48c-2-6-6-8-10-8" stroke="#f8fafc" strokeWidth="3" fill="none"/>
+        <path d="M24 38c0 8 16 8 16 0" fill="none" stroke="#64748b" strokeWidth="2"/>
+        <circle cx="32" cy="44" r="3" fill="#94a3b8" stroke="#64748b" strokeWidth="1.5"/>
+      </svg>
+    );
+  }
+}
+
+// Helper to get beautiful custom country flags
+function getCountryFlag(country: string) {
+  const norm = country.trim().toLowerCase();
+  if (norm.includes('viet') || norm.includes('việt')) {
+    return (
+      <svg viewBox="0 0 3 2" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="3" height="2" fill="#da251d"/>
+        <polygon points="1.5,0.4 1.62,0.78 2.01,0.78 1.7,1.02 1.82,1.4 1.5,1.16 1.18,1.4 1.3,1.02 0.99,0.78 1.38,0.78" fill="#ffff00"/>
+      </svg>
+    );
+  }
+  if (norm.includes('nhật') || norm.includes('japan')) {
+    return (
+      <svg viewBox="0 0 3 2" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="3" height="2" fill="#ffffff"/>
+        <circle cx="1.5" cy="1" r="0.6" fill="#bc002d"/>
+      </svg>
+    );
+  }
+  if (norm.includes('mỹ') || norm.includes('usa') || norm.includes('america')) {
+    return (
+      <svg viewBox="0 0 7410 3900" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="7410" height="3900" fill="#b22234"/>
+        <path d="M0,300H7410M0,900H7410M0,1500H7410M0,2100H7410M0,2700H7410M0,3300H7410" stroke="#fff" strokeWidth="300"/>
+        <rect width="2964" height="2100" fill="#3c3b6e"/>
+        <circle cx="1482" cy="1050" r="400" fill="#fff" opacity="0.8"/>
+      </svg>
+    );
+  }
+  if (norm.includes('mexico')) {
+    return (
+      <svg viewBox="0 0 7 4" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="2.33" height="4" fill="#006847"/>
+        <rect x="2.33" width="2.33" height="4" fill="#ffffff"/>
+        <rect x="4.66" width="2.34" height="4" fill="#c8102e"/>
+        <circle cx="3.5" cy="2" r="0.4" fill="#7d5d2b"/>
+      </svg>
+    );
+  }
+  if (norm.includes('ý') || norm.includes('italy')) {
+    return (
+      <svg viewBox="0 0 3 2" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1" height="2" fill="#009246"/>
+        <rect x="1" width="1" height="2" fill="#ffffff"/>
+        <rect x="2" width="1" height="2" fill="#ce2b37"/>
+      </svg>
+    );
+  }
+  if (norm.includes('romania')) {
+    return (
+      <svg viewBox="0 0 3 2" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="1" height="2" fill="#002b7f"/>
+        <rect x="1" width="1" height="2" fill="#fcd116"/>
+        <rect x="2" width="1" height="2" fill="#ce1126"/>
+      </svg>
+    );
+  }
+  if (norm.includes('úc') || norm.includes('australia')) {
+    return (
+      <svg viewBox="0 0 2 1" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="2" height="1" fill="#00003f"/>
+        <path d="M0,0 L2,1 M0,1 L2,0" stroke="#fff" strokeWidth="0.15"/>
+        <path d="M0,0 L2,1 M0,1 L2,0" stroke="#cc002c" strokeWidth="0.08"/>
+        <rect x="0.9" width="0.2" height="1" fill="#fff"/>
+        <rect y="0.4" width="2" height="0.2" fill="#fff"/>
+        <rect x="0.95" width="0.1" height="1" fill="#cc002c"/>
+        <rect y="0.45" width="2" height="0.1" fill="#cc002c"/>
+        <circle cx="1.5" cy="0.75" r="0.12" fill="#fff" opacity="0.7"/>
+      </svg>
+    );
+  }
+  if (norm.includes('thụy điển') || norm.includes('sweden')) {
+    return (
+      <svg viewBox="0 0 16 10" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+        <rect width="16" height="10" fill="#006aa7"/>
+        <rect x="5" width="2" height="10" fill="#fecc00"/>
+        <rect y="4" width="16" height="2" fill="#fecc00"/>
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 3 2" className="w-4 h-3 rounded-xs border border-slate-200 shrink-0 shadow-xs" xmlns="http://www.w3.org/2000/svg">
+      <rect width="3" height="2" fill="#94a3b8"/>
+    </svg>
+  );
+}
+
 // Helper to provide realistic rich academic abstracts and bios
 function getSessionEnrichment(session: ConferenceSession) {
   const title = session.title;
@@ -893,23 +1018,33 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {FOREIGN_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[280px] md:w-[320px] bg-white/5 border border-white/10 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[400px] hover:border-teal-500/40 transition-all group animate-fade-in"
+                className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[390px] hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in"
               >
-                {/* Top Content */}
                 <div className="space-y-4">
-                  {/* Photo Placeholder/Initials */}
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${spk.avatarBg} text-white flex items-center justify-center text-xl font-black shadow-md border border-white/10`}>
-                    {spk.initials}
+                  {/* Country & Flag pill badge */}
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 w-fit text-[10px] text-teal-400 font-extrabold uppercase tracking-wider">
+                    {getCountryFlag(spk.country)}
+                    <span>{spk.country}</span>
                   </div>
-                  <div>
-                    <span className="text-[10px] text-teal-400 font-extrabold uppercase tracking-widest font-mono">{spk.country}</span>
-                    <h4 className="text-base md:text-lg font-black text-white leading-tight mt-0.5 group-hover:text-teal-300 transition-colors">{spk.name}</h4>
-                    <p className="text-xs text-slate-400 font-semibold mt-1">{spk.role}</p>
+
+                  {/* Profile Layout (Avatar + Name & Role) */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full border border-teal-500/30 overflow-hidden shrink-0 bg-slate-800 shadow-md group-hover:scale-105 transition-transform duration-200">
+                      {getSpeakerAvatar(spk.name)}
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm md:text-base font-black text-white leading-tight group-hover:text-teal-300 transition-colors">
+                        {spk.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-400 font-bold leading-normal">
+                        {spk.role}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Bottom Highlight box */}
-                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-[11px] text-slate-350 leading-relaxed italic">
+
+                {/* Highlight box */}
+                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-2">
                   {spk.highlight}
                 </div>
               </div>
@@ -959,23 +1094,33 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {DOMESTIC_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[280px] md:w-[320px] bg-slate-50 border border-slate-200 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[400px] hover:border-teal-500/30 hover:bg-white transition-all group"
+                className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[390px] hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group"
               >
-                {/* Top Content */}
                 <div className="space-y-4">
-                  {/* Photo Placeholder/Initials */}
-                  <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${spk.avatarBg} text-white flex items-center justify-center text-xl font-black shadow-md border border-slate-200/20`}>
-                    {spk.initials}
+                  {/* Country & Flag pill badge */}
+                  <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 w-fit text-[10px] text-teal-600 font-extrabold uppercase tracking-wider">
+                    {getCountryFlag(spk.country)}
+                    <span>{spk.country}</span>
                   </div>
-                  <div>
-                    <span className="text-[10px] text-teal-600 font-extrabold uppercase tracking-widest font-mono">{spk.country}</span>
-                    <h4 className="text-base md:text-lg font-black text-slate-900 leading-tight mt-0.5 group-hover:text-teal-700 transition-colors">{spk.name}</h4>
-                    <p className="text-xs text-slate-500 font-semibold mt-1">{spk.role}</p>
+
+                  {/* Profile Layout (Avatar + Name & Role) */}
+                  <div className="flex items-start gap-4">
+                    <div className="w-16 h-16 rounded-full border border-teal-500/20 overflow-hidden shrink-0 bg-slate-100 shadow-md group-hover:scale-105 transition-transform duration-200">
+                      {getSpeakerAvatar(spk.name)}
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-sm md:text-base font-black text-slate-900 leading-tight group-hover:text-teal-700 transition-colors">
+                        {spk.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-550 font-bold leading-normal">
+                        {spk.role}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                
-                {/* Bottom Highlight box */}
-                <div className="bg-teal-50/45 border border-teal-100/40 p-4 rounded-2xl text-[11px] text-slate-650 leading-relaxed italic">
+
+                {/* Highlight box */}
+                <div className="bg-teal-50/45 border border-teal-100/40 p-4 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-2">
                   {spk.highlight}
                 </div>
               </div>
