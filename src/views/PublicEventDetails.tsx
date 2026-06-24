@@ -270,11 +270,6 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Resolve configured images or fall back to defaults
   const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
   const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1782198647752.png';
-  const slide1Url = businessConfig.landingSlide1Url || '/media__1782198647776.png';
-  const slide2Url = businessConfig.landingSlide2Url || '/media__1782198647541.png';
-  const slide3Url = businessConfig.landingSlide3Url || '/media__1782198647504.png';
-  const slide4Url = businessConfig.landingSlide4Url || '/media__1782198647557.png';
-
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -283,23 +278,11 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const [selectedSessionDetail, setSelectedSessionDetail] = useState<ConferenceSession | null>(null);
   const [modalTab, setModalTab] = useState<'abstract' | 'bio'>('abstract');
 
-  // Carousel & header dropdown states
-  const [currentSlide, setCurrentSlide] = useState<number>(0);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  // Header dropdown states
   const [showTicketDropdown, setShowTicketDropdown] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
 
   const ticketDropdownRef = useRef<HTMLDivElement>(null);
-  const totalSlides = 5;
-
-  // Auto-play slideshow every 6 seconds
-  useEffect(() => {
-    if (isHovered) return;
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [isHovered]);
 
   // Close ticket dropdown when clicking outside
   useEffect(() => {
@@ -355,14 +338,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Extract unique tracks for filters
   const uniqueTracks = ['All', ...Array.from(new Set(sessions.map(s => s.track))).filter(Boolean)];
 
-  // Carousel slide definitions
-  const slides = [
-    { id: 0, type: 'custom' },
-    { id: 1, type: 'image', image: slide1Url, title: 'Foreign Speakers' },
-    { id: 2, type: 'image', image: slide2Url, title: 'Domestic Speakers' },
-    { id: 3, type: 'image', image: slide3Url, title: 'Agenda' },
-    { id: 4, type: 'image', image: slide4Url, title: 'Invitation Letter' }
-  ];
+
 
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 font-sans scroll-smooth">
@@ -651,145 +627,68 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         )}
       </header>
 
-      {/* 2. WIDESCREEN SLIDESHOW (HERO BANNER CAROUSEL) */}
-      <section 
-        className="relative w-full overflow-hidden border-b border-slate-200"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        {/* Slides Container */}
-        <div className="relative w-full h-[380px] md:h-[480px]">
-          {slides.map((slide, index) => {
-            const isActive = index === currentSlide;
+      {/* 2. WIDESCREEN HERO BANNER */}
+      <section className="relative w-full overflow-hidden border-b border-slate-200">
+        <div className="relative w-full h-[380px] md:h-[480px] flex flex-col md:flex-row items-center bg-gradient-to-r from-[#FAF8F2] via-[#EBF4FC] to-[#D6EBFE] px-6 md:px-16 py-8">
+          
+          {/* Left Column: Text Content */}
+          <div className="w-full md:w-[55%] z-20 flex flex-col justify-center text-[#4E2A14] space-y-4 md:space-y-6">
             
-            return (
-              <div 
-                key={slide.id}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${
-                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              >
-                {slide.type === 'custom' ? (
-                  /* Custom main slide representing Slide 0 matching screenshot */
-                  <div className="w-full h-full relative overflow-hidden flex flex-col md:flex-row items-center bg-gradient-to-r from-[#FAF8F2] via-[#EBF4FC] to-[#D6EBFE] px-6 md:px-16 py-8">
-                    
-                    {/* Left Column: Text Content */}
-                    <div className="w-full md:w-[55%] z-20 flex flex-col justify-center text-[#4E2A14] space-y-4 md:space-y-6">
-                      
-                      {/* Logo image in banner */}
-                      <img 
-                        src={logoUrl} 
-                        alt="PARS Logo" 
-                        className="h-14 md:h-20 w-auto object-contain self-start" 
-                      />
-                      
-                      {/* Custom Date Layout with superscript day tags */}
-                      <div className="flex items-end font-serif tracking-tight select-none">
-                        <span className="text-3xl md:text-5xl font-extrabold leading-none mr-3 mb-0.5">SEP.</span>
-                        <div className="flex flex-col items-center">
-                          <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SAT</span>
-                          <span className="text-6xl md:text-8xl font-black leading-none">12</span>
-                        </div>
-                        <span className="text-3xl md:text-5xl font-extrabold mx-3 leading-none pb-1.5">-</span>
-                        <div className="flex flex-col items-center">
-                          <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SUN</span>
-                          <span className="text-6xl md:text-8xl font-black leading-none">13</span>
-                        </div>
-                      </div>
-
-                      {/* Heading labels */}
-                      <div className="space-y-1.5 md:space-y-2.5">
-                        <p className="text-[11px] md:text-[15px] font-sans font-bold tracking-[0.06em] uppercase text-[#4E2A14] opacity-95">
-                          PLASTIC & AESTHETIC REGENERATIVE SURGERY
-                        </p>
-                        
-                        {/* Huge serif PARS 2026 title */}
-                        <h1 className="text-6xl md:text-[90px] font-black font-serif leading-none tracking-normal flex items-baseline">
-                          <span className="tracking-[0.08em] text-[#4E2A14]">PARS</span>
-                          <span className="text-4xl md:text-6xl font-black text-[#C59B27] ml-2 font-sans">2026</span>
-                        </h1>
-                      </div>
-
-                      {/* Divider line */}
-                      <div className="w-full max-w-[500px] h-1 bg-[#4E2A14] opacity-90 rounded-full" />
-
-                      {/* Location text */}
-                      <p className="text-[11px] md:text-[16px] font-sans font-extrabold tracking-[0.02em] uppercase text-[#4E2A14] leading-snug">
-                        MELIÀ HANOI - 44B.LY THUONG KIET. HANOI. VIETNAM
-                      </p>
-                    </div>
-
-                    {/* Right Column: Landmarks Image with Fade-out Overlay */}
-                    <div className="absolute right-0 bottom-0 top-0 w-full md:w-[48%] h-full pointer-events-none z-10 hidden md:block">
-                      <img 
-                        src={landmarksUrl} 
-                        alt="Landmarks" 
-                        className="w-full h-full object-cover object-bottom" 
-                      />
-                      {/* Left blending gradient */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#EBF4FC] via-[#EBF4FC]/60 to-transparent w-[35%]" />
-                    </div>
-
-                  </div>
-                ) : (
-                  /* Standard high-fidelity image slide for posters */
-                  <div className="w-full h-full relative overflow-hidden flex items-center justify-center bg-[#0d0f12]">
-                    {/* Blurred poster background for cinematic aesthetic */}
-                    <div 
-                      className="absolute inset-0 bg-cover bg-center opacity-25 blur-2xl scale-110 pointer-events-none"
-                      style={{ backgroundImage: `url(${slide.image})` }}
-                    />
-                    
-                    {/* Actual slide poster centering */}
-                    <div className="relative z-10 h-full py-5 px-6 flex items-center justify-center max-h-full">
-                      <img 
-                        src={slide.image} 
-                        alt={slide.title} 
-                        className="max-h-[340px] md:max-h-[440px] w-auto object-contain shadow-2xl rounded-xl border border-white/10"
-                      />
-                    </div>
-                  </div>
-                )}
+            {/* Logo image in banner */}
+            <img 
+              src={logoUrl} 
+              alt="PARS Logo" 
+              className="h-14 md:h-20 w-auto object-contain self-start" 
+            />
+            
+            {/* Custom Date Layout with superscript day tags */}
+            <div className="flex items-end font-serif tracking-tight select-none">
+              <span className="text-3xl md:text-5xl font-extrabold leading-none mr-3 mb-0.5">SEP.</span>
+              <div className="flex flex-col items-center">
+                <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SAT</span>
+                <span className="text-6xl md:text-8xl font-black leading-none">12</span>
               </div>
-            );
-          })}
-        </div>
+              <span className="text-3xl md:text-5xl font-extrabold mx-3 leading-none pb-1.5">-</span>
+              <div className="flex flex-col items-center">
+                <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SUN</span>
+                <span className="text-6xl md:text-8xl font-black leading-none">13</span>
+              </div>
+            </div>
 
-        {/* Carousel Arrow Controls */}
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/20 hover:bg-black/35 backdrop-blur-xs border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer z-20"
-          title="Previous slide"
-        >
-          <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
-        </button>
-        <button
-          onClick={() => setCurrentSlide((prev) => (prev + 1) % totalSlides)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/20 hover:bg-black/35 backdrop-blur-xs border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer z-20"
-          title="Next slide"
-        >
-          <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
-        </button>
+            {/* Heading labels */}
+            <div className="space-y-1.5 md:space-y-2.5">
+              <p className="text-[11px] md:text-[15px] font-sans font-bold tracking-[0.06em] uppercase text-[#4E2A14] opacity-95">
+                PLASTIC & AESTHETIC REGENERATIVE SURGERY
+              </p>
+              
+              {/* Huge serif PARS 2026 title */}
+              <h1 className="text-6xl md:text-[90px] font-black font-serif leading-none tracking-normal flex items-baseline">
+                <span className="tracking-[0.08em] text-[#4E2A14]">PARS</span>
+                <span className="text-4xl md:text-6xl font-black text-[#C59B27] ml-2 font-sans">2026</span>
+              </h1>
+            </div>
 
-        {/* Carousel Pagination Dots */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20">
-          <div className="bg-black/25 backdrop-blur-xs px-3.5 py-2 rounded-full flex gap-2.5">
-            {slides.map((_, index) => {
-              const isActive = index === currentSlide;
-              return (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer p-0 border-none ${
-                    isActive ? 'bg-white w-5' : 'bg-white/45 w-2 hover:bg-white/70'
-                  }`}
-                  title={`Go to slide ${index + 1}`}
-                />
-              );
-            })}
+            {/* Divider line */}
+            <div className="w-full max-w-[500px] h-1 bg-[#4E2A14] opacity-90 rounded-full" />
+
+            {/* Location text */}
+            <p className="text-[11px] md:text-[16px] font-sans font-extrabold tracking-[0.02em] uppercase text-[#4E2A14] leading-snug">
+              MELIÀ HANOI - 44B.LY THUONG KIET. HANOI. VIETNAM
+            </p>
           </div>
-        </div>
 
+          {/* Right Column: Landmarks Image with Fade-out Overlay */}
+          <div className="absolute right-0 bottom-0 top-0 w-full md:w-[48%] h-full pointer-events-none z-10 hidden md:block">
+            <img 
+              src={landmarksUrl} 
+              alt="Landmarks" 
+              className="w-full h-full object-cover object-bottom" 
+            />
+            {/* Left blending gradient */}
+            <div className="absolute inset-0 bg-gradient-to-r from-[#EBF4FC] via-[#EBF4FC]/60 to-transparent w-[35%]" />
+          </div>
+
+        </div>
       </section>
 
 
