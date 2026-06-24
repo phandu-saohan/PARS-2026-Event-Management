@@ -536,6 +536,20 @@ export interface LandingPageSections {
     foreign: SpeakerConfig[];
     domestic: SpeakerConfig[];
   };
+  sectionBg?: {
+    /** Màu nền section Giới thiệu hội nghị */
+    intro?: string;
+    /** Màu nền section Báo cáo viên Quốc tế */
+    speakersForeign?: string;
+    /** Màu nền section Báo cáo viên Trong nước */
+    speakersDomestic?: string;
+    /** Màu nền section Đăng ký tham dự */
+    register?: string;
+    /** Màu nền section Nhà tài trợ */
+    sponsors?: string;
+    /** Màu nền section Địa điểm */
+    location?: string;
+  };
 }
 
 

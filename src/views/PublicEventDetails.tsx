@@ -427,6 +427,17 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const domesticSpeakers = (configSpeakers?.domestic && configSpeakers.domestic.length > 0)
     ? configSpeakers.domestic
     : DOMESTIC_SPEAKERS;
+
+  // Section background colors from config (fallback to default CSS class colors)
+  const bg = businessConfig.landingPageSections?.sectionBg || {};
+  const sectionStyle = {
+    intro:            bg.intro            ? { backgroundColor: bg.intro }            : undefined,
+    speakersForeign:  bg.speakersForeign  ? { backgroundColor: bg.speakersForeign }  : undefined,
+    speakersDomestic: bg.speakersDomestic ? { backgroundColor: bg.speakersDomestic } : undefined,
+    register:         bg.register         ? { backgroundColor: bg.register }          : undefined,
+    sponsors:         bg.sponsors         ? { backgroundColor: bg.sponsors }           : undefined,
+    location:         bg.location         ? { backgroundColor: bg.location }           : undefined,
+  };
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -857,7 +868,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
 
       {/* 3. EVENT INFO & 4 BLOCKS SECTION */}
-      <section id="intro" className="py-16 md:py-24 max-w-6xl mx-auto px-4 scroll-mt-20">
+      <section id="intro" className="py-16 md:py-24 scroll-mt-20" style={sectionStyle.intro}>
+        <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           
           {/* Left Column: Brief Summary */}
@@ -985,10 +997,11 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </div>
 
         </div>
+        </div>
       </section>
 
       {/* 4. FOREIGN SPEAKERS CAROUSEL */}
-      <section id="speakers" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20">
+      <section id="speakers" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.speakersForeign}>
         <div className="max-w-6xl mx-auto px-4">
           
           {/* Section Header */}
@@ -1067,7 +1080,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 5. DOMESTIC SPEAKERS CAROUSEL */}
-      <section className="py-16 md:py-24 bg-white border-b border-slate-200 scroll-mt-20">
+      <section className="py-16 md:py-24 bg-white border-b border-slate-200 scroll-mt-20" style={sectionStyle.speakersDomestic}>
         <div className="max-w-6xl mx-auto px-4">
           
           {/* Section Header */}
@@ -1146,7 +1159,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 6. STEPPER REGISTRATION FORM */}
-      <section id="register" className="py-16 md:py-24 bg-slate-100 border-y border-slate-200 scroll-mt-20">
+      <section id="register" className="py-16 md:py-24 bg-slate-100 border-y border-slate-200 scroll-mt-20" style={sectionStyle.register}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10 max-w-xl mx-auto space-y-2">
             <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">SECURE REGISTRATION</span>
@@ -1455,7 +1468,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 8. SPONSORS */}
-      <section id="sponsors" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20">
+      <section id="sponsors" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
         <div className="max-w-6xl mx-auto px-4 text-center">
           <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">CONFERENCE SPONSORS</span>
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 mb-4 leading-none">
@@ -1514,7 +1527,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 9. LOCATION & MAP BLOCK */}
-      <section id="location" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20">
+      <section id="location" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.location}>
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           
           {/* Left info column */}

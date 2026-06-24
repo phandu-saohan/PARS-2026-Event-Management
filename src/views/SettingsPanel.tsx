@@ -5877,7 +5877,79 @@ ON CONFLICT (code) DO UPDATE SET
               </div>
 
 
-              {/* 4. SPEAKER MANAGEMENT SECTION CARD */}
+              {/* 4. SECTION BACKGROUND COLORS CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center text-sm font-bold">
+                    🎨
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 4: Màu Nền Từng Section</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Tuỳ chỉnh màu nền của từng section trên trang thông tin sự kiện. Để trống dùng màu mặc định.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {([
+                    { key: 'intro',            label: 'Giới thiệu hội nghị',       defaultColor: '#ffffff', emoji: '📋' },
+                    { key: 'speakersForeign',  label: 'Báo cáo viên Quốc tế',      defaultColor: '#0f172a', emoji: '🌍' },
+                    { key: 'speakersDomestic', label: 'Báo cáo viên Trong nước',   defaultColor: '#ffffff', emoji: '🇻🇳' },
+                    { key: 'register',         label: 'Đăng ký tham dự',           defaultColor: '#f1f5f9', emoji: '📝' },
+                    { key: 'sponsors',         label: 'Nhà tài trợ & Đối tác',     defaultColor: '#ffffff', emoji: '🤝' },
+                    { key: 'location',         label: 'Địa điểm tổ chức',          defaultColor: '#0f172a', emoji: '📍' },
+                  ] as const).map(({ key, label, defaultColor, emoji }) => {
+                    const currentBg = businessConfig.landingPageSections?.sectionBg;
+                    const currentVal = currentBg?.[key] || '';
+                    return (
+                      <div key={key} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl border border-slate-150">
+                        <span className="text-base">{emoji}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] font-black text-slate-700 truncate">{label}</p>
+                          <p className="text-[9px] text-slate-400 font-mono">{currentVal || `mặc định (${defaultColor})`}</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Color picker */}
+                          <label className="relative cursor-pointer" title="Chọn màu">
+                            <div
+                              className="w-8 h-8 rounded-lg border-2 border-slate-300 shadow-inner overflow-hidden"
+                              style={{ backgroundColor: currentVal || defaultColor }}
+                            />
+                            <input
+                              type="color"
+                              value={currentVal || defaultColor}
+                              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+                              onChange={(e) => {
+                                const sections = businessConfig.landingPageSections || {};
+                                const sectionBg = { ...(sections.sectionBg || {}), [key]: e.target.value };
+                                setBusinessConfig({ ...businessConfig, landingPageSections: { ...sections, sectionBg } });
+                              }}
+                            />
+                          </label>
+                          {/* Reset button */}
+                          {currentVal && (
+                            <button
+                              type="button"
+                              title="Đặt lại màu mặc định"
+                              onClick={() => {
+                                const sections = businessConfig.landingPageSections || {};
+                                const sectionBg = { ...(sections.sectionBg || {}) };
+                                delete sectionBg[key];
+                                setBusinessConfig({ ...businessConfig, landingPageSections: { ...sections, sectionBg } });
+                              }}
+                              className="w-6 h-6 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-300 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all cursor-pointer text-[10px]"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-[9px] text-slate-400 italic">💡 Nhấn vào ô màu để mở bảng chọn màu. Nhấn ✕ để khôi phục màu mặc định. Nhớ nhấn "Lưu Toàn Bộ" để áp dụng.</p>
+              </div>
+
+              {/* 5. SPEAKER MANAGEMENT SECTION CARD */}
               <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
                   <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold">
