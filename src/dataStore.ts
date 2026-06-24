@@ -554,15 +554,15 @@ export class DataStore {
     this.users = this.getLocalStorage(DataStore.KEY_USERS, INITIAL_USERS);
     this.packages = this.getLocalStorage(DataStore.KEY_PACKAGES, INITIAL_PACKAGES);
     
-    this.zaloConfig = this.getLocalStorage(DataStore.KEY_ZALO, DEFAULT_ZALO_CONFIG);
-    this.emailConfig = this.getLocalStorage(DataStore.KEY_EMAIL, DEFAULT_EMAIL_CONFIG);
-    this.resendConfig = this.getLocalStorage(DataStore.KEY_RESEND, DEFAULT_RESEND_CONFIG);
-    this.templates = this.getLocalStorage(DataStore.KEY_TEMPLATES, INITIAL_TEMPLATES);
-    this.supabaseConfig = this.getLocalStorage(DataStore.KEY_SUPABASE, { url: '', anonKey: '', isConnected: false });
-    this.notificationLogs = this.getLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, []);
-    this.specialtyTracks = this.getLocalStorage(DataStore.KEY_SPECIALTY_TRACKS, INITIAL_TRACKS);
-    this.pendingSyncAttendeeIds = this.getLocalStorage('pars_pending_sync_attendees', []);
-    const savedConfig = this.getLocalStorage(DataStore.KEY_BUSINESS_CONFIG, DEFAULT_BUSINESS_CONFIG);
+    this.zaloConfig = this.getLocalStorage(DataStore.KEY_ZALO, DEFAULT_ZALO_CONFIG) || DEFAULT_ZALO_CONFIG;
+    this.emailConfig = this.getLocalStorage(DataStore.KEY_EMAIL, DEFAULT_EMAIL_CONFIG) || DEFAULT_EMAIL_CONFIG;
+    this.resendConfig = this.getLocalStorage(DataStore.KEY_RESEND, DEFAULT_RESEND_CONFIG) || DEFAULT_RESEND_CONFIG;
+    this.templates = this.getLocalStorage(DataStore.KEY_TEMPLATES, INITIAL_TEMPLATES) || INITIAL_TEMPLATES;
+    this.supabaseConfig = this.getLocalStorage(DataStore.KEY_SUPABASE, { url: '', anonKey: '', isConnected: false }) || { url: '', anonKey: '', isConnected: false };
+    this.notificationLogs = this.getLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, []) || [];
+    this.specialtyTracks = this.getLocalStorage(DataStore.KEY_SPECIALTY_TRACKS, INITIAL_TRACKS) || INITIAL_TRACKS;
+    this.pendingSyncAttendeeIds = this.getLocalStorage('pars_pending_sync_attendees', []) || [];
+    const savedConfig = this.getLocalStorage(DataStore.KEY_BUSINESS_CONFIG, DEFAULT_BUSINESS_CONFIG) || DEFAULT_BUSINESS_CONFIG;
     this.businessConfig = {
       ...DEFAULT_BUSINESS_CONFIG,
       ...savedConfig,
@@ -2313,7 +2313,7 @@ export class DataStore {
     return config;
   }
 
-  getBusinessConfig() { return this.businessConfig; }
+  getBusinessConfig() { return this.businessConfig || DEFAULT_BUSINESS_CONFIG; }
   saveBusinessConfig(config: BusinessConfig) {
     this.businessConfig = config;
     this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, config);

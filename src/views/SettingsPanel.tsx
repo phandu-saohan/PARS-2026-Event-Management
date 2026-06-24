@@ -199,8 +199,8 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
    * Works for both base64 data URLs and regular https:// URLs.
    */
   const applyPwaIconToDocument = (logoUrl?: string, themeColor?: string) => {
-    const url = logoUrl || businessConfig.pwaLogoUrl;
-    const color = themeColor || businessConfig.pwaThemeColor || '#be6940';
+    const url = logoUrl || businessConfig?.pwaLogoUrl;
+    const color = themeColor || businessConfig?.pwaThemeColor || '#be6940';
 
     if (url) {
       // Update favicon (tab icon)
