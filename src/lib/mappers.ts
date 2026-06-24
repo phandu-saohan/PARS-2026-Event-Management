@@ -457,6 +457,12 @@ export function mapBusinessConfigToDb(c: BusinessConfig): Record<string, any> {
     sponsor_form_config: c.sponsorFormConfig || null,
     add_on_services: c.addOnServices || null,
     cme_template_config: c.cmeTemplateConfig || null,
+    landing_logo_url: c.landingLogoUrl || '',
+    landing_landmarks_url: c.landingLandmarksUrl || '',
+    landing_slide1_url: c.landingSlide1Url || '',
+    landing_slide2_url: c.landingSlide2Url || '',
+    landing_slide3_url: c.landingSlide3Url || '',
+    landing_slide4_url: c.landingSlide4Url || '',
   };
 }
 
@@ -484,6 +490,12 @@ export function mapDbToBusinessConfig(row: any): BusinessConfig {
     sponsorFormConfig: row.sponsor_form_config || undefined,
     addOnServices: row.add_on_services || undefined,
     cmeTemplateConfig: row.cme_template_config || undefined,
+    landingLogoUrl: row.landing_logo_url || '',
+    landingLandmarksUrl: row.landing_landmarks_url || '',
+    landingSlide1Url: row.landing_slide1_url || '',
+    landingSlide2Url: row.landing_slide2_url || '',
+    landingSlide3Url: row.landing_slide3_url || '',
+    landingSlide4Url: row.landing_slide4_url || '',
   };
 }
 

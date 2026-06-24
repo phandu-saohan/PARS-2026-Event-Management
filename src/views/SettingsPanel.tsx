@@ -1681,6 +1681,276 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                   </div>
                 </div>
 
+                {/* 1.3 HÌNH ẢNH TRANG CHỦ & TIN SỰ KIỆN */}
+                <div className="bg-white p-6 rounded-3xl border border-slate-200 space-y-4 shadow-xs mt-4">
+                  <div>
+                    <h4 className="text-sm font-black text-slate-900 uppercase">Cấu hình hình ảnh trang chủ & tin sự kiện</h4>
+                    <p className="text-[10px] text-slate-450 mt-0.5 font-medium">
+                      Tải lên hoặc điều chỉnh các tài nguyên hình ảnh hiển thị trên trang landing page công khai của hội nghị (logo, ảnh nền, và các slide poster).
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Logo trang chủ */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Logo chính thức (Header & Hero) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingLogoUrl ? (
+                            <img src={businessConfig.landingLogoUrl} alt="Logo Landing" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src="/media__1782106316692.png" alt="Logo Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingLogoUrl: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingLogoUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingLogoUrl: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ảnh Landmarks */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Ảnh phong cảnh Hà Nội (Slide 0) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingLandmarksUrl ? (
+                            <img src={businessConfig.landingLandmarksUrl} alt="Landmarks Landing" className="w-full h-full object-cover object-bottom" />
+                          ) : (
+                            <img src="/media__1782198647752.png" alt="Mặc định" className="w-full h-full object-cover object-bottom opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingLandmarksUrl: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingLandmarksUrl && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingLandmarksUrl: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 1: Báo cáo viên nước ngoài */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Poster Báo cáo viên nước ngoài (Slide 1) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingSlide1Url ? (
+                            <img src={businessConfig.landingSlide1Url} alt="Slide 1" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src="/media__1782198647776.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingSlide1Url: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingSlide1Url && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingSlide1Url: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 2: Báo cáo viên trong nước */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Poster Báo cáo viên trong nước (Slide 2) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingSlide2Url ? (
+                            <img src={businessConfig.landingSlide2Url} alt="Slide 2" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src="/media__1782198647541.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingSlide2Url: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingSlide2Url && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingSlide2Url: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 3: Chương trình khoa học */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Poster Chương trình khoa học (Slide 3) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingSlide3Url ? (
+                            <img src={businessConfig.landingSlide3Url} alt="Slide 3" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src="/media__1782198647504.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingSlide3Url: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingSlide3Url && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingSlide3Url: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Slide 4: Thư mời */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">Poster Thư mời hội nghị (Slide 4) *</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig.landingSlide4Url ? (
+                            <img src={businessConfig.landingSlide4Url} alt="Slide 4" className="w-full h-full object-contain" />
+                          ) : (
+                            <img src="/media__1782198647557.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className="px-3 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                            Tải lên hình mới
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    setBusinessConfig({ ...businessConfig, landingSlide4Url: reader.result as string });
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig.landingSlide4Url && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, landingSlide4Url: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục mặc định
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3 mt-4">
                   <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest block">LUẬT PHÊ DUYỆT & TRUYỀN PHÁT</span>
                   

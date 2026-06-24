@@ -267,6 +267,14 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const packages = store.getPackages().filter(p => p.isActive);
   const businessConfig = store.getBusinessConfig();
 
+  // Resolve configured images or fall back to defaults
+  const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
+  const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1782198647752.png';
+  const slide1Url = businessConfig.landingSlide1Url || '/media__1782198647776.png';
+  const slide2Url = businessConfig.landingSlide2Url || '/media__1782198647541.png';
+  const slide3Url = businessConfig.landingSlide3Url || '/media__1782198647504.png';
+  const slide4Url = businessConfig.landingSlide4Url || '/media__1782198647557.png';
+
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -350,10 +358,10 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Carousel slide definitions
   const slides = [
     { id: 0, type: 'custom' },
-    { id: 1, type: 'image', image: '/media__1782198647776.png', title: 'Foreign Speakers' },
-    { id: 2, type: 'image', image: '/media__1782198647541.png', title: 'Domestic Speakers' },
-    { id: 3, type: 'image', image: '/media__1782198647504.png', title: 'Agenda' },
-    { id: 4, type: 'image', image: '/media__1782198647557.png', title: 'Invitation Letter' }
+    { id: 1, type: 'image', image: slide1Url, title: 'Foreign Speakers' },
+    { id: 2, type: 'image', image: slide2Url, title: 'Domestic Speakers' },
+    { id: 3, type: 'image', image: slide3Url, title: 'Agenda' },
+    { id: 4, type: 'image', image: slide4Url, title: 'Invitation Letter' }
   ];
 
   return (
@@ -366,7 +374,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Logo Icon and Text */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <img 
-              src="/media__1782106316692.png" 
+              src={logoUrl} 
               alt="PARS Logo" 
               className="h-10 md:h-12 w-auto object-contain"
             />
@@ -670,7 +678,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                       
                       {/* Logo image in banner */}
                       <img 
-                        src="/media__1782106316692.png" 
+                        src={logoUrl} 
                         alt="PARS Logo" 
                         className="h-14 md:h-20 w-auto object-contain self-start" 
                       />
@@ -714,7 +722,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     {/* Right Column: Landmarks Image with Fade-out Overlay */}
                     <div className="absolute right-0 bottom-0 top-0 w-full md:w-[48%] h-full pointer-events-none z-10 hidden md:block">
                       <img 
-                        src="/media__1782198647752.png" 
+                        src={landmarksUrl} 
                         alt="Landmarks" 
                         className="w-full h-full object-cover object-bottom" 
                       />

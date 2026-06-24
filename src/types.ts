@@ -487,6 +487,13 @@ export interface BusinessConfig {
   addOnServices?: AddOnService[];
   /** Cấu hình layout chứng chỉ CME điện tử */
   cmeTemplateConfig?: CmeTemplateConfig;
+  /** Các cấu hình hình ảnh cho trang landing page công khai */
+  landingLogoUrl?: string;
+  landingLandmarksUrl?: string;
+  landingSlide1Url?: string;
+  landingSlide2Url?: string;
+  landingSlide3Url?: string;
+  landingSlide4Url?: string;
 }
 
 
