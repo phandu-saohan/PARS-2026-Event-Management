@@ -627,54 +627,35 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         )}
       </header>
 
-      {/* 2. WIDESCREEN HERO BANNER */}
+            {/* 2. WIDESCREEN HERO BANNER */}
       <section 
         className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] bg-cover bg-center flex items-center border-b border-slate-200"
         style={{ backgroundImage: `url(${landmarksUrl})` }}
       >
         {/* Dark overlay for rich contrast and legibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/75 to-slate-950/60 z-10" />
+        <div className="absolute inset-0 bg-slate-950/75 z-10" />
         
         {/* Ambient lighting/glow effect */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none z-10" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none z-10" />
 
         {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 w-full text-white flex flex-col justify-center space-y-6 md:space-y-8">
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 w-full text-white flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
           
-          {/* Logo image in banner */}
-          <img 
-            src={logoUrl} 
-            alt="PARS Logo" 
-            className="h-12 md:h-16 w-auto object-contain self-start drop-shadow-lg" 
-          />
-          
-          {/* Date + Location Info Badge */}
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
-              <Calendar className="w-4.5 h-4.5 text-amber-400" />
-              <span>12 - 13 THÁNG 09, 2026</span>
-            </div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
-              <MapPin className="w-4.5 h-4.5 text-rose-400" />
-              <span>MELIÁ HANOI, HÀ NỘI, VIỆT NAM</span>
-            </div>
-          </div>
-
           {/* Conference name and tag */}
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest self-start mb-2">
+          <div className="flex flex-col items-center space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2">
               <Sparkles className="w-3 h-3 animate-pulse" />
               HỘI NGHỊ KHOA HỌC QUỐC TẾ
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline justify-center">
               <span className="text-white">PARS</span>
               <span className="text-[#C59B27] ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">2026</span>
             </h1>
           </div>
 
           {/* Theme / Subject */}
-          <div className="max-w-3xl space-y-2">
+          <div className="max-w-4xl space-y-2 mx-auto">
             <p className="text-base md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
               PLASTIC & AESTHETIC REGENERATIVE SURGERY
             </p>
@@ -684,7 +665,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </div>
 
           {/* Actions: 2 Buttons */}
-          <div className="flex flex-wrap gap-4 pt-4 z-30">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 z-30">
             <button
               onClick={() => scrollToSection('register')}
               className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center gap-2.5 cursor-pointer border-none"
@@ -700,6 +681,18 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
               <span>Chương trình hội nghị</span>
             </button>
+          </div>
+
+          {/* Date + Location Info Badge - Centered at the bottom */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
+              <Calendar className="w-4.5 h-4.5 text-amber-400" />
+              <span>12 - 13 THÁNG 09, 2026</span>
+            </div>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
+              <MapPin className="w-4.5 h-4.5 text-rose-400" />
+              <span>MELIÀ HANOI, HÀ NỘI, VIỆT NAM</span>
+            </div>
           </div>
 
         </div>
