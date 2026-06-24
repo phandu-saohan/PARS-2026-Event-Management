@@ -818,373 +818,419 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                   </div>
                 )}
 
-                {/* STEP 1: THÔNG TIN ĐẠI BIỂU */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
-                      <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">01</span>
-                      <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-                        {L.section('personalInfo', 'THÔNG TIN ĐẠI BIỂU ĐĂNG KÝ', 'DELEGATE PERSONAL INFORMATION')}
-                      </h3>
-                    </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                    {/* Language Selector */}
-                    {
-                      /*
-                      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
-                      <label className="block text-xs font-extrabold text-slate-800 mb-2 uppercase">
-                        {L.f('nationality', 'Chọn ngôn ngữ *', 'Select Language *')}
-                      </label>
-                      <div className="flex bg-slate-200/50 rounded-lg p-1 gap-2 max-w-sm">
-                        <button
-                          type="button"
-                          onClick={() => setNationality('vietname')}
-                          className={`flex-1 py-2 text-xs font-bold rounded-md transition-all cursor-pointer ${nationality === 'vietname' ? 'bg-teal-900 text-amber-400 shadow-md' : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                          {L.t('Việt Nam', 'Vietnamese')}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setNationality('foreign')}
-                          className={`flex-1 py-2 text-xs font-bold rounded-md transition-all cursor-pointer ${nationality === 'foreign' ? 'bg-teal-900 text-amber-400 shadow-md' : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                        >
-                          International
-                        </button>
-                      </div>
-                    </div>
-                      */
-                    }
+                  {/* LEFT COLUMN: Personal Info, Package selection, CME & Gala */}
+                  <div className="lg:col-span-7 space-y-8">
 
-                    {/* Avatar Section */}
-                    <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                      <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
-                        {avatarImage ? (
-                          <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
-                        ) : (
-                          <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
-                            {L.t('Chưa có ảnh', 'No Photo')}
-                          </span>
-                        )}
-                        {isAvatarUploading && (
-                          <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
-                            Loading...
-                          </div>
-                        )}
+                    {/* STEP 1: THÔNG TIN ĐẠI BIỂU */}
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
+                        <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">01</span>
+                        <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
+                          {L.section('personalInfo', 'THÔNG TIN ĐẠI BIỂU ĐĂNG KÝ', 'DELEGATE PERSONAL INFORMATION')}
+                        </h3>
                       </div>
-                      <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
-                        <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
-                          {L.f('avatar', 'Ảnh Chân Dung / Avatar *', 'Portrait Photo *')}
-                        </span>
-                        <p className="text-[10px] text-slate-500 leading-snug">
-                          {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt tức thì.', 'Recommended clear face portrait for instant facial recognition check-in.')}
-                        </p>
-                        <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
-                          <div 
-                            role="button"
-                            onClick={() => avatarInputRef.current?.click()}
-                            className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
-                          >
-                            {L.t('Tải ảnh chân dung', 'Upload Portrait')}
-                            <input 
-                              ref={avatarInputRef}
-                              type="file" 
-                              accept="image/*" 
-                              onChange={handleAvatarUpload} 
-                              className="hidden" 
-                            />
-                          </div>
-                          {avatarImage && (
-                            <button
-                              type="button"
-                              onClick={() => setAvatarImage(null)}
-                              className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
-                            >
-                              {L.t('Xóa', 'Remove')}
-                            </button>
+
+                      {/* Avatar Section */}
+                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
+                          {avatarImage ? (
+                            <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
+                          ) : (
+                            <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
+                              {L.t('Chưa có ảnh', 'No Photo')}
+                            </span>
                           )}
+                          {isAvatarUploading && (
+                            <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
+                              Loading...
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
+                          <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
+                            {L.f('avatar', 'Ảnh Chân Dung / Avatar *', 'Portrait Photo *')}
+                          </span>
+                          <p className="text-[10px] text-slate-500 leading-snug">
+                            {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt tức thì.', 'Recommended clear face portrait for instant facial recognition check-in.')}
+                          </p>
+                          <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
+                            <div 
+                              role="button"
+                              onClick={() => avatarInputRef.current?.click()}
+                              className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
+                            >
+                              {L.t('Tải ảnh chân dung', 'Upload Portrait')}
+                              <input 
+                                ref={avatarInputRef}
+                                type="file" 
+                                accept="image/*" 
+                                onChange={handleAvatarUpload} 
+                                className="hidden" 
+                              />
+                            </div>
+                            {avatarImage && (
+                              <button
+                                type="button"
+                                onClick={() => setAvatarImage(null)}
+                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
+                              >
+                                {L.t('Xóa', 'Remove')}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Title & Name */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="md:col-span-4">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('academicTitle', 'Học hàm / Học vị *', 'Academic Title *')}
+                          </label>
+                          <select
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-medium focus:border-teal-600 focus:outline-none focus:bg-white transition-all cursor-pointer"
+                          >
+                            <option value="GS.TS.BS">{L.t('GS.TS.BS (Giáo sư Tiến sĩ Bác sĩ)', 'Prof. Dr. Med.')}</option>
+                            <option value="PGS.TS.BS">{L.t('PGS.TS.BS (Phó Giáo sư Tiến sĩ Bác sĩ)', 'Assoc. Prof. Dr. Med.')}</option>
+                            <option value="TS.BS">{L.t('TS.BS (Tiến sĩ Bác sĩ)', 'Dr. Med. / PhD')}</option>
+                            <option value="ThS.BS">{L.t('ThS.BS (Thạc sĩ Bác sĩ)', 'M.Med. / Master')}</option>
+                            <option value="BSCK1">{L.t('BSCK1 (Bác sĩ Chuyên khoa I)', 'Specialist I')}</option>
+                            <option value="BSCK2">{L.t('BSCK2 (Bác sĩ Chuyên khoa II)', 'Specialist II')}</option>
+                            <option value="BSNT">{L.t('BSNT (Bác sĩ Nội trú)', 'Resident Physician')}</option>
+                            <option value="BS">{L.t('BS (Bác sĩ)', 'MD (Medical Doctor)')}</option>
+                            <option value="Đại biểu">{L.t('Khác... (Đại biểu/Khác)', 'Other / Delegate')}</option>
+                          </select>
+                        </div>
+
+                        <div className="md:col-span-8">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('fullName', 'Họ và Tên (In hoa có dấu) *', 'Full Name (Capitalized) *')}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value.toUpperCase())}
+                            placeholder={L.p('ví dụ: NGUYỄN VĂN A', 'e.g. NGUYEN VAN A')}
+                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold focus:border-teal-600 focus:outline-none focus:bg-white uppercase tracking-wider transition-all placeholder-slate-400"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Year of Birth & Contact details */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="md:col-span-4">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('yearOfBirth', 'Năm sinh *', 'Year of Birth *')}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            maxLength={4}
+                            value={yearOfBirth}
+                            onChange={(e) => setYearOfBirth(e.target.value.replace(/D/g, ''))}
+                            placeholder={L.p('ví dụ: 1988', 'e.g. 1988')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400"
+                          />
+                          <span className="text-[10px] text-slate-400 mt-1 block">
+                            {L.t('Cần thiết cho chứng chỉ CME', 'Required for CME certification')}
+                          </span>
+                        </div>
+
+                        <div className="md:col-span-4">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('phone', 'Số điện thoại di động *', 'Contact Phone Number *')}
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                            placeholder={L.p('ví dụ: 0912345678', 'e.g. 0912345678')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400 animate-fade-in"
+                          />
+                          <span className="text-[10px] text-slate-400 mt-1 block">
+                            {L.t('Zalo OA dùng để gửi vé QR tự động', 'Zalo OA for automated QR ticket sending')}
+                          </span>
+                        </div>
+
+                        <div className="md:col-span-4">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('email', 'Địa chỉ Email nhận vé & CME *', 'Email for Ticket & CME *')}
+                          </label>
+                          <input
+                            type="email"
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder={L.p('ví dụ: bacsi.nguyen@gmail.com', 'e.g. doctor@gmail.com')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Workplace */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                        <div className="md:col-span-12">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('workplace', 'Đơn vị công tác (Bệnh viện/Khoa Y/Viện thẩm mỹ) *', 'Workplace (Hospital/Medical School/Clinic) *')}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={organization}
+                            onChange={(e) => setOrganization(e.target.value)}
+                            placeholder={L.p('ví dụ: Bệnh viện Chợ Rẫy', 'e.g. Cho Ray Hospital')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address */}
+                      <div className="grid grid-cols-1 gap-4">
+                        <div className="col-span-1">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.f('address', 'Địa chỉ liên hệ *', 'Contact Address *')}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
+                            placeholder={L.p('ví dụ: Phường Thảo Điền, Thành phố Thủ Đức, Hồ Chí Minh', 'e.g. Thao Dien, Thu Duc City, Ho Chi Minh City')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Title & Name */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('academicTitle', 'Học hàm / Học vị *', 'Academic Title *')}
-                        </label>
-                        <select
-                          value={title}
-                          onChange={(e) => setTitle(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-medium focus:border-teal-600 focus:outline-none focus:bg-white transition-all cursor-pointer"
-                        >
-                          <option value="GS.TS.BS">{L.t('GS.TS.BS (Giáo sư Tiến sĩ Bác sĩ)', 'Prof. Dr. Med.')}</option>
-                          <option value="PGS.TS.BS">{L.t('PGS.TS.BS (Phó Giáo sư Tiến sĩ Bác sĩ)', 'Assoc. Prof. Dr. Med.')}</option>
-                          <option value="TS.BS">{L.t('TS.BS (Tiến sĩ Bác sĩ)', 'Dr. Med. / PhD')}</option>
-                          <option value="ThS.BS">{L.t('ThS.BS (Thạc sĩ Bác sĩ)', 'M.Med. / Master')}</option>
-                          <option value="BSCK1">{L.t('BSCK1 (Bác sĩ Chuyên khoa I)', 'Specialist I')}</option>
-                          <option value="BSCK2">{L.t('BSCK2 (Bác sĩ Chuyên khoa II)', 'Specialist II')}</option>
-                          <option value="BSNT">{L.t('BSNT (Bác sĩ Nội trú)', 'Resident Physician')}</option>
-                          <option value="BS">{L.t('BS (Bác sĩ)', 'MD (Medical Doctor)')}</option>
-                          <option value="Đại biểu">{L.t('Khác... (Đại biểu/Khác)', 'Other / Delegate')}</option>
-                        </select>
+                    {/* STEP 2: CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ */}
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
+                        <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">02</span>
+                        <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
+                          {L.section('package', 'CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ', 'CONFERENCE REGISTRATION PACKAGE')}
+                        </h3>
                       </div>
 
-                      <div className="md:col-span-8">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('fullName', 'Họ và Tên (In hoa có dấu) *', 'Full Name (Capitalized) *')}
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value.toUpperCase())}
-                          placeholder={L.p('ví dụ: NGUYỄN VĂN A', 'e.g. NGUYEN VAN A')}
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold focus:border-teal-600 focus:outline-none focus:bg-white uppercase tracking-wider transition-all placeholder-slate-400"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Year of Birth & Contact details */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('yearOfBirth', 'Năm sinh *', 'Year of Birth *')}
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          maxLength={4}
-                          value={yearOfBirth}
-                          onChange={(e) => setYearOfBirth(e.target.value.replace(/\D/g, ''))}
-                          placeholder={L.p('ví dụ: 1988', 'e.g. 1988')}
-                          className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400"
-                        />
-                        <span className="text-[10px] text-slate-400 mt-1 block">
-                          {L.t('Cần thiết cho chứng chỉ CME', 'Required for CME certification')}
-                        </span>
-                      </div>
-
-                      <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('phone', 'Số điện thoại di động *', 'Contact Phone Number *')}
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder={L.p('ví dụ: 0912345678', 'e.g. 0912345678')}
-                          className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400 animate-fade-in"
-                        />
-                        <span className="text-[10px] text-slate-400 mt-1 block">
-                          {L.t('Zalo OA dùng để gửi vé QR tự động', 'Zalo OA for automated QR ticket sending')}
-                        </span>
-                      </div>
-
-                      <div className="md:col-span-4">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('email', 'Địa chỉ Email nhận vé & CME *', 'Email for Ticket & CME *')}
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder={L.p('ví dụ: bacsi.nguyen@gmail.com', 'e.g. doctor@gmail.com')}
-                          className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Workplace */}
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                      <div className="md:col-span-12">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('workplace', 'Đơn vị công tác (Bệnh viện/Khoa Y/Viện thẩm mỹ) *', 'Workplace (Hospital/Medical School/Clinic) *')}
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={organization}
-                          onChange={(e) => setOrganization(e.target.value)}
-                          placeholder={L.p('ví dụ: Bệnh viện Chợ Rẫy', 'e.g. Cho Ray Hospital')}
-                          className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Address */}
-                    <div className="grid grid-cols-1 gap-4">
-                      <div className="col-span-1">
-                        <label className="block text-xs font-bold text-slate-700 mb-1">
-                          {L.f('address', 'Địa chỉ liên hệ *', 'Contact Address *')}
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={address}
-                          onChange={(e) => setAddress(e.target.value)}
-                          placeholder={L.p('ví dụ: Phường Thảo Điền, Thành phố Thủ Đức, Hồ Chí Minh', 'e.g. Thao Dien, Thu Duc City, Ho Chi Minh City')}
-                          className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
-                        />
-                      </div>
-                    </div>
-
-                  </div>
-
-                {/* STEP 2: CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ */}
-                <div className="space-y-6 mt-8">
-                    <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
-                      <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">02</span>
-                      <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-                        {L.section('package', 'CHỌN GÓI ĐĂNG KÝ HỘI NGHỊ', 'CONFERENCE REGISTRATION PACKAGE')}
-                      </h3>
-                    </div>
-
-
-
-                    <div className={`grid grid-cols-1 gap-5 ${nationality === 'foreign' ? 'md:grid-cols-1 max-w-md mx-auto w-full' : 'md:grid-cols-3'
-                      }`}>
-                      {packages
-                        .filter((pkg) => {
-                          if (nationality === 'vietname') {
-                            return pkg.id === 'pkg-member' || pkg.id === 'pkg-standard' || pkg.id === 'pkg-student';
-                          } else {
-                            return pkg.id === 'pkg-foreign';
-                          }
-                        })
-                        .map((pkg) => {
-                          const isSelected = packageId === pkg.id;
-                          const currentPkgPrice = pkg.fee;
-                          return (
-                            <label
-                              key={pkg.id}
-                              onClick={() => handleSelectPackage(pkg.id)}
-                              className={`p-5 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all relative ${isSelected
-                                ? 'bg-teal-50/40 border-teal-600 ring-2 ring-teal-600/20 shadow-lg'
-                                : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm'
-                                }`}
-                            >
-                              <div className="space-y-3">
-                                <div className="flex items-center justify-between">
-                                  <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${pkg.id === 'pkg-member' ? 'bg-indigo-100 text-indigo-850 border border-indigo-200' :
-                                    pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
-                                    }`}>
-                                    {pkg.id === 'pkg-member' ? L.t('Hội Viên', 'Member') :
-                                      pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
-                                        pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
-                                          pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
-                                  </span>
-                                  {isSelected && <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs">✓</span>}
-                                </div>
-
-                                <div>
-                                  <span className="font-black text-xs md:text-sm text-slate-950 block leading-tight">{pkg.name}</span>
-
-                                  <div className="flex flex-wrap gap-1 mt-1.5">
-                                    {pkg.id === 'pkg-free' ? (
-                                      <span className="px-1 py-0.2 bg-teal-50 text-teal-800 border border-teal-100 rounded text-[7.5px] font-black">{L.t('✓ MIỄN PHÍ', '✓ FREE')}</span>
-                                    ) : (
-                                      <span className="px-1 py-0.2 bg-slate-100 text-slate-400 rounded text-[7.5px] font-bold">{L.t('Phí tự chọn phụ trợ', 'Add-on fees excluded')}</span>
-                                    )}
+                      <div className="grid grid-cols-1 gap-4">
+                        {packages
+                          .filter((pkg) => {
+                            if (nationality === 'vietname') {
+                              return pkg.id === 'pkg-member' || pkg.id === 'pkg-standard' || pkg.id === 'pkg-student';
+                            } else {
+                              return pkg.id === 'pkg-foreign';
+                            }
+                          })
+                          .map((pkg) => {
+                            const isSelected = packageId === pkg.id;
+                            const currentPkgPrice = pkg.fee;
+                            return (
+                              <label
+                                key={pkg.id}
+                                onClick={() => handleSelectPackage(pkg.id)}
+                                className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all relative ${isSelected
+                                  ? 'bg-teal-50/40 border-teal-600 ring-2 ring-teal-600/20 shadow-lg'
+                                  : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm'
+                                  }`}
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${pkg.id === 'pkg-member' ? 'bg-indigo-100 text-indigo-850 border border-indigo-200' :
+                                      pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
+                                      }`}>
+                                      {pkg.id === 'pkg-member' ? L.t('Hội Viên', 'Member') :
+                                        pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
+                                          pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
+                                            pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
+                                    </span>
+                                    {isSelected && <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold">✓</span>}
                                   </div>
 
-                                  <span className="text-[9.5px] text-slate-400 block mt-3.5 uppercase font-bold tracking-wider font-mono">{L.t('QUYỀN LỢI ĐI KÈM:', 'BENEFITS INCLUDED:')}</span>
-                                  <ul className="text-[10px] text-slate-500 space-y-1.5 mt-1.5 list-disc pl-3">
-                                    {pkg.benefits.map((b, i) => (
-                                      <li key={i} className="leading-tight">{b}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              </div>
+                                  <div>
+                                    <span className="font-black text-xs md:text-sm text-slate-950 block leading-tight">{pkg.name}</span>
 
-                              <div className="font-mono font-black text-slate-950 text-base md:text-lg mt-5 border-t border-slate-100 pt-3 text-right">
-                                {pkg.id === 'pkg-foreign' ? (
-                                  <span>
-                                    ${Math.round(pkg.fee / 25000)}{' '}
-                                    <span className="text-[10px] font-normal text-slate-400 font-sans">
-                                      ({pkg.fee.toLocaleString()} VNĐ)
+                                    <div className="flex flex-wrap gap-1 mt-1">
+                                      {pkg.id === 'pkg-free' ? (
+                                        <span className="px-1 py-0.2 bg-teal-50 text-teal-800 border border-teal-100 rounded text-[7.5px] font-black">{L.t('✓ MIỄN PHÍ', '✓ FREE')}</span>
+                                      ) : (
+                                        <span className="px-1 py-0.2 bg-slate-100 text-slate-400 rounded text-[7.5px] font-bold">{L.t('Phí tự chọn phụ trợ', 'Add-on fees excluded')}</span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="font-mono font-black text-slate-950 text-sm md:text-base mt-3 border-t border-slate-100 pt-2 text-right">
+                                  {pkg.id === 'pkg-foreign' ? (
+                                    <span>
+                                      $${Math.round(pkg.fee / 25000)}{' '}
+                                      <span className="text-[10px] font-normal text-slate-400 font-sans">
+                                        ({pkg.fee.toLocaleString()} VNĐ)
+                                      </span>
                                     </span>
-                                  </span>
-                                ) : (
-                                  <span>
-                                    {currentPkgPrice.toLocaleString()}{' '}
-                                    <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
-                                  </span>
-                                )}
-                              </div>
-                            </label>
-                          );
-                        })}
+                                  ) : (
+                                    <span>
+                                      {currentPkgPrice.toLocaleString()}{' '}
+                                      <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
+                                    </span>
+                                  )}
+                                </div>
+                              </label>
+                            );
+                          })}
+                      </div>
                     </div>
+
+                    {/* CME & Gala Dinner selections */}
+                    {(() => {
+                      const leftAddOns = addOnServices.filter(svc => svc.isEnabled && (svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala')));
+                      if (leftAddOns.length === 0) return null;
+                      return (
+                        <div className="space-y-6">
+                          <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
+                            <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">03</span>
+                            <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
+                              {L.t('Cấp Chứng Chỉ CME & Gala Dinner', 'CME Certification & Gala Dinner')}
+                            </h3>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-4">
+                            {leftAddOns.map((svc) => {
+                              const isSelected = addOnSelections[svc.id] || false;
+                              const svcFee = svc.fee;
+                              const colorMap = {
+                                teal: { bg: 'bg-teal-50/40', border: 'border-teal-600', ring: 'ring-teal-600/10', text: 'text-teal-900', checkbox: 'text-teal-800' },
+                                amber: { bg: 'bg-amber-50/40', border: 'border-amber-500', ring: 'ring-amber-500/10', text: 'text-amber-850', checkbox: 'text-amber-600' },
+                                purple: { bg: 'bg-purple-50/40', border: 'border-purple-500', ring: 'ring-purple-500/10', text: 'text-purple-850', checkbox: 'text-purple-600' },
+                                pink: { bg: 'bg-pink-50/40', border: 'border-pink-500', ring: 'ring-pink-500/10', text: 'text-pink-850', checkbox: 'text-pink-600' },
+                                indigo: { bg: 'bg-indigo-50/40', border: 'border-indigo-500', ring: 'ring-indigo-500/10', text: 'text-indigo-850', checkbox: 'text-indigo-600' },
+                                rose: { bg: 'bg-rose-50/40', border: 'border-rose-500', ring: 'ring-rose-500/10', text: 'text-rose-850', checkbox: 'text-rose-600' },
+                              };
+                              const c = colorMap[svc.color || 'teal'] || colorMap.teal;
+
+                              return (
+                                <div
+                                  key={svc.id}
+                                  onClick={() => toggleAddOn(svc.id)}
+                                  className={`p-4 rounded-2xl border cursor-pointer select-none transition-all ${isSelected
+                                    ? `${c.bg} ${c.border} ring-2 ${c.ring}`
+                                    : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm hover:shadow-xs'
+                                    }`}
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        toggleAddOn(svc.id);
+                                      }}
+                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer`}
+                                    />
+                                    <div>
+                                      <span className={`text-xs font-black ${c.text} block uppercase`}>
+                                        {L.t(`${svc.nameVi} (+ ${svcFee.toLocaleString()}đ)`, `${svc.nameEn} (+ ${svcFee.toLocaleString()} VND)`)}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500 block leading-relaxed mt-0.5">
+                                        {L.t(svc.descriptionVi, svc.descriptionEn)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                   </div>
 
-                {/* STEP 3: DỊCH VỤ PHỤ TRỢ TỰ CHỌN */}
-                <div className="space-y-6 mt-8">
-                    <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
-                      <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">03</span>
-                      <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-                        {L.section('scheduleAddOns', 'DỊCH VỤ PHỤ TRỢ TỰ CHỌN', 'OPTIONAL ADD-ON SERVICES')}
-                      </h3>
-                    </div>
+                  {/* RIGHT COLUMN: other add-ons, note fields, cumulative fee panel, submit button */}
+                  <div className="lg:col-span-5 space-y-8">
 
-                    {/* Grid of Add-On Services (Dynamic from Config) */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {addOnServices.filter(svc => svc.isEnabled).map((svc) => {
-                        const isSelected = addOnSelections[svc.id] || false;
-                        const svcFee = svc.fee;
-                        const colorMap: Record<string, { bg: string; border: string; ring: string; text: string; checkbox: string }> = {
-                          teal: { bg: 'bg-teal-50/40', border: 'border-teal-600', ring: 'ring-teal-600/10', text: 'text-teal-900', checkbox: 'text-teal-800' },
-                          amber: { bg: 'bg-amber-50/40', border: 'border-amber-500', ring: 'ring-amber-500/10', text: 'text-amber-850', checkbox: 'text-amber-600' },
-                          purple: { bg: 'bg-purple-50/40', border: 'border-purple-500', ring: 'ring-purple-500/10', text: 'text-purple-850', checkbox: 'text-purple-600' },
-                          pink: { bg: 'bg-pink-50/40', border: 'border-pink-500', ring: 'ring-pink-500/10', text: 'text-pink-850', checkbox: 'text-pink-600' },
-                          indigo: { bg: 'bg-indigo-50/40', border: 'border-indigo-500', ring: 'ring-indigo-500/10', text: 'text-indigo-850', checkbox: 'text-indigo-600' },
-                          rose: { bg: 'bg-rose-50/40', border: 'border-rose-500', ring: 'ring-rose-500/10', text: 'text-rose-850', checkbox: 'text-rose-600' },
-                        };
-                        const c = colorMap[svc.color || 'teal'] || colorMap.teal;
-
-                        return (
-                          <div
-                            key={svc.id}
-                            onClick={() => toggleAddOn(svc.id)}
-                            className={`p-4 rounded-2xl border cursor-pointer select-none transition-all ${isSelected
-                              ? `${c.bg} ${c.border} ring-2 ${c.ring}`
-                              : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
-                              }`}
-                          >
-                            <div className="flex items-start gap-4">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  toggleAddOn(svc.id);
-                                }}
-                                className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer`}
-                              />
-                              <div>
-                                <span className={`text-xs font-black ${c.text} block uppercase`}>
-                                  {L.t(`${svc.nameVi} (+ ${svcFee.toLocaleString()}đ)`, `${svc.nameEn} (+ ${svcFee.toLocaleString()} VND)`)}
-                                </span>
-                                <span className="text-[10px] text-slate-500 block leading-relaxed mt-0.5">
-                                  {L.t(svc.descriptionVi, svc.descriptionEn)}
-                                </span>
-                              </div>
-                            </div>
+                    {/* Other services */}
+                    {(() => {
+                      const rightAddOns = addOnServices.filter(svc => svc.isEnabled && !(svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala')));
+                      if (rightAddOns.length === 0) return null;
+                      return (
+                        <div className="space-y-6">
+                          <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
+                            <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">04</span>
+                            <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
+                              {L.t('Dịch Vụ Phụ Trợ Khác', 'Other Optional Services')}
+                            </h3>
                           </div>
-                        );
-                      })}
-                    </div>
+
+                          <div className="grid grid-cols-1 gap-4">
+                            {rightAddOns.map((svc) => {
+                              const isSelected = addOnSelections[svc.id] || false;
+                              const svcFee = svc.fee;
+                              const colorMap = {
+                                teal: { bg: 'bg-teal-50/40', border: 'border-teal-600', ring: 'ring-teal-600/10', text: 'text-teal-900', checkbox: 'text-teal-800' },
+                                amber: { bg: 'bg-amber-50/40', border: 'border-amber-500', ring: 'ring-amber-500/10', text: 'text-amber-850', checkbox: 'text-amber-600' },
+                                purple: { bg: 'bg-purple-50/40', border: 'border-purple-500', ring: 'ring-purple-500/10', text: 'text-purple-850', checkbox: 'text-purple-600' },
+                                pink: { bg: 'bg-pink-50/40', border: 'border-pink-500', ring: 'ring-pink-500/10', text: 'text-pink-850', checkbox: 'text-pink-600' },
+                                indigo: { bg: 'bg-indigo-50/40', border: 'border-indigo-500', ring: 'ring-indigo-500/10', text: 'text-indigo-850', checkbox: 'text-indigo-600' },
+                                rose: { bg: 'bg-rose-50/40', border: 'border-rose-500', ring: 'ring-rose-500/10', text: 'text-rose-850', checkbox: 'text-rose-600' },
+                              };
+                              const c = colorMap[svc.color || 'teal'] || colorMap.teal;
+
+                              return (
+                                <div
+                                  key={svc.id}
+                                  onClick={() => toggleAddOn(svc.id)}
+                                  className={`p-4 rounded-2xl border cursor-pointer select-none transition-all ${isSelected
+                                    ? `${c.bg} ${c.border} ring-2 ${c.ring}`
+                                    : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm hover:shadow-xs'
+                                    }`}
+                                >
+                                  <div className="flex items-start gap-4">
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={(e) => {
+                                        e.stopPropagation();
+                                        toggleAddOn(svc.id);
+                                      }}
+                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer`}
+                                    />
+                                    <div>
+                                      <span className={`text-xs font-black ${c.text} block uppercase`}>
+                                        {L.t(`${svc.nameVi} (+ ${svcFee.toLocaleString()}đ)`, `${svc.nameEn} (+ ${svcFee.toLocaleString()} VND)`)}
+                                      </span>
+                                      <span className="text-[10px] text-slate-500 block leading-relaxed mt-0.5">
+                                        {L.t(svc.descriptionVi, svc.descriptionEn)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
                     {/* Note fields */}
-                    <div>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
+                        <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">
+                          {addOnServices.filter(svc => svc.isEnabled && !(svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala'))).length > 0 ? '05' : '04'}
+                        </span>
+                        <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
+                          {L.t('Yêu Cầu Đặc Biệt', 'Special Requests')}
+                        </h3>
+                      </div>
                       <RichTextEditor
                         value={notes}
                         onChange={setNotes}
                         label={L.f('notes', 'Ghi chú yêu cầu đặc biệt khác cho BTC', 'Special notes or request for Organizer')}
-                        placeholder={L.p('ví dụ: Đóng gói ăn chay, Xuất hóa đơn đỏ cho cơ quan bệnh viện công (ghi rõ MST, Tên tổ chức)...', 'e.g. Vegetarian meal request, Invoice request with Tax code and Organization name...')}
+                        placeholder={L.p('ví dụ: Đóng gói ăn chay, Xuất hóa đơn đỏ cho cơ quan bệnh viện công (ghi rõ MST, Tên tổ chức)...', 'e.g. Vegetarian meal, Invoice details (Tax code, Name)...')}
                         id="delegate-notes"
                       />
                     </div>
@@ -1224,15 +1270,18 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                         id="btn-submit-delegate"
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-8 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
+                        className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
                         {isSubmitting ? L.t('Đang gửi thông tin đăng ký...', 'Submitting registration details...') : L.t('Xác Nhận Đăng Ký & Đi Đến Thanh Toán ⚡', 'Confirm Registration & Go to Payment ⚡')}
                       </button>
                     </div>
+
                   </div>
 
-              </form>
+                </div>
+
+            </form>
 
               {/* Footer Note from config */}
               {formCfg?.footerNote && (

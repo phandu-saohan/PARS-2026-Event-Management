@@ -1170,7 +1170,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </p>
           </div>
 
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <PublicDelegateRegister onNavigate={onNavigate} isInline={true} />
           </div>
         </div>
