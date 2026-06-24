@@ -66,7 +66,7 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ role }: SettingsPanelProps) {
   // Navigation tab state
-  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'roles' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup'>('business');
+  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'roles' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup' | 'landing-page'>('business');
   const [formActiveSection, setFormActiveSection] = useState<'delegate' | 'speaker' | 'sponsor'>('delegate');
 
   // Printer config states (saved to localStorage for device-specific setup)
@@ -1413,6 +1413,19 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
           >
             <span className="shrink-0 text-base">💾</span>
             <span>Sao Lưu & Phục Hồi</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSubTab('landing-page')}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border-none ${
+              activeSubTab === 'landing-page'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-slate-150 hover:text-slate-900 bg-transparent'
+            }`}
+          >
+            <Globe className="w-4 h-4 shrink-0" />
+            <span>🌐 Cài đặt Trang Tin Sự Kiện</span>
           </button>
 
           {/* Quick diagnostic tips */}
@@ -5068,6 +5081,745 @@ ON CONFLICT (code) DO UPDATE SET
               </div>
             </div>
           )}
+
+          {/* ================= SECTION 13: EVENT LANDING PAGE SETTINGS ================= */}
+          {activeSubTab === 'landing-page' && (
+            <div className="space-y-6 text-slate-850">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide">Cài Đặt Trang Tin Sự Kiện</h3>
+                  <p className="text-[11px] text-slate-455 mt-0.5">Thay đổi thông tin hình ảnh theo từng section và các phần tử có trong section của trang chủ hội nghị.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await store.saveBusinessConfig(businessConfig);
+                      alert('Đã cập nhật toàn bộ cấu hình trang tin sự kiện lưu vào database thành công!');
+                      reloadData();
+                    } catch (err) {
+                      alert('Không thể lưu cấu hình: ' + (err.message || err));
+                    }
+                  }}
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-xl transition-all text-xs border-none cursor-pointer flex items-center gap-1.5 shadow-md shadow-slate-900/10"
+                >
+                  💾 Lưu Toàn Bộ Cấu Hình
+                </button>
+              </div>
+
+              {/* 1. HERO BANNER SECTION CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-bold">
+                    🚀
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 1: Hero Banner (Banner chính chào mừng)</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Thay đổi hình nền lớn full screen và các thông tin tiêu đề, nút hành động, thời gian địa điểm canh giữa.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Hero Background Image */}
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[11px] font-bold text-slate-500 block">Ảnh nền Full Screen (Phong cảnh/Landmarks Hà Nội) *</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-3 border border-slate-200 rounded-xl">
+                      <div className="w-24 h-16 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingLandmarksUrl ? (
+                          <img src={businessConfig.landingLandmarksUrl} alt="Hero Background" className="w-full h-full object-cover" />
+                        ) : (
+                          <img src="/media__1782198647752.png" alt="Mặc định" className="w-full h-full object-cover opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên hình nền mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingLandmarksUrl: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingLandmarksUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingLandmarksUrl: '' })}
+                            className="px-2.5 py-1.5 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục mặc định
+                          </button>
+                        )}
+                        <p className="text-[9px] text-slate-400 mt-1">Nên sử dụng ảnh độ phân giải cao (từ Full HD 1920x1080) và nằm ngang.</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tag label */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Nhãn phụ phía trên (Tag line) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.tag || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), tag: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="HỘI NGHỊ KHOA HỌC QUỐC TẾ"
+                    />
+                  </div>
+
+                  {/* Conference title name */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Tên Hội Nghi Phía Trước (vd: PARS) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.title || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), title: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="PARS"
+                    />
+                  </div>
+
+                  {/* Year */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Năm Hội Nghị (Màu vàng đồng - vd: 2026) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.year || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), year: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="2026"
+                    />
+                  </div>
+
+                  {/* English Theme */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Chủ đề (Tiếng Anh) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.themeEn || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), themeEn: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="PLASTIC & AESTHETIC REGENERATIVE SURGERY"
+                    />
+                  </div>
+
+                  {/* Vietnamese Theme */}
+                  <div className="space-y-1 md:col-span-2">
+                    <label className="text-[11px] font-bold text-slate-500 block">Chủ đề (Tiếng Việt) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.themeVi || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), themeVi: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh"
+                    />
+                  </div>
+
+                  {/* Button Register Text */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Nhãn nút "Đăng ký ngay" *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.btnRegisterText || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), btnRegisterText: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="Đăng ký ngay"
+                    />
+                  </div>
+
+                  {/* Button Program Text */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Nhãn nút "Chương trình hội nghị" *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.btnProgramText || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), btnProgramText: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="Chương trình hội nghị"
+                    />
+                  </div>
+
+                  {/* Date organizer */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Thời gian tổ chức (vd: 12 - 13 THÁNG 09, 2026) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.date || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), date: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="12 - 13 THÁNG 09, 2026"
+                    />
+                  </div>
+
+                  {/* Location organizer */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Địa điểm tổ chức (vd: MELIÀ HANOI, HÀ NỘI...) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.hero?.location || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            hero: { ...(sections.hero || {}), location: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="MELIÀ HANOI, HÀ NỘI, VIỆT NAM"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. INTRODUCE SECTION CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center text-sm font-bold">
+                    📝
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 2: Giới thiệu hội nghị (Introduce)</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Thay đổi tiêu đề giới thiệu hội nghị, các đoạn văn bản mô tả và 3 điểm nhấn uy tín đi kèm dấu check.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Title of Intro */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Tiêu đề Section giới thiệu *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.intro?.title || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            intro: { ...(sections.intro || {}), title: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="GIỚI THIỆU HỘI NGHỊ"
+                    />
+                  </div>
+
+                  {/* Text 1 */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Đoạn văn mô tả 1 (Giới thiệu chính) *</label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 leading-relaxed"
+                      value={businessConfig.landingPageSections?.intro?.text1 || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            intro: { ...(sections.intro || {}), text1: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="Hội nghị Khoa học Quốc tế PARS 2026..."
+                    />
+                  </div>
+
+                  {/* Text 2 */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Đoạn văn mô tả 2 (Cập nhật tiến bộ lâm sàng) *</label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 leading-relaxed"
+                      value={businessConfig.landingPageSections?.intro?.text2 || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            intro: { ...(sections.intro || {}), text2: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="Hội nghị tập trung cập nhật các tiến bộ lâm sàng..."
+                    />
+                  </div>
+
+                  {/* 3 Highlight Blocks */}
+                  <div className="border-t border-slate-100 pt-3 space-y-3">
+                    <span className="text-[10.5px] font-extrabold text-slate-600 block uppercase tracking-wide">3 Điểm nhấn uy tín (Highlights)</span>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Highlight 1 */}
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-150 space-y-2">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Điểm nhấn 1</span>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề điểm nhấn</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.highlight1Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight1Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Đơn vị chủ trì uy tín"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả chi tiết</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.highlight1Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight1Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Bệnh viện Thẩm mỹ EMCAS..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Highlight 2 */}
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-150 space-y-2">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Điểm nhấn 2</span>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề điểm nhấn</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.highlight2Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight2Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Chứng chỉ CME 4.5h"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả chi tiết</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.highlight2Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight2Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Cấp chứng nhận đào tạo..."
+                          />
+                        </div>
+                      </div>
+
+                      {/* Highlight 3 */}
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-150 space-y-2">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Điểm nhấn 3</span>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề điểm nhấn</label>
+                          <input
+                            type="text"
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.highlight3Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight3Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Giao lưu chuyên gia đa quốc gia"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả chi tiết</label>
+                          <textarea
+                            rows={2}
+                            className="w-full px-2 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.highlight3Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), highlight3Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Cơ hội đối thoại trực tiếp..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. IMAGES & POSTER SLIDES SECTION CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-bold">
+                    🖼️
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 3: Tài nguyên hình ảnh & Slides khác</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Thay đổi logo hội nghị hiển thị ở thanh điều hướng và 4 slide poster thông tin chính thức.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Conference Logo */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Logo chính thức (Header & Hero) *</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingLogoUrl ? (
+                          <img src={businessConfig.landingLogoUrl} alt="Logo Landing" className="w-full h-full object-contain" />
+                        ) : (
+                          <img src="/media__1782106316692.png" alt="Logo Mặc định" className="w-full h-full object-contain opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên logo mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingLogoUrl: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingLogoUrl && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingLogoUrl: '' })}
+                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Slide 1: Báo cáo viên nước ngoài */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 1 (Báo cáo viên nước ngoài)</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingSlide1Url ? (
+                          <img src={businessConfig.landingSlide1Url} alt="Slide 1" className="w-full h-full object-contain" />
+                        ) : (
+                          <img src="/media__1782198647504.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên hình mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingSlide1Url: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingSlide1Url && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide1Url: '' })}
+                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Slide 2: Báo cáo viên trong nước */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-555 block">Poster Slide 2 (Báo cáo viên trong nước)</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingSlide2Url ? (
+                          <img src={businessConfig.landingSlide2Url} alt="Slide 2" className="w-full h-full object-contain" />
+                        ) : (
+                          <img src="/media__1782198647541.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên hình mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingSlide2Url: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingSlide2Url && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide2Url: '' })}
+                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Slide 3: Chương trình khoa học */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 3 (Chương trình khoa học)</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingSlide3Url ? (
+                          <img src={businessConfig.landingSlide3Url} alt="Slide 3" className="w-full h-full object-contain" />
+                        ) : (
+                          <img src="/media__1782198647557.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên hình mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingSlide3Url: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingSlide3Url && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide3Url: '' })}
+                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Slide 4: Thư mời hội nghị */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 4 (Thư mời hội nghị)</label>
+                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                        {businessConfig.landingSlide4Url ? (
+                          <img src={businessConfig.landingSlide4Url} alt="Slide 4" className="w-full h-full object-contain" />
+                        ) : (
+                          <img src="/media__1782198647776.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
+                          Tải lên hình mới
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const reader = new FileReader();
+                                reader.onloadend = () => {
+                                  setBusinessConfig({ ...businessConfig, landingSlide4Url: reader.result });
+                                };
+                                reader.readAsDataURL(file);
+                              }
+                            }}
+                          />
+                        </label>
+                        {businessConfig.landingSlide4Url && (
+                          <button
+                            type="button"
+                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide4Url: '' })}
+                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                          >
+                            Khôi phục
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom Action Button */}
+              <div className="flex justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    try {
+                      await store.saveBusinessConfig(businessConfig);
+                      alert('Đã cập nhật toàn bộ cấu hình trang tin sự kiện lưu vào database thành công!');
+                      reloadData();
+                    } catch (err) {
+                      alert('Không thể lưu cấu hình: ' + (err.message || err));
+                    }
+                  }}
+                  className="px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-2xl transition-all text-xs border-none cursor-pointer flex items-center gap-2 shadow-lg shadow-slate-900/10"
+                >
+                  💾 Lưu Toàn Bộ Cấu Hồi Trang Tin
+                </button>
+              </div>
+            </div>
+          )}
+
 
           {/* Modals or other subtab containers */}
         </div>

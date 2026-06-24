@@ -463,6 +463,7 @@ export function mapBusinessConfigToDb(c: BusinessConfig): Record<string, any> {
     landing_slide2_url: c.landingSlide2Url || '',
     landing_slide3_url: c.landingSlide3Url || '',
     landing_slide4_url: c.landingSlide4Url || '',
+    landing_page_sections: c.landingPageSections || null,
   };
 }
 
@@ -496,6 +497,7 @@ export function mapDbToBusinessConfig(row: any): BusinessConfig {
     landingSlide2Url: row.landing_slide2_url || '',
     landingSlide3Url: row.landing_slide3_url || '',
     landingSlide4Url: row.landing_slide4_url || '',
+    landingPageSections: row.landing_page_sections || undefined,
   };
 }
 

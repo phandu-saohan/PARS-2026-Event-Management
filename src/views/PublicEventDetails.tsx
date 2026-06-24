@@ -266,6 +266,29 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const sponsors = store.getSponsors();
   const packages = store.getPackages().filter(p => p.isActive);
   const businessConfig = store.getBusinessConfig();
+  const sections = businessConfig.landingPageSections || {};
+  
+  // Hero section dynamic elements with fallbacks
+  const heroTag = sections.hero?.tag || "HỘI NGHỊ KHOA HỌC QUỐC TẾ";
+  const heroTitle = sections.hero?.title || "PARS";
+  const heroYear = sections.hero?.year || "2026";
+  const heroThemeEn = sections.hero?.themeEn || "PLASTIC & AESTHETIC REGENERATIVE SURGERY";
+  const heroThemeVi = sections.hero?.themeVi || "Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh";
+  const heroDate = sections.hero?.date || "12 - 13 THÁNG 09, 2026";
+  const heroLocation = sections.hero?.location || "MELIÀ HANOI, HÀ NỘI, VIỆT NAM";
+  const heroBtnRegisterText = sections.hero?.btnRegisterText || "Đăng ký ngay";
+  const heroBtnProgramText = sections.hero?.btnProgramText || "Chương trình hội nghị";
+
+  // Intro section dynamic elements with fallbacks
+  const introTitle = sections.intro?.title || "GIỚI THIỆU HỘI NGHỊ";
+  const introText1 = sections.intro?.text1 || "Hội nghị Khoa học Quốc tế PARS 2026 do Bệnh viện Thẩm mỹ EMCAS đăng cai tổ chức là sự kiện y khoa đỉnh cao quy tụ dàn chuyên gia thẩm mỹ uy tín hàng đầu toàn cầu (ISAPS, ASPS, EURAPS) và Việt Nam.";
+  const introText2 = sections.intro?.text2 || "Hội nghị tập trung cập nhật các tiến bộ lâm sàng vượt bậc, chuyển giao công nghệ phẫu thuật tạo hình vóc dáng nâng cao, trẻ hóa vùng kín, nâng mũi sụn sườn cấu trúc và kiểm soát toàn diện rủi ro túi ngực (BIA-ALCL).";
+  const introHighlight1Title = sections.intro?.highlight1Title || "Đơn vị chủ trì uy tín";
+  const introHighlight1Desc = sections.intro?.highlight1Desc || "Bệnh viện Thẩm mỹ EMCAS sở hữu đầy đủ thẩm quyền chuyên môn và chất lượng dịch vụ chuẩn quốc tế.";
+  const introHighlight2Title = sections.intro?.highlight2Title || "Chứng chỉ CME 4.5h";
+  const introHighlight2Desc = sections.intro?.highlight2Desc || "Cấp chứng nhận đào tạo liên tục y khoa theo quy định của Bộ Y tế, do Bác sĩ Phạm Xuân Khiêm ký duyệt.";
+  const introHighlight3Title = sections.intro?.highlight3Title || "Giao lưu chuyên gia đa quốc gia";
+  const introHighlight3Desc = sections.intro?.highlight3Desc || "Cơ hội đối thoại trực tiếp và học tập kinh nghiệm thực chiến từ các Giáo sư hàng đầu Hoa Kỳ, Nhật Bản, Thụy Điển, Mexico.";
 
   // Resolve configured images or fall back to defaults
   const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
@@ -645,22 +668,22 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="flex flex-col items-center space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest mb-2">
               <Sparkles className="w-3 h-3 animate-pulse" />
-              HỘI NGHỊ KHOA HỌC QUỐC TẾ
+              {heroTag}
             </div>
             
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline justify-center">
-              <span className="text-white">PARS</span>
-              <span className="text-[#C59B27] ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">2026</span>
+              <span className="text-white">{heroTitle}</span>
+              <span className="text-[#C59B27] ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">{heroYear}</span>
             </h1>
           </div>
 
           {/* Theme / Subject */}
           <div className="max-w-4xl space-y-2 mx-auto">
             <p className="text-base md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
-              PLASTIC & AESTHETIC REGENERATIVE SURGERY
+              {heroThemeEn}
             </p>
             <p className="text-xs md:text-base lg:text-lg font-sans font-semibold text-slate-300 tracking-wide uppercase opacity-90">
-              Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh
+              {heroThemeVi}
             </p>
           </div>
 
@@ -670,7 +693,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               onClick={() => scrollToSection('register')}
               className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center gap-2.5 cursor-pointer border-none"
             >
-              <span>Đăng ký ngay</span>
+              <span>{heroBtnRegisterText}</span>
               <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
             </button>
             
@@ -679,7 +702,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center gap-2.5 cursor-pointer backdrop-blur-md"
             >
               <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
-              <span>Chương trình hội nghị</span>
+              <span>{heroBtnProgramText}</span>
             </button>
           </div>
 
@@ -687,11 +710,11 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="flex flex-wrap items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
               <Calendar className="w-4.5 h-4.5 text-amber-400" />
-              <span>12 - 13 THÁNG 09, 2026</span>
+              <span>{heroDate}</span>
             </div>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
               <MapPin className="w-4.5 h-4.5 text-rose-400" />
-              <span>MELIÀ HANOI, HÀ NỘI, VIỆT NAM</span>
+              <span>{heroLocation}</span>
             </div>
           </div>
 
@@ -707,13 +730,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
             <div className="w-12 h-1 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-full" />
             <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">
-              GIỚI THIỆU HỘI NGHỊ
+              {introTitle}
             </h3>
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
-              Hội nghị Khoa học Quốc tế PARS 2026 do <strong>Bệnh viện Thẩm mỹ EMCAS</strong> đăng cai tổ chức là sự kiện y khoa đỉnh cao quy tụ dàn chuyên gia thẩm mỹ uy tín hàng đầu toàn cầu (ISAPS, ASPS, EURAPS) và Việt Nam.
+              {introText1}
             </p>
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
-              Hội nghị tập trung cập nhật các tiến bộ lâm sàng vượt bậc, chuyển giao công nghệ phẫu thuật tạo hình vóc dáng nâng cao, trẻ hóa vùng kín, nâng mũi sụn sườn cấu trúc và kiểm soát toàn diện rủi ro túi ngực (BIA-ALCL).
+              {introText2}
             </p>
 
             {/* Bullet Highlights */}
@@ -721,22 +744,22 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">Đơn vị chủ trì uy tín</span>
-                  <p className="text-xs text-slate-500">Bệnh viện Thẩm mỹ EMCAS sở hữu đầy đủ thẩm quyền chuyên môn và chất lượng dịch vụ chuẩn quốc tế.</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight1Title}</span>
+                  <p className="text-xs text-slate-500">{introHighlight1Desc}</p>
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">Chứng chỉ CME 4.5h</span>
-                  <p className="text-xs text-slate-500">Cấp chứng nhận đào tạo liên tục y khoa theo quy định của Bộ Y tế, do Bác sĩ Phạm Xuân Khiêm ký duyệt.</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight2Title}</span>
+                  <p className="text-xs text-slate-500">{introHighlight2Desc}</p>
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">Giao lưu chuyên gia đa quốc gia</span>
-                  <p className="text-xs text-slate-500">Cơ hội đối thoại trực tiếp và học tập kinh nghiệm thực chiến từ các Giáo sư hàng đầu Hoa Kỳ, Nhật Bản, Thụy Điển, Mexico.</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight3Title}</span>
+                  <p className="text-xs text-slate-500">{introHighlight3Desc}</p>
                 </div>
               </div>
             </div>

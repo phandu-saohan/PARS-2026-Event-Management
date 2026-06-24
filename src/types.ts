@@ -494,6 +494,32 @@ export interface BusinessConfig {
   landingSlide2Url?: string;
   landingSlide3Url?: string;
   landingSlide4Url?: string;
+  landingPageSections?: LandingPageSections;
+}
+
+export interface LandingPageSections {
+  hero?: {
+    tag?: string;
+    title?: string;
+    year?: string;
+    themeEn?: string;
+    themeVi?: string;
+    date?: string;
+    location?: string;
+    btnRegisterText?: string;
+    btnProgramText?: string;
+  };
+  intro?: {
+    title?: string;
+    text1?: string;
+    text2?: string;
+    highlight1Title?: string;
+    highlight1Desc?: string;
+    highlight2Title?: string;
+    highlight2Desc?: string;
+    highlight3Title?: string;
+    highlight3Desc?: string;
+  };
 }
 
 

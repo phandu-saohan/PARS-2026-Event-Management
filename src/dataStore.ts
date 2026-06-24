@@ -135,6 +135,30 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   autoSendZns: true,
   requirePracticeCode: true,
   cmeTemplateConfig: DEFAULT_CME_TEMPLATE_CONFIG,
+  landingPageSections: {
+    hero: {
+      tag: "HỘI NGHỊ KHOA HỌC QUỐC TẾ",
+      title: "PARS",
+      year: "2026",
+      themeEn: "PLASTIC & AESTHETIC REGENERATIVE SURGERY",
+      themeVi: "Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh",
+      date: "12 - 13 THÁNG 09, 2026",
+      location: "MELIÀ HANOI, HÀ NỘI, VIỆT NAM",
+      btnRegisterText: "Đăng ký ngay",
+      btnProgramText: "Chương trình hội nghị"
+    },
+    intro: {
+      title: "GIỚI THIỆU HỘI NGHỊ",
+      text1: "Hội nghị Khoa học Quốc tế PARS 2026 do Bệnh viện Thẩm mỹ EMCAS đăng cai tổ chức là sự kiện y khoa đỉnh cao quy tụ dàn chuyên gia thẩm mỹ uy tín hàng đầu toàn cầu (ISAPS, ASPS, EURAPS) và Việt Nam.",
+      text2: "Hội nghị tập trung cập nhật các tiến bộ lâm sàng vượt bậc, chuyển giao công nghệ phẫu thuật tạo hình vóc dáng nâng cao, trẻ hóa vùng kín, nâng mũi sụn sườn cấu trúc và kiểm soát toàn diện rủi ro túi ngực (BIA-ALCL).",
+      highlight1Title: "Đơn vị chủ trì uy tín",
+      highlight1Desc: "Bệnh viện Thẩm mỹ EMCAS sở hữu đầy đủ thẩm quyền chuyên môn và chất lượng dịch vụ chuẩn quốc tế.",
+      highlight2Title: "Chứng chỉ CME 4.5h",
+      highlight2Desc: "Cấp chứng nhận đào tạo liên tục y khoa theo quy định của Bộ Y tế, do Bác sĩ Phạm Xuân Khiêm ký duyệt.",
+      highlight3Title: "Giao lưu chuyên gia đa quốc gia",
+      highlight3Desc: "Cơ hội đối thoại trực tiếp và học tập kinh nghiệm thực chiến từ các Giáo sư hàng đầu Hoa Kỳ, Nhật Bản, Thụy Điển, Mexico."
+    }
+  },
 
   pwaName: "PARS 2026 - Hội Nghị Khoa Học Thẩm Mỹ",
   pwaShortName: "PARS 2026",
