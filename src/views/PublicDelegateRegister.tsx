@@ -1033,13 +1033,13 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                               <label
                                 key={pkg.id}
                                 onClick={() => handleSelectPackage(pkg.id)}
-                                className={`p-4 rounded-2xl border cursor-pointer flex flex-col justify-between transition-all relative ${isSelected
+                                className={`p-4 rounded-2xl border cursor-pointer flex justify-between items-start gap-4 transition-all relative ${isSelected
                                   ? 'bg-teal-50/40 border-teal-600 ring-2 ring-teal-600/20 shadow-lg'
                                   : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm'
                                   }`}
                               >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
+                                <div className="space-y-2 flex-1 min-w-0">
+                                  <div className="flex items-center">
                                     <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${pkg.id === 'pkg-member' ? 'bg-indigo-100 text-indigo-850 border border-indigo-200' :
                                       pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
                                       }`}>
@@ -1048,7 +1048,6 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                                           pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
                                             pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
                                     </span>
-                                    {isSelected && <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold">✓</span>}
                                   </div>
 
                                   <div>
@@ -1064,18 +1063,25 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                                   </div>
                                 </div>
 
-                                <div className="font-mono font-black text-slate-950 text-sm md:text-base mt-3 border-t border-slate-100 pt-2 text-right">
-                                  {pkg.id === 'pkg-foreign' ? (
-                                    <span>
-                                      $${Math.round(pkg.fee / 25000)}{' '}
-                                      <span className="text-[10px] font-normal text-slate-400 font-sans">
-                                        ({pkg.fee.toLocaleString()} VNĐ)
+                                <div className="flex items-center gap-2 shrink-0">
+                                  <div className="font-mono font-black text-slate-950 text-sm md:text-base text-right">
+                                    {pkg.id === 'pkg-foreign' ? (
+                                      <span>
+                                        ${Math.round(pkg.fee / 25000)}{' '}
+                                        <span className="text-[10px] font-normal text-slate-400 font-sans block mt-0.5">
+                                          ({pkg.fee.toLocaleString()} VNĐ)
+                                        </span>
                                       </span>
-                                    </span>
-                                  ) : (
-                                    <span>
-                                      {currentPkgPrice.toLocaleString()}{' '}
-                                      <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
+                                    ) : (
+                                      <span>
+                                        {currentPkgPrice.toLocaleString()}{' '}
+                                        <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
+                                      </span>
+                                    )}
+                                  </div>
+                                  {isSelected && (
+                                    <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                      ✓
                                     </span>
                                   )}
                                 </div>
