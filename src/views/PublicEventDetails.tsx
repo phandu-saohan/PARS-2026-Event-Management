@@ -1018,33 +1018,33 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {FOREIGN_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[390px] hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in"
+                className="w-[290px] md:w-[330px] bg-white/5 border border-white/10 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[420px] md:h-[450px] hover:border-teal-500/40 hover:bg-white/10 transition-all group animate-fade-in text-center"
               >
-                <div className="space-y-4">
+                <div className="space-y-4 flex flex-col items-center">
+                  {/* Speaker Avatar - Large and at the top */}
+                  <div className="w-24 h-24 md:w-28 h-28 rounded-full border-2 border-teal-500/30 overflow-hidden shrink-0 bg-slate-800 shadow-lg group-hover:scale-105 transition-transform duration-200">
+                    {getSpeakerAvatar(spk.name)}
+                  </div>
+
                   {/* Country & Flag pill badge */}
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 w-fit text-[10px] text-teal-400 font-extrabold uppercase tracking-wider">
                     {getCountryFlag(spk.country)}
                     <span>{spk.country}</span>
                   </div>
 
-                  {/* Profile Layout (Avatar + Name & Role) */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-full border border-teal-500/30 overflow-hidden shrink-0 bg-slate-800 shadow-md group-hover:scale-105 transition-transform duration-200">
-                      {getSpeakerAvatar(spk.name)}
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm md:text-base font-black text-white leading-tight group-hover:text-teal-300 transition-colors">
-                        {spk.name}
-                      </h4>
-                      <p className="text-[11px] text-slate-400 font-bold leading-normal">
-                        {spk.role}
-                      </p>
-                    </div>
+                  {/* Name & Role */}
+                  <div className="space-y-1">
+                    <h4 className="text-sm md:text-base font-black text-white leading-tight group-hover:text-teal-300 transition-colors">
+                      {spk.name}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 font-bold leading-normal">
+                      {spk.role}
+                    </p>
                   </div>
                 </div>
 
                 {/* Highlight box */}
-                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-2">
+                <div className="bg-white/5 border border-white/5 p-4 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-4 text-left">
                   {spk.highlight}
                 </div>
               </div>
@@ -1094,33 +1094,33 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {DOMESTIC_SPEAKERS.map((spk, idx) => (
               <div 
                 key={idx} 
-                className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[360px] md:h-[390px] hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group"
+                className="w-[290px] md:w-[330px] bg-slate-50 border border-slate-200 rounded-3xl p-6 shrink-0 snap-start flex flex-col justify-between h-[420px] md:h-[450px] hover:border-teal-500/30 hover:bg-white hover:shadow-md transition-all group text-center"
               >
-                <div className="space-y-4">
+                <div className="space-y-4 flex flex-col items-center">
+                  {/* Speaker Avatar - Large and at the top */}
+                  <div className="w-24 h-24 md:w-28 h-28 rounded-full border-2 border-teal-500/20 overflow-hidden shrink-0 bg-slate-100 shadow-lg group-hover:scale-105 transition-transform duration-200">
+                    {getSpeakerAvatar(spk.name)}
+                  </div>
+
                   {/* Country & Flag pill badge */}
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 w-fit text-[10px] text-teal-600 font-extrabold uppercase tracking-wider">
                     {getCountryFlag(spk.country)}
                     <span>{spk.country}</span>
                   </div>
 
-                  {/* Profile Layout (Avatar + Name & Role) */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-full border border-teal-500/20 overflow-hidden shrink-0 bg-slate-100 shadow-md group-hover:scale-105 transition-transform duration-200">
-                      {getSpeakerAvatar(spk.name)}
-                    </div>
-                    <div className="space-y-1">
-                      <h4 className="text-sm md:text-base font-black text-slate-900 leading-tight group-hover:text-teal-700 transition-colors">
-                        {spk.name}
-                      </h4>
-                      <p className="text-[11px] text-slate-550 font-bold leading-normal">
-                        {spk.role}
-                      </p>
-                    </div>
+                  {/* Name & Role */}
+                  <div className="space-y-1">
+                    <h4 className="text-sm md:text-base font-black text-slate-900 leading-tight group-hover:text-teal-700 transition-colors">
+                      {spk.name}
+                    </h4>
+                    <p className="text-[11px] text-slate-555 font-bold leading-normal">
+                      {spk.role}
+                    </p>
                   </div>
                 </div>
 
                 {/* Highlight box */}
-                <div className="bg-teal-50/45 border border-teal-100/40 p-4 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-2">
+                <div className="bg-teal-50/45 border border-teal-100/40 p-4 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-4 text-left">
                   {spk.highlight}
                 </div>
               </div>
