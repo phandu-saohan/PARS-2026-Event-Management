@@ -628,64 +628,78 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </header>
 
       {/* 2. WIDESCREEN HERO BANNER */}
-      <section className="relative w-full overflow-hidden border-b border-slate-200">
-        <div className="relative w-full h-[380px] md:h-[480px] flex flex-col md:flex-row items-center bg-gradient-to-r from-[#FAF8F2] via-[#EBF4FC] to-[#D6EBFE] px-6 md:px-16 py-8">
+      <section 
+        className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] bg-cover bg-center flex items-center border-b border-slate-200"
+        style={{ backgroundImage: `url(${landmarksUrl})` }}
+      >
+        {/* Dark overlay for rich contrast and legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950/90 via-slate-900/75 to-slate-950/60 z-10" />
+        
+        {/* Ambient lighting/glow effect */}
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none z-10" />
+
+        {/* Content Container */}
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 w-full text-white flex flex-col justify-center space-y-6 md:space-y-8">
           
-          {/* Left Column: Text Content */}
-          <div className="w-full md:w-[55%] z-20 flex flex-col justify-center text-[#4E2A14] space-y-4 md:space-y-6">
-            
-            {/* Logo image in banner */}
-            <img 
-              src={logoUrl} 
-              alt="PARS Logo" 
-              className="h-14 md:h-20 w-auto object-contain self-start" 
-            />
-            
-            {/* Custom Date Layout with superscript day tags */}
-            <div className="flex items-end font-serif tracking-tight select-none">
-              <span className="text-3xl md:text-5xl font-extrabold leading-none mr-3 mb-0.5">SEP.</span>
-              <div className="flex flex-col items-center">
-                <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SAT</span>
-                <span className="text-6xl md:text-8xl font-black leading-none">12</span>
-              </div>
-              <span className="text-3xl md:text-5xl font-extrabold mx-3 leading-none pb-1.5">-</span>
-              <div className="flex flex-col items-center">
-                <span className="text-[9px] md:text-[10px] font-sans font-black uppercase text-[#4E2A14] leading-none mb-1">SUN</span>
-                <span className="text-6xl md:text-8xl font-black leading-none">13</span>
-              </div>
+          {/* Logo image in banner */}
+          <img 
+            src={logoUrl} 
+            alt="PARS Logo" 
+            className="h-12 md:h-16 w-auto object-contain self-start drop-shadow-lg" 
+          />
+          
+          {/* Date + Location Info Badge */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
+              <Calendar className="w-4.5 h-4.5 text-amber-400" />
+              <span>12 - 13 THÁNG 09, 2026</span>
             </div>
-
-            {/* Heading labels */}
-            <div className="space-y-1.5 md:space-y-2.5">
-              <p className="text-[11px] md:text-[15px] font-sans font-bold tracking-[0.06em] uppercase text-[#4E2A14] opacity-95">
-                PLASTIC & AESTHETIC REGENERATIVE SURGERY
-              </p>
-              
-              {/* Huge serif PARS 2026 title */}
-              <h1 className="text-6xl md:text-[90px] font-black font-serif leading-none tracking-normal flex items-baseline">
-                <span className="tracking-[0.08em] text-[#4E2A14]">PARS</span>
-                <span className="text-4xl md:text-6xl font-black text-[#C59B27] ml-2 font-sans">2026</span>
-              </h1>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
+              <MapPin className="w-4.5 h-4.5 text-rose-400" />
+              <span>MELIÁ HANOI, HÀ NỘI, VIỆT NAM</span>
             </div>
+          </div>
 
-            {/* Divider line */}
-            <div className="w-full max-w-[500px] h-1 bg-[#4E2A14] opacity-90 rounded-full" />
+          {/* Conference name and tag */}
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] md:text-xs font-black uppercase tracking-widest self-start mb-2">
+              <Sparkles className="w-3 h-3 animate-pulse" />
+              HỘI NGHỊ KHOA HỌC QUỐC TẾ
+            </div>
+            
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline">
+              <span className="text-white">PARS</span>
+              <span className="text-[#C59B27] ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">2026</span>
+            </h1>
+          </div>
 
-            {/* Location text */}
-            <p className="text-[11px] md:text-[16px] font-sans font-extrabold tracking-[0.02em] uppercase text-[#4E2A14] leading-snug">
-              MELIÀ HANOI - 44B.LY THUONG KIET. HANOI. VIETNAM
+          {/* Theme / Subject */}
+          <div className="max-w-3xl space-y-2">
+            <p className="text-base md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
+              PLASTIC & AESTHETIC REGENERATIVE SURGERY
+            </p>
+            <p className="text-xs md:text-base lg:text-lg font-sans font-semibold text-slate-300 tracking-wide uppercase opacity-90">
+              Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh
             </p>
           </div>
 
-          {/* Right Column: Landmarks Image with Fade-out Overlay */}
-          <div className="absolute right-0 bottom-0 top-0 w-full md:w-[48%] h-full pointer-events-none z-10 hidden md:block">
-            <img 
-              src={landmarksUrl} 
-              alt="Landmarks" 
-              className="w-full h-full object-cover object-bottom" 
-            />
-            {/* Left blending gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#EBF4FC] via-[#EBF4FC]/60 to-transparent w-[35%]" />
+          {/* Actions: 2 Buttons */}
+          <div className="flex flex-wrap gap-4 pt-4 z-30">
+            <button
+              onClick={() => scrollToSection('register')}
+              className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center gap-2.5 cursor-pointer border-none"
+            >
+              <span>Đăng ký ngay</span>
+              <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
+            </button>
+            
+            <button
+              onClick={() => scrollToSection('program')}
+              className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center gap-2.5 cursor-pointer backdrop-blur-md"
+            >
+              <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
+              <span>Chương trình hội nghị</span>
+            </button>
           </div>
 
         </div>
