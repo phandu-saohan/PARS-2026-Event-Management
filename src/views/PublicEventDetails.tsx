@@ -7,7 +7,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Calendar, MapPin, Users, Award, ShieldAlert, Cpu, CheckCircle, 
   FileText, ArrowRight, HeartHandshake, Clock, Search, Star, Bookmark, 
-  Filter, X, Info, HelpCircle, ChevronLeft, ChevronRight, Menu, Map, 
+  Filter, X, Info, HelpCircle, ChevronLeft, ChevronRight, Menu, 
   Building, Check, Sparkles, Send, Phone, Mail, Globe, ExternalLink
 } from 'lucide-react';
 import { store } from '../dataStore';
