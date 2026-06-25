@@ -1213,7 +1213,7 @@ export class DataStore {
   /**
    * Load data asynchronously from Supabase if configured
    */
-  async initializeSupabase() {
+   async initializeSupabase() {
     if (!isSupabaseConfigured()) {
       this.supabaseConfig.isConnected = false;
       this.saveToLocalStorage(DataStore.KEY_SUPABASE, this.supabaseConfig);
@@ -1226,55 +1226,29 @@ export class DataStore {
       this.supabaseConfig.anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
       this.saveToLocalStorage(DataStore.KEY_SUPABASE, this.supabaseConfig);
 
-      console.log('⚡ Connected to Supabase. Synchronizing caches...');
+      console.log('⚡ Connected to Supabase. Stage 1: Loading public caches...');
 
-      // Run parallel fetches for performance
+      // --- PHASE 1: Fast-track public facing tables (extremely lightweight) ---
       const [
         { data: pkgs },
         { data: tracks },
         { data: bConfig },
-        { data: users },
-        { data: dbRoles },
         { data: sessions },
-        { data: attendees },
-        { data: speakers },
         { data: sponsors },
-        { data: tasks },
-        { data: finance },
-        { data: templates },
-        { data: logs },
-        { data: scripts },
-        { data: configs },
         { data: dbRooms },
         { data: dbDates },
         { data: dbShifts },
         { data: dbSections },
-        { data: dbContacts },
-        { data: dbMarketingPosts },
-        { data: dbCampaigns },
       ] = await Promise.all([
         supabase.from('packages').select('*'),
         supabase.from('specialty_tracks').select('*'),
         supabase.from('business_config').select('*').eq('id', 'default').maybeSingle(),
-        supabase.from('user_accounts').select('*'),
-        supabase.from('roles').select('*'),
         supabase.from('sessions').select('*'),
-        supabase.from('attendees').select('*'),
-        supabase.from('speakers').select('*'),
         supabase.from('sponsors').select('*'),
-        supabase.from('internal_tasks').select('*'),
-        supabase.from('finance_transactions').select('*'),
-        supabase.from('notification_templates').select('*'),
-        supabase.from('notification_logs').select('*'),
-        supabase.from('embed_scripts').select('*'),
-        supabase.from('system_config').select('*'),
         Promise.resolve(supabase.from('rooms').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('schedule_dates').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('shifts').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('virtual_sections').select('*')).catch(() => ({ data: null })),
-        Promise.resolve(supabase.from('contacts').select('*')).catch(() => ({ data: null })),
-        Promise.resolve(supabase.from('marketing_posts').select('*')).catch(() => ({ data: null })),
-        Promise.resolve(supabase.from('sending_campaigns').select('*')).catch(() => ({ data: null })),
       ]);
 
       if (pkgs) {
@@ -1296,7 +1270,6 @@ export class DataStore {
           cmeTemplateConfig: dbConfig.cmeTemplateConfig || DEFAULT_BUSINESS_CONFIG.cmeTemplateConfig,
         };
 
-        
         // Auto-migrate old/empty appUrl
         if (!this.businessConfig.appUrl || this.businessConfig.appUrl.includes('pars2026-delta.vercel.app')) {
           this.businessConfig.appUrl = 'https://pars2026.vercel.app';
@@ -1307,6 +1280,78 @@ export class DataStore {
           this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, this.businessConfig);
         }
       }
+      if (sessions) {
+        this.sessions = sessions.map(mapDbToSession);
+        this.saveToLocalStorage(DataStore.KEY_SESSIONS, this.sessions);
+      }
+      if (sponsors) {
+        this.sponsors = sponsors.map(mapDbToSponsor);
+        this.saveToLocalStorage(DataStore.KEY_SPONSORS, this.sponsors);
+      }
+      if (dbRooms && dbRooms.length > 0) {
+        this.rooms = dbRooms.map(mapDbToRoom);
+        this.saveToLocalStorage(DataStore.KEY_ROOMS, this.rooms);
+      }
+      if (dbDates && dbDates.length > 0) {
+        this.dates = dbDates.map(mapDbToScheduleDate);
+        this.saveToLocalStorage(DataStore.KEY_DATES, this.dates);
+      }
+      if (dbShifts && dbShifts.length > 0) {
+        this.shifts = dbShifts.map(mapDbToShift);
+        this.saveToLocalStorage(DataStore.KEY_SHIFTS, this.shifts);
+      }
+      if (dbSections && dbSections.length > 0) {
+        this.virtualSections = dbSections.map(mapDbToVirtualSection);
+        this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
+      }
+
+      console.log('⚡ Public caches loaded. Dispatching event for instant UI update...');
+      // Dispatch immediately so Public page displays new images/data right away!
+      window.dispatchEvent(new CustomEvent('store-loaded'));
+
+      // --- PHASE 2: Load heavy/admin tables in the background ---
+      this.initializeAdminCaches();
+    } catch (e) {
+      console.error('Failed to sync public data with Supabase:', e);
+    }
+  }
+
+  /**
+   * Helper method to load heavy/admin-facing tables in the background
+   */
+  private async initializeAdminCaches() {
+    try {
+      console.log('⚡ Connected to Supabase. Stage 2: Loading admin/heavy caches...');
+      const [
+        { data: users },
+        { data: dbRoles },
+        { data: attendees },
+        { data: speakers },
+        { data: tasks },
+        { data: finance },
+        { data: templates },
+        { data: logs },
+        { data: scripts },
+        { data: configs },
+        { data: dbContacts },
+        { data: dbMarketingPosts },
+        { data: dbCampaigns },
+      ] = await Promise.all([
+        supabase.from('user_accounts').select('*'),
+        supabase.from('roles').select('*'),
+        supabase.from('attendees').select('*'),
+        supabase.from('speakers').select('*'),
+        supabase.from('internal_tasks').select('*'),
+        supabase.from('finance_transactions').select('*'),
+        supabase.from('notification_templates').select('*'),
+        supabase.from('notification_logs').select('*'),
+        supabase.from('embed_scripts').select('*'),
+        supabase.from('system_config').select('*'),
+        Promise.resolve(supabase.from('contacts').select('*')).catch(() => ({ data: null })),
+        Promise.resolve(supabase.from('marketing_posts').select('*')).catch(() => ({ data: null })),
+        Promise.resolve(supabase.from('sending_campaigns').select('*')).catch(() => ({ data: null })),
+      ]);
+
       if (users) {
         this.users = users.map(mapDbToUser);
         this.saveToLocalStorage(DataStore.KEY_USERS, this.users);
@@ -1314,10 +1359,6 @@ export class DataStore {
       if (dbRoles) {
         this.roles = dbRoles.map(mapDbToRole);
         this.saveToLocalStorage(DataStore.KEY_ROLES, this.roles);
-      }
-      if (sessions) {
-        this.sessions = sessions.map(mapDbToSession);
-        this.saveToLocalStorage(DataStore.KEY_SESSIONS, this.sessions);
       }
       if (attendees) {
         const dbAttendees = attendees.map(mapDbToAttendee);
@@ -1344,10 +1385,6 @@ export class DataStore {
       if (speakers) {
         this.speakers = speakers.map(mapDbToSpeaker);
         this.saveToLocalStorage(DataStore.KEY_SPEAKERS, this.speakers);
-      }
-      if (sponsors) {
-        this.sponsors = sponsors.map(mapDbToSponsor);
-        this.saveToLocalStorage(DataStore.KEY_SPONSORS, this.sponsors);
       }
       if (tasks) {
         this.tasks = tasks.map(mapDbToTask);
@@ -1407,22 +1444,6 @@ export class DataStore {
         }
       }
 
-      if (dbRooms && dbRooms.length > 0) {
-        this.rooms = dbRooms.map(mapDbToRoom);
-        this.saveToLocalStorage(DataStore.KEY_ROOMS, this.rooms);
-      }
-      if (dbDates && dbDates.length > 0) {
-        this.dates = dbDates.map(mapDbToScheduleDate);
-        this.saveToLocalStorage(DataStore.KEY_DATES, this.dates);
-      }
-      if (dbShifts && dbShifts.length > 0) {
-        this.shifts = dbShifts.map(mapDbToShift);
-        this.saveToLocalStorage(DataStore.KEY_SHIFTS, this.shifts);
-      }
-      if (dbSections && dbSections.length > 0) {
-        this.virtualSections = dbSections.map(mapDbToVirtualSection);
-        this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
-      }
       if (dbContacts) {
         this.contacts = dbContacts.map(mapDbToContact);
         this.saveToLocalStorage(DataStore.KEY_CONTACTS, this.contacts);
@@ -1436,10 +1457,10 @@ export class DataStore {
         this.saveToLocalStorage(DataStore.KEY_CAMPAIGNS, this.sendingCampaigns);
       }
 
-      console.log('✅ Supabase cache synchronization complete!');
+      console.log('✅ Stage 2 admin cache sync complete! Dispatching final store-loaded.');
       window.dispatchEvent(new CustomEvent('store-loaded'));
-    } catch (e) {
-      console.error('Failed to sync with Supabase:', e);
+    } catch (err) {
+      console.error('Failed to sync admin data with Supabase:', err);
     }
   }
 
