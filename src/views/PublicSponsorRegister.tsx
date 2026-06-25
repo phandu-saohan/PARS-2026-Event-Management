@@ -242,7 +242,7 @@ const TIER_HEADERS = [
 ];
 
 export default function PublicSponsorRegister({ onNavigate }: PublicSponsorRegisterProps) {
-  const businessConfig = store.getBusinessConfig();
+  const [businessConfig, setBusinessConfig] = useState(() => store.getBusinessConfig());
   const formCfg = businessConfig.sponsorFormConfig;
   const sponsorTiers = store.getSponsorPackages();
   const [nationality, setNationality] = useState<'vietname' | 'foreign'>('vietname');
@@ -280,6 +280,17 @@ export default function PublicSponsorRegister({ onNavigate }: PublicSponsorRegis
       setCustomBenefitsText(list.join('\n'));
     }
   }, [tier, nationality, sponsorTiers]);
+
+  // Sync businessConfig when admin saves settings
+  useEffect(() => {
+    const sync = () => setBusinessConfig(store.getBusinessConfig());
+    window.addEventListener('store-updated', sync);
+    window.addEventListener('store-loaded', sync);
+    return () => {
+      window.removeEventListener('store-updated', sync);
+      window.removeEventListener('store-loaded', sync);
+    };
+  }, []);
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

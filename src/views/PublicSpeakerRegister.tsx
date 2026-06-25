@@ -49,7 +49,7 @@ interface PublicSpeakerRegisterProps {
 }
 
 export default function PublicSpeakerRegister({ onNavigate }: PublicSpeakerRegisterProps) {
-  const businessConfig = store.getBusinessConfig();
+  const [businessConfig, setBusinessConfig] = useState(() => store.getBusinessConfig());
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const docInputRef = useRef<HTMLInputElement>(null);
   const formCfg = businessConfig.speakerFormConfig;
@@ -81,6 +81,17 @@ export default function PublicSpeakerRegister({ onNavigate }: PublicSpeakerRegis
       }
     }
   }, [tracks, presentationTrack]);
+
+  // Sync businessConfig when admin saves settings
+  useEffect(() => {
+    const sync = () => setBusinessConfig(store.getBusinessConfig());
+    window.addEventListener('store-updated', sync);
+    window.addEventListener('store-loaded', sync);
+    return () => {
+      window.removeEventListener('store-updated', sync);
+      window.removeEventListener('store-loaded', sync);
+    };
+  }, []);
   
   // States
   const [isSubmitted, setIsSubmitted] = useState(false);

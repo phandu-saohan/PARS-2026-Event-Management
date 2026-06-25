@@ -122,7 +122,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
   const fileInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const doctorProofInputRef = useRef<HTMLInputElement>(null);
-  const businessConfig = store.getBusinessConfig();
+  const [businessConfig, setBusinessConfig] = useState(() => store.getBusinessConfig());
   const formCfg = businessConfig.delegateFormConfig;
   const addOnServices: AddOnService[] = businessConfig.addOnServices || [
     { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
@@ -130,6 +130,17 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
     { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
     { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, isEnabled: true, color: 'pink' }
   ];
+
+  // Sync businessConfig when admin saves settings
+  useEffect(() => {
+    const sync = () => setBusinessConfig(store.getBusinessConfig());
+    window.addEventListener('store-updated', sync);
+    window.addEventListener('store-loaded', sync);
+    return () => {
+      window.removeEventListener('store-updated', sync);
+      window.removeEventListener('store-loaded', sync);
+    };
+  }, []);
 
   // Auto-height postMessage for iframe embedding in WordPress
   useEffect(() => {
