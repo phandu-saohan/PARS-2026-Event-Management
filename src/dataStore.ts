@@ -2884,6 +2884,7 @@ export class DataStore {
         if (error) console.error('Error saving Business Config to Supabase:', error);
       });
     }
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'business_config' } }));
     return config;
   }
 

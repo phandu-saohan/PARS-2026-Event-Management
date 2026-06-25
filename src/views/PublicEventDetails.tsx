@@ -369,10 +369,38 @@ function getSessionEnrichment(session: ConferenceSession) {
 }
 
 export default function PublicEventDetails({ onNavigate }: PublicEventDetailsProps) {
-  const sessions = store.getSessions();
-  const sponsors = store.getSponsors();
-  const packages = store.getPackages().filter(p => p.isActive);
-  const businessConfig = store.getBusinessConfig();
+  const [sessions, setSessions] = useState(() => store.getSessions());
+  const [sponsors, setSponsors] = useState(() => store.getSponsors());
+  const [packages, setPackages] = useState(() => store.getPackages().filter(p => p.isActive));
+  const [businessConfig, setBusinessConfig] = useState(() => store.getBusinessConfig());
+
+  // Listen to store load and update events to make the public landing page fully reactive
+  useEffect(() => {
+    const handleStoreChange = (e?: any) => {
+      // If it's a store-updated event, we only need to update the relevant state
+      if (e && e.type === 'store-updated') {
+        const table = e.detail?.table;
+        if (table === 'sessions') setSessions(store.getSessions());
+        else if (table === 'sponsors') setSponsors(store.getSponsors());
+        else if (table === 'packages') setPackages(store.getPackages().filter(p => p.isActive));
+        else if (table === 'business_config') setBusinessConfig(store.getBusinessConfig());
+      } else {
+        // For store-loaded, reload all states
+        setSessions(store.getSessions());
+        setSponsors(store.getSponsors());
+        setPackages(store.getPackages().filter(p => p.isActive));
+        setBusinessConfig(store.getBusinessConfig());
+      }
+    };
+
+    window.addEventListener('store-loaded', handleStoreChange);
+    window.addEventListener('store-updated', handleStoreChange);
+    return () => {
+      window.removeEventListener('store-loaded', handleStoreChange);
+      window.removeEventListener('store-updated', handleStoreChange);
+    };
+  }, []);
+
   const sections = businessConfig.landingPageSections || {};
   
   // Hero section dynamic elements with fallbacks
