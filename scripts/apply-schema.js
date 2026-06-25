@@ -49,10 +49,17 @@ async function runMigration() {
 
     const sqlFiles = [
       'schema.sql',
+      'add_roles_and_permissions.sql',
       'add_contacts_table.sql',
       'add_schedule_management_tables.sql',
       'add_notification_module_tables.sql',
       'add_doctor_proof_url.sql',
+      'add_marketing_module.sql',
+      'add_campaigns_table.sql',
+      'add_event_images_table.sql',
+      'add_oauth_refresh_tokens.sql',
+      'setup_assets_storage.sql',
+      'update_landing_page_sections_speakers.sql',
       'seed.sql'
     ];
 

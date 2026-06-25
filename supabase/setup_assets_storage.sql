@@ -18,7 +18,7 @@ DO UPDATE SET
   allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- 2. Kích hoạt tính năng RLS (Row Level Security) cho bảng storage.objects nếu chưa kích hoạt
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 
 -- 3. Xóa các chính sách cũ (nếu có) để tránh xung đột trùng lặp khi chạy lại script
 DROP POLICY IF EXISTS "Allow public read assets" ON storage.objects;
