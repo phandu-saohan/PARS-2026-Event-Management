@@ -455,6 +455,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const [onlyMyAgenda, setOnlyMyAgenda] = useState<boolean>(false);
   const [selectedSessionDetail, setSelectedSessionDetail] = useState<ConferenceSession | null>(null);
   const [modalTab, setModalTab] = useState<'abstract' | 'bio'>('abstract');
+  const [programExpanded, setProgramExpanded] = useState<boolean>(false);
 
   // Header dropdown states
   const [showTicketDropdown, setShowTicketDropdown] = useState<boolean>(false);
@@ -1187,197 +1188,227 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 7. CONFERENCE PROGRAM — COMPACT AGENDA */}
-      <section id="program" className="py-10 md:py-14 scroll-mt-20 bg-slate-50 border-t border-slate-200">
+      {(() => {
+        const INITIAL_SHOW = 4;
+        const daySessions = sessions.filter(s => s.date === selectedDate);
+        const timeBlocksMap = new Map<string, string>();
+        daySessions.forEach(s => timeBlocksMap.set(s.startTime, s.endTime));
+        const sortedTimeBlocks = Array.from(timeBlocksMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
+        const visibleBlocks = programExpanded ? sortedTimeBlocks : sortedTimeBlocks.slice(0, INITIAL_SHOW);
+        const hiddenCount = sortedTimeBlocks.length - INITIAL_SHOW;
+
+        return (
+      <section id="program" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4">
 
-          {/* ── Header + Day tabs in one row ── */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-            <div>
-              <span className="text-teal-600 text-[10px] font-extrabold tracking-widest uppercase font-mono block mb-0.5">CONFERENCE AGENDA</span>
-              <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase leading-tight">
-                Chương Trình Khoa Học Chi Tiết
-              </h2>
-            </div>
+          {/* ── Section Header ── */}
+          <div className="text-center mb-8 max-w-2xl mx-auto space-y-2">
+            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">CONFERENCE AGENDA</span>
+            <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 leading-none">
+              Chương Trình Khoa Học Chi Tiết
+            </h2>
+            <p className="text-slate-500 text-xs leading-relaxed font-semibold">
+              Lịch trình 2 ngày hội nghị với các phiên báo cáo chuyên đề đa phòng. Nhấp vào bài để xem tóm tắt khoa học và lý lịch báo cáo viên.
+            </p>
+          </div>
 
-            {/* Day tabs — pill style */}
-            <div className="flex bg-slate-200/60 rounded-lg p-0.5 shrink-0">
+          {/* ── Day Tabs (pill toggle) ── */}
+          <div className="flex justify-center mb-6">
+            <div className="inline-flex bg-slate-100 rounded-xl p-1 border border-slate-200">
               {[
-                { date: '2026-09-12', label: 'Ngày 1 — 12/09' },
-                { date: '2026-09-13', label: 'Ngày 2 — 13/09' },
+                { date: '2026-09-12', label: 'Ngày 1', sub: '12/09/2026', desc: 'Khai mạc & Báo cáo khoa học' },
+                { date: '2026-09-13', label: 'Ngày 2', sub: '13/09/2026', desc: 'Chuyên đề nâng cao & Bế mạc' },
               ].map((d) => (
                 <button
                   key={d.date}
-                  onClick={() => setSelectedDate(d.date)}
-                  className={`px-4 py-1.5 rounded-md text-[11px] font-extrabold transition-all cursor-pointer border-none ${
+                  onClick={() => { setSelectedDate(d.date); setProgramExpanded(false); }}
+                  className={`px-5 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer border-none flex flex-col items-center gap-0.5 min-w-[140px] ${
                     selectedDate === d.date
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'bg-transparent text-slate-600 hover:text-slate-900'
+                      ? 'bg-slate-900 text-white shadow-md'
+                      : 'bg-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
-                  {d.label}
+                  <span className="font-black text-sm">{d.label}</span>
+                  <span className={`text-[10px] font-mono ${selectedDate === d.date ? 'text-slate-400' : 'text-slate-400'}`}>{d.sub}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* ── Timeline table ── */}
-          {(() => {
-            const filteredSessions = sessions.filter((s) => {
-              if (s.date !== selectedDate) return false;
-              return true;
-            });
+          {/* ── Hall Legend (compact inline) ── */}
+          <div className="flex justify-center gap-4 mb-5">
+            {ROOMS_CONFIG.map(r => (
+              <div key={r.id} className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
+                <span className={`w-2.5 h-2.5 rounded-full ${r.id === 'Hội trường 1' ? 'bg-rose-500' : 'bg-indigo-500'}`} />
+                <span className="font-bold">{r.vietnameseName}</span>
+                <span className="text-slate-400 hidden sm:inline">— {r.subtitle}</span>
+              </div>
+            ))}
+          </div>
 
-            if (filteredSessions.length === 0) {
-              return (
-                <div className="bg-white py-10 rounded-xl border border-slate-200 text-center space-y-1">
-                  <Info className="w-7 h-7 text-slate-300 mx-auto" />
-                  <p className="text-sm font-semibold text-slate-500">Không có phiên nào trong ngày này.</p>
-                </div>
-              );
-            }
+          {/* ── Timeline Table ── */}
+          {daySessions.length === 0 ? (
+            <div className="bg-slate-50 py-12 rounded-2xl border border-slate-200 text-center space-y-2">
+              <Info className="w-8 h-8 text-slate-300 mx-auto" />
+              <p className="text-sm font-semibold text-slate-500">Không có phiên nào trong ngày này.</p>
+            </div>
+          ) : (
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
 
-            const daySessions = sessions.filter(s => s.date === selectedDate);
-            const timeBlocksMap = new Map<string, string>();
-            daySessions.forEach(s => timeBlocksMap.set(s.startTime, s.endTime));
-            const sortedTimeBlocks = Array.from(timeBlocksMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-
-            return (
-              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
-
-                {/* ── Desktop: compact 3-col table ── */}
-                <div className="hidden md:block">
-                  {/* Header row */}
-                  <div className="grid grid-cols-[72px_1fr_1fr] bg-slate-900 text-white text-[9px] font-extrabold uppercase tracking-widest divide-x divide-slate-700/60 select-none">
-                    <div className="px-2 py-2 flex items-center justify-center gap-1 text-slate-400 font-mono">
-                      <Clock className="w-3 h-3 text-teal-400 shrink-0" /> Giờ
+              {/* ── Desktop Table ── */}
+              <div className="hidden md:block">
+                {/* Header */}
+                <div className="grid grid-cols-[80px_1fr_1fr] bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider divide-x divide-slate-700/50 select-none">
+                  <div className="px-3 py-3 flex items-center justify-center gap-1.5 text-slate-400 font-mono">
+                    <Clock className="w-3.5 h-3.5 text-teal-600 shrink-0" /> Giờ
+                  </div>
+                  {ROOMS_CONFIG.map(room => (
+                    <div key={room.id} className="px-4 py-3 flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${room.id === 'Hội trường 1' ? 'bg-rose-400' : 'bg-indigo-400'}`} />
+                      <span className="font-extrabold">{room.vietnameseName}</span>
+                      <span className="text-slate-400 font-normal normal-case text-[9px] hidden lg:inline truncate">— {room.subtitle}</span>
                     </div>
-                    {ROOMS_CONFIG.map(room => (
-                      <div key={room.id} className="px-3 py-2 flex items-center gap-1.5">
-                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${room.id === 'Hội trường 1' ? 'bg-rose-400' : 'bg-indigo-400'}`} />
-                        <span>{room.vietnameseName}</span>
-                        <span className="text-slate-500 font-normal normal-case hidden lg:inline text-[8px] truncate">— {room.subtitle}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Rows */}
-                  <div className="divide-y divide-slate-100">
-                    {sortedTimeBlocks.map(([startTime, endTime]) => {
-                      const slots = daySessions.filter(s => s.startTime === startTime);
-                      const rep = slots[0];
-                      const isGeneral = slots.length === 1 && (
-                        !rep.roomName.includes('Hội trường 1') &&
-                        !rep.roomName.includes('Hội trường 2')
-                      ) || rep.roomName.toLowerCase().includes('bàn check')
-                        || rep.roomName.toLowerCase().includes('ăn trưa')
-                        || rep.roomName.toLowerCase().includes('teabreak')
-                        || rep.roomName.toLowerCase().includes('tiệc trà')
-                        || rep.title.toLowerCase().includes('chụp ảnh')
-                        || rep.title.toLowerCase().includes('bế mạc')
-                        || rep.title.toLowerCase().includes('khai mạc');
-
-                      return (
-                        <div key={startTime} className="grid grid-cols-[72px_1fr] divide-x divide-slate-100 hover:bg-slate-50/50 transition-colors">
-                          {/* Time cell */}
-                          <div className="px-2 py-1.5 flex flex-col items-center justify-center font-mono select-none">
-                            <span className="text-slate-800 font-black text-[11px] leading-none">{startTime}</span>
-                            <span className="text-slate-400 text-[9px] font-semibold leading-none mt-0.5">{endTime}</span>
-                          </div>
-
-                          {isGeneral ? (
-                            /* General / plenary row */
-                            <div
-                              className="px-3 py-1.5 flex items-center gap-2 bg-gradient-to-r from-slate-50/80 to-white cursor-pointer hover:from-teal-50/40"
-                              onClick={() => setSelectedSessionDetail(rep)}
-                            >
-                              <div className="w-1 h-1 rounded-full bg-teal-400 shrink-0" />
-                              <div className="min-w-0 flex items-center gap-2 flex-wrap">
-                                <span className="bg-slate-100 text-slate-500 text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">{rep.roomName}</span>
-                                <span className="font-bold text-slate-800 text-[11px] leading-tight hover:text-teal-700 transition-colors">{rep.title}</span>
-                                {rep.speakerName && (
-                                  <span className="text-[9px] text-slate-400 font-semibold">— {rep.speakerName}</span>
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            /* Split 2-hall row */
-                            <div className="grid grid-cols-2 divide-x divide-slate-100">
-                              {ROOMS_CONFIG.map(room => {
-                                const s = slots.find(x => x.roomName.includes(room.id));
-
-                                if (!s) return (
-                                  <div key={room.id} className="px-3 py-1.5 text-slate-300 text-[9px] italic flex items-center justify-center">—</div>
-                                );
-
-                                return (
-                                  <div
-                                    key={room.id}
-                                    onClick={() => setSelectedSessionDetail(s)}
-                                    className={`px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors border-l-2 ${
-                                      room.id === 'Hội trường 1' ? 'border-l-rose-400 hover:bg-rose-50/30' : 'border-l-indigo-400 hover:bg-indigo-50/30'
-                                    }`}
-                                  >
-                                    <p className="font-bold text-slate-800 text-[11px] leading-snug line-clamp-2 hover:text-teal-700 transition-colors">
-                                      {s.title}
-                                    </p>
-                                    <p className="text-[9px] text-slate-400 font-semibold mt-0.5 truncate">{s.speakerName}</p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  ))}
                 </div>
 
-                {/* ── Mobile: compact list ── */}
-                <div className="md:hidden divide-y divide-slate-100">
-                  {filteredSessions.map(session => {
+                {/* Rows */}
+                <div className="divide-y divide-slate-200/60">
+                  {visibleBlocks.map(([startTime, endTime]) => {
+                    const slots = daySessions.filter(s => s.startTime === startTime);
+                    const rep = slots[0];
+                    const isGeneral = slots.length === 1 && (
+                      !rep.roomName.includes('Hội trường 1') &&
+                      !rep.roomName.includes('Hội trường 2')
+                    ) || rep.roomName.toLowerCase().includes('bàn check')
+                      || rep.roomName.toLowerCase().includes('ăn trưa')
+                      || rep.roomName.toLowerCase().includes('teabreak')
+                      || rep.roomName.toLowerCase().includes('tiệc trà')
+                      || rep.title.toLowerCase().includes('chụp ảnh')
+                      || rep.title.toLowerCase().includes('bế mạc')
+                      || rep.title.toLowerCase().includes('khai mạc');
+
+                    return (
+                      <div key={startTime} className="grid grid-cols-[80px_1fr] divide-x divide-slate-200/60 hover:bg-white transition-colors group">
+                        {/* Time */}
+                        <div className="px-2 py-3 flex flex-col items-center justify-center font-mono select-none bg-slate-50/50">
+                          <span className="text-slate-800 font-black text-xs leading-none">{startTime}</span>
+                          <span className="text-slate-400 text-[10px] font-semibold leading-none mt-1">{endTime}</span>
+                        </div>
+
+                        {isGeneral ? (
+                          <div
+                            className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-teal-50/30 transition-colors"
+                            onClick={() => setSelectedSessionDetail(rep)}
+                          >
+                            <div className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
+                            <div className="min-w-0">
+                              <span className="bg-slate-200 text-slate-600 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mr-2">{rep.roomName}</span>
+                              <span className="font-bold text-slate-800 text-xs leading-tight hover:text-teal-700 transition-colors">{rep.title}</span>
+                              {rep.speakerName && (
+                                <span className="ml-2 text-[10px] text-slate-400 font-semibold">— {rep.speakerName}</span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-2 divide-x divide-slate-200/60">
+                            {ROOMS_CONFIG.map(room => {
+                              const s = slots.find(x => x.roomName.includes(room.id));
+                              if (!s) return (
+                                <div key={room.id} className="px-4 py-3 text-slate-300 text-[10px] italic flex items-center justify-center select-none">—</div>
+                              );
+                              return (
+                                <div
+                                  key={room.id}
+                                  onClick={() => setSelectedSessionDetail(s)}
+                                  className={`px-4 py-3 cursor-pointer hover:bg-white transition-all border-l-[3px] ${
+                                    room.id === 'Hội trường 1' ? 'border-l-rose-400 hover:bg-rose-50/20' : 'border-l-indigo-400 hover:bg-indigo-50/20'
+                                  }`}
+                                >
+                                  <p className="font-bold text-slate-800 text-xs leading-snug line-clamp-2 group-hover:text-teal-700 transition-colors">
+                                    {s.title}
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 font-semibold mt-1 truncate">{s.speakerName}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* ── Mobile List ── */}
+              <div className="md:hidden divide-y divide-slate-200/60">
+                {(() => {
+                  const mobileFiltered = sessions.filter(s => s.date === selectedDate);
+                  const mobileSessions = programExpanded ? mobileFiltered : mobileFiltered.slice(0, INITIAL_SHOW * 2);
+                  return mobileSessions.map(session => {
                     const matchingRoom = ROOMS_CONFIG.find(r => session.roomName.includes(r.id));
                     return (
                       <div
                         key={session.id}
                         onClick={() => setSelectedSessionDetail(session)}
-                        className="flex items-start gap-2 px-3 py-2 active:bg-slate-50 transition-colors cursor-pointer"
+                        className="flex items-start gap-3 px-4 py-3 active:bg-white transition-colors cursor-pointer"
                       >
-                        {/* Time */}
-                        <div className="shrink-0 w-[52px] pt-0.5 text-center">
-                          <span className="text-[10px] font-mono font-black text-slate-700 block leading-none">{session.startTime}</span>
-                          <span className="text-[8px] font-mono text-slate-400 leading-none">{session.endTime}</span>
+                        <div className="shrink-0 w-[50px] pt-0.5 text-center">
+                          <span className="text-xs font-mono font-black text-slate-700 block leading-none">{session.startTime}</span>
+                          <span className="text-[10px] font-mono text-slate-400 leading-none mt-0.5 block">{session.endTime}</span>
                         </div>
-                        {/* Left accent */}
-                        <div className={`w-0.5 self-stretch shrink-0 rounded-full ${matchingRoom?.id === 'Hội trường 1' ? 'bg-rose-400' : matchingRoom ? 'bg-indigo-400' : 'bg-teal-400'}`} />
-                        {/* Content */}
+                        <div className={`w-[3px] self-stretch shrink-0 rounded-full ${matchingRoom?.id === 'Hội trường 1' ? 'bg-rose-400' : matchingRoom ? 'bg-indigo-400' : 'bg-teal-600'}`} />
                         <div className="flex-1 min-w-0">
                           {matchingRoom && (
-                            <span className={`text-[7px] font-black uppercase tracking-wider px-1 py-0.5 rounded ${matchingRoom.tagBg}`}>{matchingRoom.vietnameseName}</span>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${matchingRoom.tagBg}`}>{matchingRoom.vietnameseName}</span>
                           )}
-                          <p className="font-bold text-slate-800 text-[11px] leading-snug mt-0.5 line-clamp-2">{session.title}</p>
+                          <p className="font-bold text-slate-800 text-xs leading-snug mt-0.5 line-clamp-2">{session.title}</p>
                           {session.speakerName && (
-                            <p className="text-[9px] text-slate-400 font-semibold truncate">{session.speakerName}</p>
+                            <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5">{session.speakerName}</p>
                           )}
                         </div>
                       </div>
                     );
-                  })}
-                </div>
-
-                {/* Footer count */}
-                <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-[9px] text-slate-400 font-semibold font-mono">
-                    {filteredSessions.length} phiên · {selectedDate === '2026-09-12' ? 'Ngày 1 – 12/09/2026' : 'Ngày 2 – 13/09/2026'}
-                  </span>
-                  <span className="text-[9px] text-slate-400 font-medium">
-                    Nhấp vào bài để xem chi tiết
-                  </span>
-                </div>
+                  });
+                })()}
               </div>
-            );
-          })()}
+
+              {/* ── Show More / Collapse Button ── */}
+              {hiddenCount > 0 && (
+                <div className="border-t border-slate-200/60">
+                  <button
+                    onClick={() => setProgramExpanded(!programExpanded)}
+                    className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-teal-600 hover:text-teal-700 hover:bg-slate-50 transition-all cursor-pointer border-none bg-transparent"
+                  >
+                    {programExpanded ? (
+                      <>
+                        <ChevronRight className="w-4 h-4 -rotate-90 transition-transform" />
+                        Thu gọn
+                      </>
+                    ) : (
+                      <>
+                        <ChevronRight className="w-4 h-4 rotate-90 transition-transform" />
+                        Xem thêm {hiddenCount} phiên còn lại
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Footer */}
+              <div className="px-4 py-2 bg-slate-100/80 border-t border-slate-200/60 flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 font-semibold font-mono">
+                  {programExpanded ? sortedTimeBlocks.length : Math.min(INITIAL_SHOW, sortedTimeBlocks.length)}/{sortedTimeBlocks.length} phiên · {selectedDate === '2026-09-12' ? 'Ngày 1 – 12/09/2026' : 'Ngày 2 – 13/09/2026'}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  Nhấp vào bài để xem chi tiết
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </section>
+        );
+      })()}
 
       {/* 8. SPONSORS */}
       <section id="sponsors" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
