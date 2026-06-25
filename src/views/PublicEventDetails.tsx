@@ -1186,233 +1186,141 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         </div>
       </section>
 
-      {/* 7. CONFERENCE PROGRAM */}
-      <section id="program" className="py-16 md:py-24 max-w-6xl mx-auto px-4 scroll-mt-20">
-        <div className="space-y-8">
-          {/* Header controls & Quick tabs */}
-          <div className="bg-white p-6 md:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-150 pb-5">
-              <div>
-                <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-1">CONFERENCE AGENDA</span>
-                <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                  CHƯƠNG TRÌNH KHOA HỌC CHI TIẾT
-                </h3>
-                <p className="text-slate-500 text-xs mt-1">
-                  Nhấp vào bài báo cáo cụ thể trên timeline phân phòng để hiển thị Tóm tắt khoa học (Abstract) và lý lịch Báo cáo viên (Bio).
-                </p>
-              </div>
+      {/* 7. CONFERENCE PROGRAM — COMPACT AGENDA */}
+      <section id="program" className="py-10 md:py-14 scroll-mt-20 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-6xl mx-auto px-4">
 
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  id="btn-filter-my-agenda"
-                  onClick={() => setOnlyMyAgenda(!onlyMyAgenda)}
-                  className={`px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 border ${
-                    onlyMyAgenda 
-                      ? 'bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/10' 
-                      : 'bg-amber-55 text-amber-700 border-amber-200 hover:bg-amber-100'
-                  }`}
-                >
-                  <Star className={`w-3.5 h-3.5 ${onlyMyAgenda ? 'fill-white' : 'fill-amber-500 text-amber-500'}`} />
-                  Lịch cá nhân ({personalAgenda.length})
-                </button>
-              </div>
+          {/* ── Header + Day tabs in one row ── */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+            <div>
+              <span className="text-teal-600 text-[10px] font-extrabold tracking-widest uppercase font-mono block mb-0.5">CONFERENCE AGENDA</span>
+              <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase leading-tight">
+                Chương Trình Khoa Học Chi Tiết
+              </h2>
             </div>
 
-            {/* Sơ đồ phân bố Phòng / Hội trường */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/40">
-              {ROOMS_CONFIG.map((room) => (
-                <div key={room.id} className="text-xs bg-white p-3.5 rounded-xl border border-slate-150 shadow-xs flex flex-col justify-between">
-                  <div>
-                    <span className={`inline-block px-2 py-0.5 rounded font-black uppercase text-[10px] mb-1.5 ${room.tagBg}`}>
-                      {room.vietnameseName}
-                    </span>
-                    <p className="font-extrabold text-slate-800 leading-tight">{room.subtitle}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Day selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-6">
+            {/* Day tabs — pill style */}
+            <div className="flex bg-slate-200/60 rounded-lg p-0.5 shrink-0">
               {[
-                { date: '2026-09-12', title: 'NGÀY 1: 12/09/2026', subtitle: 'Khai mạc & Phiên báo cáo khoa học chính' },
-                { date: '2026-09-13', title: 'NGÀY 2: 13/09/2026', subtitle: 'Phiên Chuyên đề nâng cao & Bế mạc' }
+                { date: '2026-09-12', label: 'Ngày 1 — 12/09' },
+                { date: '2026-09-13', label: 'Ngày 2 — 13/09' },
               ].map((d) => (
                 <button
                   key={d.date}
                   onClick={() => setSelectedDate(d.date)}
-                  className={`p-4 rounded-2xl text-left border transition-all cursor-pointer relative overflow-hidden ${
+                  className={`px-4 py-1.5 rounded-md text-[11px] font-extrabold transition-all cursor-pointer border-none ${
                     selectedDate === d.date
-                      ? 'bg-gradient-to-br from-teal-900 to-slate-900 border-teal-600 text-white shadow-md'
-                      : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-850'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-transparent text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  <p className="text-xs font-black tracking-wider opacity-75">{d.title}</p>
-                  <p className="text-sm font-bold mt-1">{d.subtitle}</p>
-                  {selectedDate === d.date && (
-                    <div className="absolute right-3 bottom-3 w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
-                  )}
+                  {d.label}
                 </button>
               ))}
             </div>
-
-            {/* Quick Track filter tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-2">
-              <span className="text-[11px] font-mono text-slate-400 font-bold uppercase mr-1.5">Lọc Chuyên đề:</span>
-              {uniqueTracks.map((t) => {
-                const trackStr = t || 'Chưa phân';
-                return (
-                  <button
-                    key={trackStr}
-                    onClick={() => setSelectedTrackFilter(trackStr)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-all cursor-pointer ${
-                      selectedTrackFilter === trackStr
-                        ? 'bg-teal-650 text-white border-teal-650'
-                        : 'bg-slate-55 text-slate-650 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    {trackStr === 'All' ? 'Tất cả' : trackStr}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
-          {/* MAIN TIMELINE CHART */}
+          {/* ── Timeline table ── */}
           {(() => {
             const filteredSessions = sessions.filter((s) => {
               if (s.date !== selectedDate) return false;
-              if (onlyMyAgenda && !personalAgenda.includes(s.id)) return false;
-              if (selectedTrackFilter !== 'All' && s.track !== selectedTrackFilter) return false;
               return true;
             });
 
             if (filteredSessions.length === 0) {
               return (
-                <div className="bg-white p-16 rounded-3xl border border-slate-150 text-center space-y-3">
-                  <Info className="w-12 h-12 text-slate-350 mx-auto" />
-                  <p className="text-sm font-semibold text-slate-600">Không có bài báo cáo khoa học nào thỏa mãn bộ lọc.</p>
-                  <p className="text-xs text-slate-450">Vui lòng thay đổi lọc chuyên đề hoặc tắt chế độ "Lịch cá nhân".</p>
+                <div className="bg-white py-10 rounded-xl border border-slate-200 text-center space-y-1">
+                  <Info className="w-7 h-7 text-slate-300 mx-auto" />
+                  <p className="text-sm font-semibold text-slate-500">Không có phiên nào trong ngày này.</p>
                 </div>
               );
             }
 
             const daySessions = sessions.filter(s => s.date === selectedDate);
             const timeBlocksMap = new Map<string, string>();
-            daySessions.forEach(s => {
-              timeBlocksMap.set(s.startTime, s.endTime);
-            });
+            daySessions.forEach(s => timeBlocksMap.set(s.startTime, s.endTime));
             const sortedTimeBlocks = Array.from(timeBlocksMap.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 
-            const hasVisibleSession = (startTime: string) => {
-              return filteredSessions.some(s => s.startTime === startTime);
-            };
-
             return (
-              <div className="space-y-6 animate-fade-in">
-                {/* DESKTOP TIMELINE GANTT */}
-                <div className="hidden md:block bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
-                  <div className="grid grid-cols-[115px_1fr_1fr] border-b border-slate-200 bg-slate-900 text-white font-extrabold text-xs text-center uppercase tracking-wider divide-x divide-slate-800 select-none">
-                    <div className="p-4 bg-slate-950 text-slate-300 flex items-center justify-center gap-1 font-mono">
-                      <Clock className="w-3.5 h-3.5 text-teal-400" />
-                      GIỜ PHIÊN
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-xs">
+
+                {/* ── Desktop: compact 3-col table ── */}
+                <div className="hidden md:block">
+                  {/* Header row */}
+                  <div className="grid grid-cols-[72px_1fr_1fr] bg-slate-900 text-white text-[9px] font-extrabold uppercase tracking-widest divide-x divide-slate-700/60 select-none">
+                    <div className="px-2 py-2 flex items-center justify-center gap-1 text-slate-400 font-mono">
+                      <Clock className="w-3 h-3 text-teal-400 shrink-0" /> Giờ
                     </div>
-                    {ROOMS_CONFIG.map((room) => (
-                      <div key={room.id} className="p-4 flex flex-col justify-center items-center">
-                        <span className="bg-white/10 text-teal-300 font-mono px-2 py-0.5 rounded text-[10px] mb-1">
-                          {room.vietnameseName}
-                        </span>
-                        <span className="text-[10px] text-slate-300 font-semibold leading-tight max-w-[160px] text-center normal-case">
-                          {room.subtitle}
-                        </span>
+                    {ROOMS_CONFIG.map(room => (
+                      <div key={room.id} className="px-3 py-2 flex items-center gap-1.5">
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${room.id === 'Hội trường 1' ? 'bg-rose-400' : 'bg-indigo-400'}`} />
+                        <span>{room.vietnameseName}</span>
+                        <span className="text-slate-500 font-normal normal-case hidden lg:inline text-[8px] truncate">— {room.subtitle}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="divide-y divide-slate-150">
+                  {/* Rows */}
+                  <div className="divide-y divide-slate-100">
                     {sortedTimeBlocks.map(([startTime, endTime]) => {
-                      if (!hasVisibleSession(startTime)) return null;
-
                       const slots = daySessions.filter(s => s.startTime === startTime);
-                      const representative = slots[0];
+                      const rep = slots[0];
                       const isGeneral = slots.length === 1 && (
-                        (!representative.roomName.includes('Hội trường 1') &&
-                         !representative.roomName.includes('Hội trường 2')) ||
-                        representative.roomName.toLowerCase().includes('bàn check') ||
-                        representative.roomName.toLowerCase().includes('ăn trưa') ||
-                        representative.roomName.toLowerCase().includes('teabreak') ||
-                        representative.roomName.toLowerCase().includes('tiệc trà') ||
-                        representative.title.toLowerCase().includes('chụp ảnh') ||
-                        representative.title.toLowerCase().includes('bế mạc')
-                      );
+                        !rep.roomName.includes('Hội trường 1') &&
+                        !rep.roomName.includes('Hội trường 2')
+                      ) || rep.roomName.toLowerCase().includes('bàn check')
+                        || rep.roomName.toLowerCase().includes('ăn trưa')
+                        || rep.roomName.toLowerCase().includes('teabreak')
+                        || rep.roomName.toLowerCase().includes('tiệc trà')
+                        || rep.title.toLowerCase().includes('chụp ảnh')
+                        || rep.title.toLowerCase().includes('bế mạc')
+                        || rep.title.toLowerCase().includes('khai mạc');
 
                       return (
-                        <div key={startTime} className="grid grid-cols-[115px_1fr] divide-x divide-slate-200 hover:bg-slate-50/40 transition-colors">
-                          <div className="p-4 flex flex-col items-center justify-center text-center font-mono select-none">
-                            <span className="text-slate-800 font-black text-sm">{startTime}</span>
-                            <span className="text-slate-400 font-extrabold text-[10px] block mt-0.5">{endTime}</span>
+                        <div key={startTime} className="grid grid-cols-[72px_1fr] divide-x divide-slate-100 hover:bg-slate-50/50 transition-colors">
+                          {/* Time cell */}
+                          <div className="px-2 py-1.5 flex flex-col items-center justify-center font-mono select-none">
+                            <span className="text-slate-800 font-black text-[11px] leading-none">{startTime}</span>
+                            <span className="text-slate-400 text-[9px] font-semibold leading-none mt-0.5">{endTime}</span>
                           </div>
 
                           {isGeneral ? (
-                            <div className="p-4 flex items-center justify-center text-center bg-slate-50/50">
-                              <div className="max-w-2xl">
-                                <span className="bg-slate-200/80 text-slate-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md inline-block mb-1">
-                                  {representative.roomName}
-                                </span>
-                                <h4 className="font-extrabold text-slate-800 text-sm hover:text-teal-650 transition-colors cursor-pointer" onClick={() => setSelectedSessionDetail(representative)}>
-                                  {representative.title}
-                                </h4>
-                                <p className="text-xs text-slate-400 font-semibold mt-1">{representative.speakerName} • {representative.speakerTitle}</p>
+                            /* General / plenary row */
+                            <div
+                              className="px-3 py-1.5 flex items-center gap-2 bg-gradient-to-r from-slate-50/80 to-white cursor-pointer hover:from-teal-50/40"
+                              onClick={() => setSelectedSessionDetail(rep)}
+                            >
+                              <div className="w-1 h-1 rounded-full bg-teal-400 shrink-0" />
+                              <div className="min-w-0 flex items-center gap-2 flex-wrap">
+                                <span className="bg-slate-100 text-slate-500 text-[7px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded">{rep.roomName}</span>
+                                <span className="font-bold text-slate-800 text-[11px] leading-tight hover:text-teal-700 transition-colors">{rep.title}</span>
+                                {rep.speakerName && (
+                                  <span className="text-[9px] text-slate-400 font-semibold">— {rep.speakerName}</span>
+                                )}
                               </div>
                             </div>
                           ) : (
-                            <div className="grid grid-cols-2 divide-x divide-slate-200">
-                              {ROOMS_CONFIG.map((room) => {
-                                const currentSession = slots.find(s => s.roomName.includes(room.id));
-                                if (!currentSession) {
-                                  return <div key={room.id} className="p-4 bg-slate-50/20 text-slate-350 text-center flex items-center justify-center text-[10px] italic select-none">Trống</div>;
-                                }
+                            /* Split 2-hall row */
+                            <div className="grid grid-cols-2 divide-x divide-slate-100">
+                              {ROOMS_CONFIG.map(room => {
+                                const s = slots.find(x => x.roomName.includes(room.id));
 
-                                const isFilteredOut = !filteredSessions.some(fs => fs.id === currentSession.id);
-                                if (isFilteredOut) {
-                                  return <div key={room.id} className="p-4 bg-slate-50/10 text-slate-200 text-center flex items-center justify-center text-[10px] select-none">Ẩn</div>;
-                                }
-
-                                const isSaved = personalAgenda.includes(currentSession.id);
+                                if (!s) return (
+                                  <div key={room.id} className="px-3 py-1.5 text-slate-300 text-[9px] italic flex items-center justify-center">—</div>
+                                );
 
                                 return (
                                   <div
                                     key={room.id}
-                                    onClick={() => setSelectedSessionDetail(currentSession)}
-                                    className={`p-4 hover:bg-slate-50/80 transition-all flex flex-col justify-between relative cursor-pointer group border-l-3 ${
-                                      room.id === 'Hội trường 1' ? 'border-l-rose-500' :
-                                      room.id === 'Hội trường 2' ? 'border-l-indigo-500' :
-                                      room.id === 'Hội trường 3' ? 'border-l-amber-500' :
-                                      'border-l-teal-500'
+                                    onClick={() => setSelectedSessionDetail(s)}
+                                    className={`px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition-colors border-l-2 ${
+                                      room.id === 'Hội trường 1' ? 'border-l-rose-400 hover:bg-rose-50/30' : 'border-l-indigo-400 hover:bg-indigo-50/30'
                                     }`}
                                   >
-                                    <div className="space-y-1">
-                                      <h4 className="font-extrabold text-slate-800 text-xs leading-snug group-hover:text-teal-650 transition-colors">
-                                        {currentSession.title}
-                                      </h4>
-                                      <p className="text-[10px] text-slate-500 font-bold">{currentSession.speakerName}</p>
-                                    </div>
-
-                                    <div className="flex items-center justify-between gap-2 mt-4 pt-2 border-t border-slate-100">
-                                      <span className="text-[9px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded uppercase tracking-wider font-mono">
-                                        {currentSession.track}
-                                      </span>
-                                      
-                                      <button
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleToggleBookmark(currentSession.id);
-                                        }}
-                                        className="text-amber-500 hover:scale-110 transition-transform p-0.5 rounded cursor-pointer border-none bg-transparent"
-                                      >
-                                        <Star className={`w-3.5 h-3.5 ${isSaved ? 'fill-amber-500' : ''}`} />
-                                      </button>
-                                    </div>
+                                    <p className="font-bold text-slate-800 text-[11px] leading-snug line-clamp-2 hover:text-teal-700 transition-colors">
+                                      {s.title}
+                                    </p>
+                                    <p className="text-[9px] text-slate-400 font-semibold mt-0.5 truncate">{s.speakerName}</p>
                                   </div>
                                 );
                               })}
@@ -1424,51 +1332,46 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   </div>
                 </div>
 
-                {/* MOBILE SCHEDULE LIST */}
-                <div className="md:hidden space-y-4">
-                  {filteredSessions.map((session) => {
-                    const isSaved = personalAgenda.includes(session.id);
+                {/* ── Mobile: compact list ── */}
+                <div className="md:hidden divide-y divide-slate-100">
+                  {filteredSessions.map(session => {
                     const matchingRoom = ROOMS_CONFIG.find(r => session.roomName.includes(r.id));
-                    
                     return (
                       <div
                         key={session.id}
                         onClick={() => setSelectedSessionDetail(session)}
-                        className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs active:bg-slate-50 transition-colors relative cursor-pointer"
+                        className="flex items-start gap-2 px-3 py-2 active:bg-slate-50 transition-colors cursor-pointer"
                       >
-                        <div className="flex items-center justify-between gap-3 mb-2.5">
-                          <span className="bg-slate-100 text-slate-800 font-mono text-[9px] font-bold px-2 py-0.5 rounded">
-                            {session.startTime} - {session.endTime}
-                          </span>
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                            matchingRoom ? matchingRoom.tagBg : 'bg-slate-100 text-slate-700'
-                          }`}>
-                            {matchingRoom ? matchingRoom.vietnameseName : session.roomName}
-                          </span>
+                        {/* Time */}
+                        <div className="shrink-0 w-[52px] pt-0.5 text-center">
+                          <span className="text-[10px] font-mono font-black text-slate-700 block leading-none">{session.startTime}</span>
+                          <span className="text-[8px] font-mono text-slate-400 leading-none">{session.endTime}</span>
                         </div>
-
-                        <h4 className="font-extrabold text-slate-900 text-sm leading-snug mb-1">
-                          {session.title}
-                        </h4>
-                        <p className="text-xs text-slate-500 font-semibold mb-3">{session.speakerName} • {session.speakerTitle}</p>
-
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                          <span className="bg-teal-50 text-teal-700 font-extrabold text-[9px] px-2 py-0.5 rounded uppercase tracking-wider">
-                            {session.track}
-                          </span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleBookmark(session.id);
-                            }}
-                            className="p-1 rounded text-amber-500 border-none bg-transparent"
-                          >
-                            <Star className={`w-4 h-4 ${isSaved ? 'fill-amber-500' : ''}`} />
-                          </button>
+                        {/* Left accent */}
+                        <div className={`w-0.5 self-stretch shrink-0 rounded-full ${matchingRoom?.id === 'Hội trường 1' ? 'bg-rose-400' : matchingRoom ? 'bg-indigo-400' : 'bg-teal-400'}`} />
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          {matchingRoom && (
+                            <span className={`text-[7px] font-black uppercase tracking-wider px-1 py-0.5 rounded ${matchingRoom.tagBg}`}>{matchingRoom.vietnameseName}</span>
+                          )}
+                          <p className="font-bold text-slate-800 text-[11px] leading-snug mt-0.5 line-clamp-2">{session.title}</p>
+                          {session.speakerName && (
+                            <p className="text-[9px] text-slate-400 font-semibold truncate">{session.speakerName}</p>
+                          )}
                         </div>
                       </div>
                     );
                   })}
+                </div>
+
+                {/* Footer count */}
+                <div className="px-3 py-1.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+                  <span className="text-[9px] text-slate-400 font-semibold font-mono">
+                    {filteredSessions.length} phiên · {selectedDate === '2026-09-12' ? 'Ngày 1 – 12/09/2026' : 'Ngày 2 – 13/09/2026'}
+                  </span>
+                  <span className="text-[9px] text-slate-400 font-medium">
+                    Nhấp vào bài để xem chi tiết
+                  </span>
                 </div>
               </div>
             );
