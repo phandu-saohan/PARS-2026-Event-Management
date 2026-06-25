@@ -1715,6 +1715,8 @@ export class DataStore {
           this.sponsors = cleanedData;
         } else if (key === DataStore.KEY_CONTACTS) {
           this.contacts = cleanedData;
+        } else if (key === DataStore.KEY_BUSINESS_CONFIG) {
+          this.businessConfig = cleanedData;
         }
 
         try {
@@ -2900,13 +2902,80 @@ export class DataStore {
     this.businessConfig = config;
     this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, config);
 
-    if (isSupabaseConfigured()) {
-      supabase.from('business_config').upsert(mapBusinessConfigToDb(config)).then(({ error }) => {
-        if (error) console.error('Error saving Business Config to Supabase:', error);
-      });
-    }
+    // Run background upload if there are base64 images, which will also handle saving to database
+    this.uploadBusinessConfigImagesBackground(config);
+
     window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'business_config' } }));
     return config;
+  }
+
+  /**
+   * Background helper to upload base64 images in business config to Supabase Storage,
+   * replacing them with clean public URLs to avoid LocalStorage quota overflow and speed up loading.
+   */
+  private async uploadBusinessConfigImagesBackground(config: BusinessConfig) {
+    if (!isSupabaseConfigured()) return;
+
+    try {
+      let changed = false;
+      const updatedConfig = { ...config };
+
+      // 1. Check landingLogoUrl
+      if (config.landingLogoUrl && config.landingLogoUrl.startsWith('data:')) {
+        const ext = config.landingLogoUrl.split(';')[0].split('/')[1] || 'png';
+        const path = `landing/logo-${Date.now()}.${ext}`;
+        console.log('⚡ Uploading base64 landingLogoUrl to Supabase Storage...');
+        const publicUrl = await uploadToSupabaseStorage(path, config.landingLogoUrl);
+        if (publicUrl) {
+          updatedConfig.landingLogoUrl = publicUrl;
+          changed = true;
+        }
+      }
+
+      // 2. Check landingLandmarksUrl
+      if (config.landingLandmarksUrl && config.landingLandmarksUrl.startsWith('data:')) {
+        const ext = config.landingLandmarksUrl.split(';')[0].split('/')[1] || 'png';
+        const path = `landing/landmarks-${Date.now()}.${ext}`;
+        console.log('⚡ Uploading base64 landingLandmarksUrl to Supabase Storage...');
+        const publicUrl = await uploadToSupabaseStorage(path, config.landingLandmarksUrl);
+        if (publicUrl) {
+          updatedConfig.landingLandmarksUrl = publicUrl;
+          changed = true;
+        }
+      }
+
+      // 3. Check other potential base64 fields (e.g., cmeTemplateConfig.logoUrl)
+      if (config.cmeTemplateConfig && config.cmeTemplateConfig.logoUrl && config.cmeTemplateConfig.logoUrl.startsWith('data:')) {
+        const ext = config.cmeTemplateConfig.logoUrl.split(';')[0].split('/')[1] || 'png';
+        const path = `cme/logo-${Date.now()}.${ext}`;
+        console.log('⚡ Uploading base64 cme logo to Supabase Storage...');
+        const publicUrl = await uploadToSupabaseStorage(path, config.cmeTemplateConfig.logoUrl);
+        if (publicUrl) {
+          updatedConfig.cmeTemplateConfig = {
+            ...config.cmeTemplateConfig,
+            logoUrl: publicUrl
+          };
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        console.log('✅ Base64 images successfully uploaded to Supabase Storage. Updating cache and database...');
+        this.businessConfig = updatedConfig;
+        this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, updatedConfig);
+        
+        // Save to database
+        await supabase.from('business_config').upsert(mapBusinessConfigToDb(updatedConfig));
+        
+        // Notify UI to re-render with the new public URLs
+        window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'business_config' } }));
+      } else {
+        // Just save the regular config to database if no images changed
+        await supabase.from('business_config').upsert(mapBusinessConfigToDb(config));
+      }
+    } catch (err) {
+      console.error('Error in background upload of business config images:', err);
+    }
   }
 
   getSponsorPackages(): SponsorPackage[] {
