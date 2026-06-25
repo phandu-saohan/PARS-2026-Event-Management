@@ -23,7 +23,7 @@ const ROOMS_CONFIG = [
   {
     id: 'Hội trường 1',
     vietnameseName: 'Hội trường A',
-    subtitle: 'Phẫu thuật thẩm mỹ vú & Tạo hình vóc dáng',
+    subtitle: 'Thẩm mỹ khuôn mặt, Phẫu thuật mũi & Cấy mỡ tạo hình',
     colorClass: 'border-l-4 border-rose-500 bg-rose-500/5',
     textTag: 'text-rose-600',
     tagBg: 'bg-rose-50 text-rose-700'
@@ -31,26 +31,10 @@ const ROOMS_CONFIG = [
   {
     id: 'Hội trường 2',
     vietnameseName: 'Hội trường B',
-    subtitle: 'Chấn thương sọ sập & Tạo hình sọ mặt',
+    subtitle: 'Phẫu thuật vú, Tạo hình cơ thể & Y học tái sinh',
     colorClass: 'border-l-4 border-indigo-500 bg-indigo-500/5',
     textTag: 'text-indigo-600',
     tagBg: 'bg-indigo-50 text-indigo-700'
-  },
-  {
-    id: 'Hội trường 3',
-    vietnameseName: 'Hội trường C',
-    subtitle: 'Hài hòa hàm mặt & Phục hình nụ cười',
-    colorClass: 'border-l-4 border-amber-500 bg-amber-500/5',
-    textTag: 'text-amber-600',
-    tagBg: 'bg-amber-50 text-amber-700'
-  },
-  {
-    id: 'Hội trường 4',
-    vietnameseName: 'Hội trường D',
-    subtitle: 'Thẩm mỹ nội khoa & Chỉ sợi, Laser da liễu',
-    colorClass: 'border-l-4 border-teal-500 bg-teal-500/5',
-    textTag: 'text-teal-600',
-    tagBg: 'bg-teal-50 text-teal-700'
   }
 ];
 
@@ -1207,7 +1191,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </div>
 
             {/* Sơ đồ phân bố Phòng / Hội trường */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/40">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/40">
               {ROOMS_CONFIG.map((room) => (
                 <div key={room.id} className="text-xs bg-white p-3.5 rounded-xl border border-slate-150 shadow-xs flex flex-col justify-between">
                   <div>
@@ -1300,7 +1284,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <div className="space-y-6 animate-fade-in">
                 {/* DESKTOP TIMELINE GANTT */}
                 <div className="hidden md:block bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-xs">
-                  <div className="grid grid-cols-[115px_1fr_1fr_1fr_1fr] border-b border-slate-200 bg-slate-900 text-white font-extrabold text-xs text-center uppercase tracking-wider divide-x divide-slate-800 select-none">
+                  <div className="grid grid-cols-[115px_1fr_1fr] border-b border-slate-200 bg-slate-900 text-white font-extrabold text-xs text-center uppercase tracking-wider divide-x divide-slate-800 select-none">
                     <div className="p-4 bg-slate-950 text-slate-300 flex items-center justify-center gap-1 font-mono">
                       <Clock className="w-3.5 h-3.5 text-teal-400" />
                       GIỜ PHIÊN
@@ -1325,9 +1309,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                       const representative = slots[0];
                       const isGeneral = slots.length === 1 && (
                         (!representative.roomName.includes('Hội trường 1') &&
-                         !representative.roomName.includes('Hội trường 2') &&
-                         !representative.roomName.includes('Hội trường 3') &&
-                         !representative.roomName.includes('Hội trường 4')) ||
+                         !representative.roomName.includes('Hội trường 2')) ||
                         representative.roomName.toLowerCase().includes('bàn check') ||
                         representative.roomName.toLowerCase().includes('ăn trưa') ||
                         representative.roomName.toLowerCase().includes('teabreak') ||
@@ -1356,7 +1338,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                               </div>
                             </div>
                           ) : (
-                            <div className="grid grid-cols-4 divide-x divide-slate-200">
+                            <div className="grid grid-cols-2 divide-x divide-slate-200">
                               {ROOMS_CONFIG.map((room) => {
                                 const currentSession = slots.find(s => s.roomName.includes(room.id));
                                 if (!currentSession) {

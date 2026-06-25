@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Smartphone, Trash2, Plus, Check, X, Smartphone as PhoneIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Code, Palette, Upload, Play, Pause, Square, Users, CheckSquare, ChevronLeft, Search, History, BarChart3, Info, Sparkles } from 'lucide-react';
+import { Mail, Smartphone, Trash2, Plus, Check, X, Smartphone as PhoneIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Code, Palette, Upload, Play, Pause, Square, Users, CheckSquare, ChevronLeft, Search, History, BarChart3, Info, Sparkles, RefreshCw } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { store } from '../dataStore';
 import { isSupabaseConfigured } from '../lib/supabase';

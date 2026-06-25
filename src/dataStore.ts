@@ -1139,8 +1139,8 @@ export class DataStore {
       this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, this.businessConfig);
     }
 
-    this.rooms = this.getLocalStorage(DataStore.KEY_ROOMS, ['Hội trường 1', 'Hội trường 2', 'Hội trường 3', 'Hội trường 4']);
-    this.dates = this.getLocalStorage(DataStore.KEY_DATES, ['2026-12-11', '2026-12-12']);
+    this.rooms = this.getLocalStorage(DataStore.KEY_ROOMS, ['Hội trường 1', 'Hội trường 2']);
+    this.dates = this.getLocalStorage(DataStore.KEY_DATES, ['2026-09-12', '2026-09-13']);
     this.shifts = this.getLocalStorage(DataStore.KEY_SHIFTS, [
       { id: 'sang', name: 'Buổi Sáng', startTime: '08:00', endTime: '12:00' },
       { id: 'chieu', name: 'Buổi Chiều', startTime: '13:00', endTime: '18:00' }
@@ -3729,6 +3729,10 @@ export class DataStore {
     localStorage.removeItem(DataStore.KEY_MARKETING_POSTS);
     localStorage.removeItem(DataStore.KEY_MARKETING_CHANNELS_CONFIG);
     localStorage.removeItem(DataStore.KEY_CAMPAIGNS);
+    localStorage.removeItem(DataStore.KEY_ROOMS);
+    localStorage.removeItem(DataStore.KEY_DATES);
+    localStorage.removeItem(DataStore.KEY_SHIFTS);
+    localStorage.removeItem(DataStore.KEY_SECTIONS);
     this.loadLocalStorage();
 
     if (isSupabaseConfigured()) {
