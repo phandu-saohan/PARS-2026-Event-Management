@@ -68,7 +68,7 @@ function AppContent() {
     } catch (e) {
       console.error('Error parsing view parameter:', e);
     }
-    return 'overview';
+    return 'event-details';
   });
   const [role, setRole] = useState<Role>('admin');
 
