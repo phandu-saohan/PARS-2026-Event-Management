@@ -47,11 +47,19 @@ CREATE TABLE public.business_config (
     pwa_theme_color TEXT DEFAULT '#4f46e5',
     pwa_background_color TEXT DEFAULT '#0f172a',
     app_url TEXT DEFAULT 'https://pars2026.vercel.app',
+    attendee_id_prefix TEXT DEFAULT 'PARS2026',
     delegate_form_config JSONB DEFAULT '{}'::jsonb,
     speaker_form_config JSONB DEFAULT '{}'::jsonb,
     sponsor_form_config JSONB DEFAULT '{}'::jsonb,
     add_on_services JSONB DEFAULT '[]'::jsonb,
     cme_template_config JSONB DEFAULT '{}'::jsonb,
+    landing_logo_url TEXT,
+    landing_landmarks_url TEXT,
+    landing_slide1_url TEXT,
+    landing_slide2_url TEXT,
+    landing_slide3_url TEXT,
+    landing_slide4_url TEXT,
+    landing_page_sections JSONB DEFAULT '{}'::jsonb,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
