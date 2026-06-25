@@ -664,7 +664,7 @@ ON CONFLICT (id) DO UPDATE SET
     allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- RLS policies for storage bucket 'assets' (clean setup)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY; -- (Skipped: already enabled by default on Supabase, avoids ownership permission error)
 
 DROP POLICY IF EXISTS "Allow public read assets" ON storage.objects;
 CREATE POLICY "Allow public read assets" ON storage.objects 
