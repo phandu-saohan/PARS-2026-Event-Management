@@ -60,6 +60,7 @@ import {
   SpeakerConfig
 } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
+import { uploadToSupabaseStorage } from '../lib/supabase';
 
 interface SettingsPanelProps {
   role: Role;
@@ -185,6 +186,9 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [spkCountry, setSpkCountry] = useState('');
   const [spkType, setSpkType] = useState<'foreign' | 'domestic'>('foreign');
   const [spkPhotoUrl, setSpkPhotoUrl] = useState('');
+
+  // Track which image field is currently being uploaded to Supabase Storage
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
 
   const getSpeakers = (type: 'foreign' | 'domestic'): SpeakerConfig[] => {
     return businessConfig.landingPageSections?.speakers?.[type] || [];
@@ -5209,20 +5213,27 @@ ON CONFLICT (code) DO UPDATE SET
                         )}
                       </div>
                       <div className="space-y-1.5">
-                        <label className="px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên hình nền mới
+                        <label className={`px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg transition-all inline-flex items-center gap-1.5 select-none ${uploadingField === 'landingLandmarksUrl' ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
+                          {uploadingField === 'landingLandmarksUrl' ? (
+                            <><span className="animate-spin inline-block w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full"></span> Đang tải lên...</>
+                          ) : '📁 Tải lên hình nền mới'}
                           <input
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={(e) => {
+                            disabled={!!uploadingField}
+                            onChange={async (e) => {
                               const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingLandmarksUrl: reader.result });
-                                };
-                                reader.readAsDataURL(file);
+                              if (!file) return;
+                              setUploadingField('landingLandmarksUrl');
+                              try {
+                                const path = `landing/hero-bg-${Date.now()}.${file.name.split('.').pop()}`;
+                                const url = await uploadToSupabaseStorage(path, file);
+                                if (url) setBusinessConfig({ ...businessConfig, landingLandmarksUrl: url });
+                                else alert('Tải ảnh thất bại. Kiểm tra lại kết nối Supabase Storage.');
+                              } finally {
+                                setUploadingField(null);
+                                e.target.value = '';
                               }
                             }}
                           />
@@ -5671,20 +5682,27 @@ ON CONFLICT (code) DO UPDATE SET
                         )}
                       </div>
                       <div className="space-y-1">
-                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên logo mới
+                        <label className={`px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg transition-all inline-flex items-center gap-1.5 select-none ${uploadingField === 'landingLogoUrl' ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
+                          {uploadingField === 'landingLogoUrl' ? (
+                            <><span className="animate-spin inline-block w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full"></span> Đang tải...</>
+                          ) : '📁 Tải lên logo mới'}
                           <input
                             type="file"
                             accept="image/*"
                             className="hidden"
-                            onChange={(e) => {
+                            disabled={!!uploadingField}
+                            onChange={async (e) => {
                               const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingLogoUrl: reader.result });
-                                };
-                                reader.readAsDataURL(file);
+                              if (!file) return;
+                              setUploadingField('landingLogoUrl');
+                              try {
+                                const path = `landing/logo-${Date.now()}.${file.name.split('.').pop()}`;
+                                const url = await uploadToSupabaseStorage(path, file);
+                                if (url) setBusinessConfig({ ...businessConfig, landingLogoUrl: url });
+                                else alert('Tải ảnh thất bại. Kiểm tra lại kết nối Supabase Storage.');
+                              } finally {
+                                setUploadingField(null);
+                                e.target.value = '';
                               }
                             }}
                           />
@@ -5702,177 +5720,62 @@ ON CONFLICT (code) DO UPDATE SET
                     </div>
                   </div>
 
-                  {/* Slide 1: Báo cáo viên nước ngoài */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 1 (Báo cáo viên nước ngoài)</label>
-                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
-                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                        {businessConfig.landingSlide1Url ? (
-                          <img src={businessConfig.landingSlide1Url} alt="Slide 1" className="w-full h-full object-contain" />
-                        ) : (
-                          <img src="/media__1782198647504.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên hình mới
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingSlide1Url: reader.result });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        {businessConfig.landingSlide1Url && (
-                          <button
-                            type="button"
-                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide1Url: '' })}
-                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
-                          >
-                            Khôi phục
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Slide 2: Báo cáo viên trong nước */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-555 block">Poster Slide 2 (Báo cáo viên trong nước)</label>
-                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
-                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                        {businessConfig.landingSlide2Url ? (
-                          <img src={businessConfig.landingSlide2Url} alt="Slide 2" className="w-full h-full object-contain" />
-                        ) : (
-                          <img src="/media__1782198647541.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên hình mới
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingSlide2Url: reader.result });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        {businessConfig.landingSlide2Url && (
-                          <button
-                            type="button"
-                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide2Url: '' })}
-                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
-                          >
-                            Khôi phục
-                          </button>
-                        )}
+                  {/* Slides helper: reusable upload block */}
+                  {([
+                    { field: 'landingSlide1Url' as const, label: 'Poster Slide 1 (Báo cáo viên nước ngoài)',   defaultSrc: '/media__1782198647504.png', folder: 'slide1' },
+                    { field: 'landingSlide2Url' as const, label: 'Poster Slide 2 (Báo cáo viên trong nước)',   defaultSrc: '/media__1782198647541.png', folder: 'slide2' },
+                    { field: 'landingSlide3Url' as const, label: 'Poster Slide 3 (Chương trình khoa học)',    defaultSrc: '/media__1782198647557.png', folder: 'slide3' },
+                    { field: 'landingSlide4Url' as const, label: 'Poster Slide 4 (Thư mời hội nghị)',         defaultSrc: '/media__1782198647776.png', folder: 'slide4' },
+                  ]).map(({ field, label, defaultSrc, folder }) => (
+                    <div key={field} className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-500 block">{label}</label>
+                      <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
+                        <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
+                          {businessConfig[field] ? (
+                            <img src={businessConfig[field]} alt={label} className="w-full h-full object-contain" />
+                          ) : (
+                            <img src={defaultSrc} alt="Mặc định" className="w-full h-full object-contain opacity-65" />
+                          )}
+                        </div>
+                        <div className="space-y-1">
+                          <label className={`px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg transition-all inline-flex items-center gap-1.5 select-none ${uploadingField === field ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
+                            {uploadingField === field ? (
+                              <><span className="animate-spin inline-block w-3 h-3 border-2 border-slate-400 border-t-transparent rounded-full"></span> Đang tải...</>
+                            ) : '📁 Tải lên hình mới'}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={!!uploadingField}
+                              onChange={async (e) => {
+                                const file = e.target.files?.[0];
+                                if (!file) return;
+                                setUploadingField(field);
+                                try {
+                                  const path = `landing/${folder}-${Date.now()}.${file.name.split('.').pop()}`;
+                                  const url = await uploadToSupabaseStorage(path, file);
+                                  if (url) setBusinessConfig({ ...businessConfig, [field]: url });
+                                  else alert('Tải ảnh thất bại. Kiểm tra lại kết nối Supabase Storage.');
+                                } finally {
+                                  setUploadingField(null);
+                                  e.target.value = '';
+                                }
+                              }}
+                            />
+                          </label>
+                          {businessConfig[field] && (
+                            <button
+                              type="button"
+                              onClick={() => setBusinessConfig({ ...businessConfig, [field]: '' })}
+                              className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
+                            >
+                              Khôi phục
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Slide 3: Chương trình khoa học */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 3 (Chương trình khoa học)</label>
-                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
-                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                        {businessConfig.landingSlide3Url ? (
-                          <img src={businessConfig.landingSlide3Url} alt="Slide 3" className="w-full h-full object-contain" />
-                        ) : (
-                          <img src="/media__1782198647557.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên hình mới
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingSlide3Url: reader.result });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        {businessConfig.landingSlide3Url && (
-                          <button
-                            type="button"
-                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide3Url: '' })}
-                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
-                          >
-                            Khôi phục
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Slide 4: Thư mời hội nghị */}
-                  <div className="space-y-1">
-                    <label className="text-[11px] font-bold text-slate-500 block">Poster Slide 4 (Thư mời hội nghị)</label>
-                    <div className="flex items-center gap-3 bg-slate-50 p-2 border border-slate-200 rounded-xl">
-                      <div className="w-16 h-12 rounded-lg border border-slate-200 bg-white flex items-center justify-center overflow-hidden shrink-0">
-                        {businessConfig.landingSlide4Url ? (
-                          <img src={businessConfig.landingSlide4Url} alt="Slide 4" className="w-full h-full object-contain" />
-                        ) : (
-                          <img src="/media__1782198647776.png" alt="Mặc định" className="w-full h-full object-contain opacity-65" />
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <label className="px-2.5 py-1 bg-white hover:bg-slate-100 border border-slate-350 text-[10px] font-bold rounded-lg cursor-pointer transition-all inline-block select-none">
-                          Tải lên hình mới
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                const reader = new FileReader();
-                                reader.onloadend = () => {
-                                  setBusinessConfig({ ...businessConfig, landingSlide4Url: reader.result });
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                          />
-                        </label>
-                        {businessConfig.landingSlide4Url && (
-                          <button
-                            type="button"
-                            onClick={() => setBusinessConfig({ ...businessConfig, landingSlide4Url: '' })}
-                            className="px-2 py-1 ml-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[10px] font-bold rounded-lg border-none cursor-pointer"
-                          >
-                            Khôi phục
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
 
@@ -6139,24 +6042,33 @@ ON CONFLICT (code) DO UPDATE SET
                             )}
                           </div>
                           <div className="flex-1 space-y-2">
-                            {/* Upload button */}
-                            <label className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 text-[10px] font-extrabold rounded-lg cursor-pointer transition-all inline-flex items-center gap-1.5 select-none">
-                              📁 Tải ảnh lên
+                            {/* Upload button — uploads to Supabase Storage */}
+                            <label className={`px-3 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-700 text-[10px] font-extrabold rounded-lg transition-all inline-flex items-center gap-1.5 select-none ${uploadingField === 'spkPhoto' ? 'opacity-60 cursor-wait' : 'cursor-pointer'}`}>
+                              {uploadingField === 'spkPhoto' ? (
+                                <><span className="animate-spin inline-block w-3 h-3 border-2 border-teal-400 border-t-transparent rounded-full"></span> Đang tải lên...</>
+                              ) : '📁 Tải ảnh lên'}
                               <input
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => {
+                                disabled={!!uploadingField}
+                                onChange={async (e) => {
                                   const file = e.target.files?.[0];
                                   if (!file) return;
-                                  if (file.size > 2 * 1024 * 1024) {
-                                    alert('Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.');
+                                  if (file.size > 5 * 1024 * 1024) {
+                                    alert('Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB.');
                                     return;
                                   }
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => setSpkPhotoUrl(reader.result as string);
-                                  reader.readAsDataURL(file);
-                                  e.target.value = '';
+                                  setUploadingField('spkPhoto');
+                                  try {
+                                    const path = `speakers/spk-${Date.now()}.${file.name.split('.').pop()}`;
+                                    const url = await uploadToSupabaseStorage(path, file);
+                                    if (url) setSpkPhotoUrl(url);
+                                    else alert('Tải ảnh thất bại. Kiểm tra lại kết nối Supabase Storage.');
+                                  } finally {
+                                    setUploadingField(null);
+                                    e.target.value = '';
+                                  }
                                 }}
                               />
                             </label>
@@ -6174,10 +6086,10 @@ ON CONFLICT (code) DO UPDATE SET
                               type="url"
                               value={spkPhotoUrl.startsWith('data:') ? '' : spkPhotoUrl}
                               onChange={e => setSpkPhotoUrl(e.target.value)}
-                              placeholder="hoặc dán link URL ảnh..."
+                              placeholder="hoặc dán link URL ảnh từ bên ngoài..."
                               className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10px] font-mono text-slate-500 focus:outline-none focus:border-teal-400"
                             />
-                            <p className="text-[9px] text-slate-400 leading-tight">Ảnh JPG/PNG, tối đa 2MB. Nếu không có sẽ dùng avatar tự động.</p>
+                            <p className="text-[9px] text-slate-400 leading-tight">Ảnh JPG/PNG tối đa 5MB — tự động lưu vào Supabase Storage bucket <code className="bg-slate-100 px-1 rounded">assets/speakers/</code>. Hoặc dán URL ngoài.</p>
                           </div>
                         </div>
                       </div>
