@@ -140,9 +140,12 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
       }
     };
     sendHeight();
-    const observer = new ResizeObserver(sendHeight);
-    if (containerRef.current) observer.observe(containerRef.current);
-    return () => observer.disconnect();
+    
+    if (typeof ResizeObserver !== 'undefined' && containerRef.current) {
+      const observer = new ResizeObserver(sendHeight);
+      observer.observe(containerRef.current);
+      return () => observer.disconnect();
+    }
   }, []);
 
   // Custom Form State

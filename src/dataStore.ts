@@ -1251,6 +1251,7 @@ export class DataStore {
         { data: dbSections },
         { data: dbContacts },
         { data: dbMarketingPosts },
+        { data: dbCampaigns },
       ] = await Promise.all([
         supabase.from('packages').select('*'),
         supabase.from('specialty_tracks').select('*'),
