@@ -137,7 +137,7 @@ export interface Attendee {
   packageName: string;
   packageFee: number;
   paymentStatus: 'paid' | 'unpaid' | 'pending_verification';
-  paymentMethod: 'bank_transfer' | 'credit_card' | 'cash';
+  paymentMethod: 'bank_transfer' | 'vnpay' | 'stripe' | 'credit_card' | 'cash';
   transactionProofUrl?: string;
   registrationDate: string;
   qrCodeValue: string;
@@ -457,6 +457,33 @@ export interface CmeTemplateConfig {
   logoUrl?: string;
 }
 
+/**
+ * Cấu hình từng cổng thanh toán tích hợp vào form đăng ký công khai
+ */
+export interface PaymentGatewayConfig {
+  /** VietQR chuyển khoản ngân hàng nội địa */
+  vietqr?: {
+    bankCode: string;        // Ví dụ: VCB, MB, TCB, ACB...
+    accountNo: string;       // Số tài khoản
+    accountName: string;     // Tên chủ tài khoản
+    isEnabled: boolean;
+  };
+  /** VNPay QR deeplink */
+  vnpay?: {
+    merchantId: string;      // Mã terminal / merchant VNPay
+    deeplink?: string;       // URL deeplink hoặc merchant ref
+    isEnabled: boolean;
+  };
+  /** Stripe Checkout cho Visa/Mastercard quốc tế */
+  stripe?: {
+    publishableKey: string;  // pk_live_... hoặc pk_test_...
+    priceId?: string;        // Stripe Price ID (nếu dùng fixed price)
+    successUrl?: string;     // URL redirect sau khi thanh toán
+    cancelUrl?: string;      // URL redirect nếu hủy
+    isEnabled: boolean;
+  };
+}
+
 export interface BusinessConfig {
   eventName: string;
   organizerName: string;
@@ -485,6 +512,8 @@ export interface BusinessConfig {
   sponsorFormConfig?: PublicFormConfig;
   /** Danh sách dịch vụ phụ trợ tùy chọn (CME, Gala, Masterclass, Tour...) */
   addOnServices?: AddOnService[];
+  /** Cấu hình cổng thanh toán (VietQR, VNPay, Stripe) */
+  paymentConfig?: PaymentGatewayConfig;
   /** Cấu hình layout chứng chỉ CME điện tử */
   cmeTemplateConfig?: CmeTemplateConfig;
   /** Các cấu hình hình ảnh cho trang landing page công khai */

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle, QrCode, Mail, Phone, FileText, Upload, AlertCircle, Sparkles, Check, HelpCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, QrCode, Mail, Phone, FileText, Upload, AlertCircle, Sparkles, Check, HelpCircle, ExternalLink } from 'lucide-react';
 import { store } from '../dataStore';
 import { sendRealtimeNotification } from '../lib/realtime';
 import { Attendee, RegistrationPackage, AddOnService } from '../types';
@@ -12,6 +12,7 @@ import RichTextEditor from '../components/RichTextEditor';
 import { getProvinceList, getDistrictsOf, getWardsOf } from '../data/vnProvinces';
 import SepayPaymentChecker from '../components/SepayPaymentChecker';
 import { useFormLabel } from '../hooks/useFormLabel';
+import PaymentMethodSelector, { PaymentMethodId } from '../components/PaymentMethodSelector';
 
 interface FormStepperProps {
   currentStep: number;
@@ -180,6 +181,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
     return today >= targetDate ? 'post_10_11' : 'pre_10_11';
   });
   const [addOnSelections, setAddOnSelections] = useState<Record<string, boolean>>({});
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethodId>('bank_transfer');
   const toggleAddOn = (id: string) => {
     setAddOnSelections(prev => ({
       ...prev,
@@ -211,14 +213,20 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Sync packageId when nationality changes
+  // Sync packageId khi nationality thay đổi; cũng điều chỉnh payment method mặc định
   useEffect(() => {
     if (nationality === 'foreign') {
       setPackageId('pkg-foreign');
+      // Đại biểu quốc tế mặc định dùng Stripe nếu đã bật
+      if (businessConfig.paymentConfig?.stripe?.isEnabled) {
+        setSelectedPaymentMethod('stripe');
+      }
     } else if (packageId === 'pkg-foreign') {
       setPackageId('pkg-member');
+      setSelectedPaymentMethod('bank_transfer');
     }
-  }, [nationality, packageId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nationality]);
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -484,8 +492,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
         packageId,
         packageName: selectedPackage?.name || 'Gói Tiêu Chuẩn',
         packageFee: calculatedTotalFee,
-        paymentStatus: 'pending_verification', // set pending to verify bank transfer receipt
-        paymentMethod: 'bank_transfer',
+        paymentStatus: 'pending_verification',
+        paymentMethod: selectedPaymentMethod as any,
         transactionProofUrl: proofImage || undefined,
         registrationDate: new Date().toISOString().split('T')[0],
         qrCodeValue,
@@ -631,38 +639,107 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                 </div>
               </div>
 
-              {/* Right Column: THANH TOÁN CHUYỂN KHOẢN VIETQR */}
-              <div className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/20 shadow-sm flex flex-col justify-between">
-                <div className="bg-amber-500 text-amber-950 p-3.5 text-center border-b border-amber-300">
-                  <span className="text-[10px] uppercase font-black tracking-wider block">QUYỂN THANH TOÁN VIETQR</span>
-                  <span className="text-[9px] text-amber-900 font-medium">BẮT BUỘC ĐỂ BTC KHỞI TẠO CME</span>
+              {/* Right Column: THANH TOÁN — conditional theo payment method đã chọn */}
+              {createdAttendee.paymentMethod === 'stripe' ? (
+                /* Stripe Card Payment Panel */
+                <div className="border border-indigo-200 rounded-2xl overflow-hidden bg-indigo-50/20 shadow-sm flex flex-col justify-between">
+                  <div className="bg-indigo-700 text-white p-3.5 text-center border-b border-indigo-600">
+                    <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN THẺ QUỐC TẾ</span>
+                    <span className="text-[9px] text-indigo-200 font-medium">VISA / MASTERCARD · POWERED BY STRIPE</span>
+                  </div>
+                  <div className="p-5 flex flex-col items-center justify-center flex-1 space-y-4 text-center">
+                    <div className="flex items-center gap-2 justify-center">
+                      <svg viewBox="0 0 48 16" className="h-7 w-auto"><rect width="48" height="16" rx="3" fill="#1A1F71" /><text x="6" y="12" fontFamily="Arial" fontWeight="bold" fontSize="11" fill="white" letterSpacing="1">VISA</text></svg>
+                      <svg viewBox="0 0 36 24" className="h-7 w-auto"><circle cx="13" cy="12" r="10" fill="#EB001B" /><circle cx="23" cy="12" r="10" fill="#F79E1B" /><path d="M18 5.5a10 10 0 0 1 0 13A10 10 0 0 1 18 5.5Z" fill="#FF5F00" /></svg>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-black text-indigo-900">{createdAttendee.packageFee.toLocaleString()} VNĐ</p>
+                      <p className="text-[10px] text-slate-500">≈ ${Math.round(createdAttendee.packageFee / 25000)} USD</p>
+                    </div>
+                    <p className="text-[10.5px] text-slate-600 leading-relaxed text-left">
+                      {L.t('Nhấn nút bên dưới để thanh toán bằng thẻ Visa/Mastercard qua cổng Stripe bảo mật. Thông tin đăng ký đã được lưu.', 'Click below to pay by Visa/Mastercard via secure Stripe checkout. Your registration is saved.')}
+                    </p>
+                    {businessConfig.paymentConfig?.stripe?.publishableKey ? (
+                      <a
+                        href={`https://buy.stripe.com/test_link?prefilled_email=${encodeURIComponent(createdAttendee.email)}&client_reference_id=${createdAttendee.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase rounded-xl flex items-center justify-center gap-2 transition-all no-underline cursor-pointer"
+                        style={{ textDecoration: 'none' }}
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        {L.t('Thanh toán bằng thẻ ngay →', 'Pay with Card Now →')}
+                      </a>
+                    ) : (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[10px] text-amber-800 text-left w-full">
+                        ⚠️ {L.t('Liên hệ BTC để thanh toán quốc tế: info@pars.vn', 'Contact organizer for international payment: info@pars.vn')}
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2 bg-indigo-50 text-center text-[9px] text-indigo-600 font-sans border-t border-indigo-200">
+                    🔒 Mã hóa 256-bit SSL · Thông tin thẻ không lưu tại máy chủ BTC
+                  </div>
                 </div>
-
-                <div className="p-4 flex flex-col items-center justify-between flex-1 space-y-3">
-                  {/* VietQR automatic dynamic generation code */}
-                  <div className="p-1 px-[10px] bg-white border border-slate-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-transform hover:scale-[1.02]">
-                    <img
-                      src={vietQrSuccessUrl}
-                      alt="VietQR code"
-                      referrerPolicy="no-referrer"
-                      className="w-40 h-auto object-contain mx-auto"
-                    />
+              ) : createdAttendee.paymentMethod === 'vnpay' ? (
+                /* VNPay QR Panel */
+                <div className="border border-blue-200 rounded-2xl overflow-hidden bg-blue-50/20 shadow-sm flex flex-col justify-between">
+                  <div className="bg-blue-600 text-white p-3.5 text-center border-b border-blue-500">
+                    <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN VNPAY QR</span>
+                    <span className="text-[9px] text-blue-100 font-medium">LIÊN NGÂN HÀNG QUỐC GIA</span>
+                  </div>
+                  <div className="p-4 flex flex-col items-center justify-between flex-1 space-y-3">
+                    <div className="p-2 bg-white border border-blue-200 rounded-xl shadow-inner">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`VNPAYQR|${businessConfig.paymentConfig?.vnpay?.merchantId || 'PARS2026'}|${createdAttendee.packageFee}|${transferMessageSub}`)}`}
+                        alt="VNPay QR"
+                        referrerPolicy="no-referrer"
+                        className="w-36 h-36 object-contain"
+                      />
+                    </div>
+                    <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700">
+                      <p>• Trạng thái: <span className="font-bold text-blue-700 bg-blue-100/60 px-2 py-0.5 rounded">Chờ xác minh</span></p>
+                      <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{createdAttendee.packageFee.toLocaleString()}đ</strong></p>
+                      <p>• Nội dung: <strong className="text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessageSub}</strong></p>
+                    </div>
+                  </div>
+                  <div className="p-2 bg-blue-50 text-center text-[9px] text-blue-800 font-sans border-t border-blue-200">
+                    📱 Mở ứng dụng ngân hàng / VNPay và quét mã QR phía trên
+                  </div>
+                </div>
+              ) : (
+                /* VietQR (bank_transfer) — mặc định */
+                <div className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/20 shadow-sm flex flex-col justify-between">
+                  <div className="bg-amber-500 text-amber-950 p-3.5 text-center border-b border-amber-300">
+                    <span className="text-[10px] uppercase font-black tracking-wider block">QUYỂN THANH TOÁN VIETQR</span>
+                    <span className="text-[9px] text-amber-900 font-medium">BẮT BUỘC ĐỂ BTC KHỞI TẠO CME</span>
                   </div>
 
-                  <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700">
-                    <p>• Trạng thái: <span className="font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded">Chờ xác minh</span></p>
-                    <p>• Ngân hàng: <strong className="text-slate-900 font-mono">VIETCOMBANK</strong></p>
-                    <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">0331000516283</strong></p>
-                    <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">Hoi phau thuat tao hinh tham my Viet Nam</strong></p>
-                    <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{createdAttendee.packageFee.toLocaleString()}đ</strong></p>
-                    <p>• Nội dung CK: <strong className="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessageSub}</strong></p>
+                  <div className="p-4 flex flex-col items-center justify-between flex-1 space-y-3">
+                    {/* VietQR automatic dynamic generation code */}
+                    <div className="p-1 px-[10px] bg-white border border-slate-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-transform hover:scale-[1.02]">
+                      <img
+                        src={vietQrSuccessUrl}
+                        alt="VietQR code"
+                        referrerPolicy="no-referrer"
+                        className="w-40 h-auto object-contain mx-auto"
+                      />
+                    </div>
+
+                    <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700">
+                      <p>• Trạng thái: <span className="font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded">Chờ xác minh</span></p>
+                      <p>• Ngân hàng: <strong className="text-slate-900 font-mono">VIETCOMBANK</strong></p>
+                      <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">0331000516283</strong></p>
+                      <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">Hoi phau thuat tao hinh tham my Viet Nam</strong></p>
+                      <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{createdAttendee.packageFee.toLocaleString()}đ</strong></p>
+                      <p>• Nội dung CK: <strong className="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessageSub}</strong></p>
+                    </div>
+                  </div>
+
+                  <div className="p-2 bg-amber-100/40 text-center text-[9px] text-amber-900 font-sans border-t border-amber-200">
+                    ⚠️ Quét QR bằng ứng dụng ngân hàng để tự điền nội dung & số tiền chính xác.
                   </div>
                 </div>
-
-                <div className="p-2 bg-amber-100/40 text-center text-[9px] text-amber-900 font-sans border-t border-amber-200">
-                  ⚠️ Quét QR bằng ứng dụng ngân hàng để tự điền nội dung & số tiền chính xác.
-                </div>
-              </div>
+              )}
             </div>
 
             {/* Proof of Payment file uploader on Step 4 */}
@@ -1236,11 +1313,21 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       );
                     })()}
 
+                    {/* Payment Method Selector */}
+                    <PaymentMethodSelector
+                      nationality={nationality}
+                      selectedMethod={selectedPaymentMethod}
+                      onSelect={setSelectedPaymentMethod}
+                      paymentConfig={businessConfig.paymentConfig}
+                      totalFee={calculatedTotalFee}
+                      lang={nationality === 'vietname' ? 'vi' : 'en'}
+                    />
+
                     {/* Note fields */}
                     <div className="space-y-4">
                       <div className="flex items-center gap-2 border-b border-teal-100 pb-2">
                         <span className="bg-teal-900 text-amber-400 font-mono font-bold px-2 py-0.5 rounded text-[10px]">
-                          {addOnServices.filter(svc => svc.isEnabled && !(svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala'))).length > 0 ? '05' : '04'}
+                          {addOnServices.filter(svc => svc.isEnabled && !(svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala'))).length > 0 ? '06' : '05'}
                         </span>
                         <h3 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
                           {L.t('Yêu Cầu Đặc Biệt', 'Special Requests')}
