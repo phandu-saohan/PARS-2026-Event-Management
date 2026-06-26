@@ -1036,7 +1036,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             <p className="text-sm md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
               {lang === 'vi' ? heroThemeVi : heroThemeEn}
             </p>
-            <p className="text-[10px] md:text-base lg:text-lg font-sans font-semibold text-slate-350 tracking-wide uppercase opacity-90">
+            <p className="text-[10px] md:text-base lg:text-lg font-sans font-semibold text-slate-200 tracking-wide uppercase opacity-90">
               {lang === 'vi' ? heroThemeEn : heroThemeVi}
             </p>
           </div>
