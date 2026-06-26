@@ -1783,65 +1783,108 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 10. PREMIUM FOOTER */}
-      <footer className="bg-slate-950 text-slate-400 py-10 px-4 border-t border-slate-900">
+      <footer className="bg-[#0b0f19] text-slate-400 py-12 px-6 border-t border-white/5 relative z-20">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
           
           {/* Col 1: Brand Info */}
-          <div className="space-y-4 md:col-span-2">
+          <div className="space-y-5 md:col-span-2 text-left">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-teal-500 to-indigo-650 flex items-center justify-center text-white font-black">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-500 to-indigo-600 flex items-center justify-center text-white font-black shadow-lg shadow-teal-500/10">
                 P
               </div>
-              <span className="text-white font-black uppercase tracking-wider text-sm">PARS 2026</span>
+              <span className="text-white font-black uppercase tracking-wider text-base">PARS 2026</span>
             </div>
-            <p className="text-xs leading-relaxed max-w-sm text-slate-400">
+            <p className="text-xs leading-relaxed max-w-md text-slate-400">
               {t('Hệ thống đăng ký & điều phối học thuật trực tuyến của Hội nghị Khoa học Quốc tế PARS 2026. Chủ trì tổ chức bởi Bệnh viện Thẩm mỹ EMCAS.', 'Online registration & academic coordination system for the PARS 2026 International Scientific Conference. Hosted by EMCAS Aesthetic Hospital.')}
             </p>
-            <div className="text-[11px] text-slate-500 pt-2 space-y-1">
-              <p>• <strong>{t('Báo cáo viên:', 'Presenters:')}</strong> {t('Hạn nộp tóm tắt abstract đến hết ngày 15/09/2026.', 'Abstract submission deadline is September 15, 2026.')}</p>
-              <p>• <strong>{t('Đại biểu:', 'Delegates:')}</strong> {t('Hoàn thành chuyển khoản lệ phí để kích hoạt vé tự động.', 'Complete the registration fee transfer for automatic ticket activation.')}</p>
+            
+            {/* Structured Info Cards */}
+            <div className="space-y-2.5 max-w-md">
+              <div className="flex gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.08] transition-all">
+                <div className="w-1 rounded bg-teal-500 shrink-0" />
+                <div>
+                  <span className="text-[10px] uppercase font-black tracking-wider text-teal-400 block">{t('BÁO CÁO VIÊN', 'SPEAKERS')}</span>
+                  <p className="text-[11px] text-slate-350 leading-snug mt-0.5">{t('Hạn nộp tóm tắt abstract đến hết ngày 15/09/2026.', 'Abstract submission deadline is September 15, 2026.')}</p>
+                </div>
+              </div>
+              <div className="flex gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.05] hover:border-white/[0.08] transition-all">
+                <div className="w-1 rounded bg-amber-500 shrink-0" />
+                <div>
+                  <span className="text-[10px] uppercase font-black tracking-wider text-amber-400 block">{t('ĐẠI BIỂU', 'DELEGATES')}</span>
+                  <p className="text-[11px] text-slate-350 leading-snug mt-0.5">{t('Hoàn thành chuyển khoản lệ phí để hệ thống kích hoạt vé điện tử tự động.', 'Complete the registration fee transfer for automatic e-ticket activation.')}</p>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Col 2: Navigation Links */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">{t('ĐƯỜNG DẪN NHANH', 'QUICK LINKS')}</h4>
-            <ul className="text-xs space-y-2.5 font-bold list-none p-0 m-0">
-              <li><button onClick={() => scrollToSection('intro')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Giới thiệu chung', 'About')}</button></li>
-              <li><button onClick={() => scrollToSection('speakers')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Báo cáo viên', 'Speakers')}</button></li>
-              <li><button onClick={() => scrollToSection('program')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Chương trình khoa học', 'Scientific Program')}</button></li>
-              <li><button onClick={() => scrollToSection('register')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Đăng ký tham dự', 'Registration')}</button></li>
+          <div className="space-y-5 text-left">
+            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono border-l-2 border-teal-500 pl-2.5">{t('ĐƯỜNG DẪN NHANH', 'QUICK LINKS')}</h4>
+            <ul className="text-xs space-y-3 font-bold list-none p-0 m-0">
+              {[
+                { id: 'intro', label: t('Giới thiệu chung', 'About') },
+                { id: 'speakers', label: t('Báo cáo viên', 'Speakers') },
+                { id: 'program', label: t('Chương trình khoa học', 'Scientific Program') },
+                { id: 'register', label: t('Đăng ký tham dự', 'Registration') },
+              ].map((item, idx) => (
+                <li key={idx}>
+                  <button 
+                    onClick={() => scrollToSection(item.id)} 
+                    className="hover:text-teal-400 transition-all cursor-pointer text-left border-none bg-transparent text-slate-400 flex items-center gap-2 group p-0"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500/30 group-hover:bg-teal-400 group-hover:scale-125 transition-all" />
+                    {item.label}
+                  </button>
+                </li>
+              ))}
             </ul>
           </div>
 
           {/* Col 3: Contact details */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">{t('LIÊN HỆ BTC', 'CONTACT US')}</h4>
-            <div className="text-xs space-y-2.5 leading-relaxed">
-              <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Đơn vị tổ chức:', 'Organizer:')}</strong>
-                {t('Bệnh viện Thẩm mỹ EMCAS', 'EMCAS Aesthetic Hospital')}
-              </p>
-              <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Zalo / Hotline:', 'Zalo / Hotline:')}</strong>
-                {t('+84964551151 (Ban thư ký)', '+84964551151 (Secretariat)')}
-              </p>
-              <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Hỗ trợ kỹ thuật:', 'Technical Support:')}</strong>
-                pars.events@gmail.com
-              </p>
+          <div className="space-y-5 text-left">
+            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono border-l-2 border-teal-500 pl-2.5">{t('LIÊN HỆ BAN TỔ CHỨC', 'CONTACT US')}</h4>
+            <div className="text-xs space-y-4 leading-relaxed text-slate-400">
+              <div className="flex gap-3 items-start">
+                <Building className="w-4.5 h-4.5 text-teal-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[10px] text-slate-400 uppercase tracking-wider block font-sans">{t('Đơn vị tổ chức', 'Organizer')}</strong>
+                  <span className="text-slate-200 font-bold">{t('Bệnh viện Thẩm mỹ EMCAS', 'EMCAS Aesthetic Hospital')}</span>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <Phone className="w-4.5 h-4.5 text-teal-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[10px] text-slate-400 uppercase tracking-wider block font-sans">{t('Hotline / Zalo hỗ trợ', 'Hotline / Zalo')}</strong>
+                  <span className="text-slate-200 font-bold">{t('+84 96 455 1151', '+84 96 455 1151')}</span>
+                </div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <Mail className="w-4.5 h-4.5 text-teal-400 shrink-0 mt-0.5" />
+                <div>
+                  <strong className="text-[10px] text-slate-400 uppercase tracking-wider block font-sans">{t('Hỗ trợ kỹ thuật', 'Technical Support')}</strong>
+                  <a href="mailto:pars.events@gmail.com" className="text-teal-400 hover:text-teal-350 hover:underline font-bold transition-colors">{t('pars.events@gmail.com', 'pars.events@gmail.com')}</a>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
 
         {/* Copy strip */}
-        <div className="max-w-6xl mx-auto border-t border-white/5 mt-12 pt-8 text-center text-xs text-slate-600 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto border-t border-white/5 mt-10 pt-6 text-center text-xs text-slate-500 flex flex-col md:flex-row items-center justify-between gap-4">
           <p>© 2026 Bệnh viện Thẩm mỹ EMCAS. All rights reserved.</p>
-          <div className="flex gap-4 font-mono text-[10px]">
-            <a href="https://parsvn.com" className="hover:text-slate-400">parsvn.com</a>
+          <div className="flex items-center gap-4 font-mono text-[10px]">
+            <a href="https://parsvn.com" target="_blank" rel="noreferrer" className="hover:text-slate-350 flex items-center gap-1 transition-colors text-slate-500 decoration-none">
+              <Globe className="w-3.5 h-3.5" />
+              parsvn.com
+            </a>
             <span className="text-white/10">|</span>
-            <button onClick={() => onNavigate('overview')} className="hover:text-slate-400 cursor-pointer border-none bg-transparent text-slate-600">BTC Dashboard</button>
+            <button 
+              onClick={() => onNavigate('overview')} 
+              className="hover:text-teal-400 hover:underline cursor-pointer border-none bg-transparent text-slate-500 font-bold flex items-center gap-1 p-0 transition-colors"
+            >
+              {t('Trang quản trị (BTC)', 'BTC Dashboard')}
+            </button>
           </div>
         </div>
       </footer>
