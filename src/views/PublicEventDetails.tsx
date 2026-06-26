@@ -586,6 +586,73 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
     ? (titles.locationSubtitleEn || "EVENT VENUE")
     : (titles.locationSubtitleVi || "ĐỊA ĐIỂM SỰ KIỆN");
 
+  const renderSponsorLogo = (spn: { name: string; tier: string; logoUrl?: string }) => {
+    if (spn.logoUrl) {
+      return (
+        <img 
+          src={spn.logoUrl} 
+          alt={spn.name} 
+          className="max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" 
+        />
+      );
+    }
+
+    const normName = spn.name.toLowerCase();
+    
+    // 1. Medtronic
+    if (normName.includes('medtronic')) {
+      return (
+        <div className="flex flex-col items-center justify-center space-y-1.5">
+          <div className="flex items-center gap-1.5 text-indigo-650">
+            <svg className="w-5.5 h-5.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <span className="font-sans font-black tracking-tight text-slate-850 text-[13px] group-hover:text-indigo-650 transition-colors uppercase">Medtronic</span>
+          </div>
+          <span className="text-[8px] text-indigo-650 font-extrabold uppercase tracking-widest font-mono bg-indigo-50/50 px-1.5 py-0.5 rounded">PLATINUM</span>
+        </div>
+      );
+    }
+
+    // 2. Boston Pharma
+    if (normName.includes('boston')) {
+      return (
+        <div className="flex flex-col items-center justify-center space-y-1.5">
+          <div className="flex items-center gap-1.5 text-amber-600">
+            <svg className="w-5.5 h-5.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 9.172V5L8 4z" />
+            </svg>
+            <span className="font-sans font-black tracking-tight text-slate-850 text-[13px] group-hover:text-amber-600 transition-colors uppercase">Boston Pharma</span>
+          </div>
+          <span className="text-[8px] text-amber-600 font-extrabold uppercase tracking-widest font-mono bg-amber-50/50 px-1.5 py-0.5 rounded">GOLD</span>
+        </div>
+      );
+    }
+
+    // 3. AstraZeneca
+    if (normName.includes('astrazeneca')) {
+      return (
+        <div className="flex flex-col items-center justify-center space-y-1.5">
+          <div className="flex items-center gap-1.5 text-emerald-600">
+            <svg className="w-5.5 h-5.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l-.707.707M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="font-sans font-black tracking-tight text-slate-850 text-[13px] group-hover:text-emerald-600 transition-colors uppercase">AstraZeneca</span>
+          </div>
+          <span className="text-[8px] text-emerald-600 font-extrabold uppercase tracking-widest font-mono bg-emerald-50/50 px-1.5 py-0.5 rounded">SILVER</span>
+        </div>
+      );
+    }
+
+    // Generic fallbacks
+    return (
+      <div className="text-center space-y-1">
+        <p className="font-extrabold text-slate-800 text-sm leading-tight uppercase group-hover:text-teal-650 transition-colors">{spn.name}</p>
+        <span className="text-[9px] text-teal-650 font-bold uppercase tracking-wider font-mono bg-teal-50 px-1.5 py-0.5 rounded mt-1 inline-block">{spn.tier}</span>
+      </div>
+    );
+  };
+
   const translateCountry = (c: string) => {
     const norm = c.trim().toLowerCase();
     if (norm === 'nhật bản') return t('Nhật Bản', 'Japan');
@@ -1628,14 +1695,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 key={spn.id} 
                 className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner flex flex-col justify-center items-center hover:bg-white hover:border-teal-500/20 hover:shadow-md transition-all h-28 relative group"
               >
-                {spn.logoUrl ? (
-                  <img src={spn.logoUrl} alt={spn.name} className="max-h-12 max-w-full object-contain grayscale group-hover:grayscale-0 transition-all duration-300" />
-                ) : (
-                  <div className="text-center">
-                    <p className="font-extrabold text-slate-800 text-sm leading-tight uppercase group-hover:text-teal-650 transition-colors">{spn.name}</p>
-                    <span className="text-[9px] text-teal-650 font-bold uppercase tracking-wider font-mono bg-teal-50 px-1.5 py-0.5 rounded mt-1.5 inline-block">{spn.tier}</span>
-                  </div>
-                )}
+                {renderSponsorLogo(spn)}
               </div>
             )) : (
               // Fallback default mocked sponsors
@@ -1645,9 +1705,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 { name: 'Boston Scientific', tier: 'Gold Sponsor' },
                 { name: 'Johnson & Johnson', tier: 'Silver Sponsor' }
               ].map((spn, idx) => (
-                <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner flex flex-col justify-center items-center hover:bg-white hover:border-teal-500/20 hover:shadow-md transition-all h-28">
-                  <p className="font-extrabold text-slate-800 text-sm leading-tight uppercase">{spn.name}</p>
-                  <span className="text-[9px] text-teal-650 font-black uppercase tracking-wider font-mono bg-teal-50 px-1.5 py-0.5 rounded mt-1.5 inline-block">{spn.tier}</span>
+                <div key={idx} className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-inner flex flex-col justify-center items-center hover:bg-white hover:border-teal-500/20 hover:shadow-md transition-all h-28 relative group">
+                  {renderSponsorLogo(spn)}
                 </div>
               ))
             )}
@@ -1661,7 +1720,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </div>
             <button 
               onClick={() => onNavigate('register-sponsor')} 
-              className="px-4 py-2 bg-teal-650 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-colors border-none"
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-black text-xs rounded-xl shadow-md cursor-pointer transition-all border-none transform hover:scale-102 duration-200 uppercase tracking-wider"
             >
               {t('Liên hệ tài trợ', 'Contact for Sponsorship')}
             </button>
