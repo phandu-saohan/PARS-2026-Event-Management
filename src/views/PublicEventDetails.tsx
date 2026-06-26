@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -323,7 +323,7 @@ function getCountryFlag(country: string) {
 }
 
 // Helper to provide realistic rich academic abstracts and bios
-function getSessionEnrichment(session: ConferenceSession) {
+function getSessionEnrichment(session: ConferenceSession, t: (vi: string, en: string) => string) {
   const title = session.title;
   const speakerName = session.speakerName;
   const speakerTitle = session.speakerTitle;
@@ -337,16 +337,28 @@ function getSessionEnrichment(session: ConferenceSession) {
 
   if (matched) {
     return {
-      abstract: matched.abstractText || `Đề tài tóm tắt: Trình bày nghiên cứu chuyên đề lâm sàng về "${matched.presentationTitle}". Nội dung hướng dẫn cải tiến kỹ thuật, đánh giá phản hồi trên tập hợp mẫu bệnh nhân thực tế và đề xuất chuẩn hóa quy chuẩn y khoa tối ưu an toàn.`,
-      bio: matched.bio || `Báo cáo viên chuyên trách có thâm niên công tác dày dạn, là tác giả của nhiều công bố khoa học uy tín trong ngành.`
+      abstract: matched.abstractText || t(
+        `Đề tài tóm tắt: Trình bày nghiên cứu chuyên đề lâm sàng về "${matched.presentationTitle}". Nội dung hướng dẫn cải tiến kỹ thuật, đánh giá phản hồi trên tập hợp mẫu bệnh nhân thực tế và đề xuất chuẩn hóa quy chuẩn y khoa tối ưu an toàn.`,
+        `Scientific Abstract: Presentation of clinical research on "${matched.presentationTitle}". Focuses on technical innovations, real patient outcomes, and standardizing medical protocols for safety.`
+      ),
+      bio: matched.bio || t(
+        `Báo cáo viên chuyên trách có thâm niên công tác dày dạn, là tác giả của nhiều công bố khoa học uy tín trong ngành.`,
+        `Dedicated presenter with extensive clinical experience, author of multiple peer-reviewed scientific publications.`
+      )
     };
   }
 
   // Pre-configured prominent examples
   if (session.id === 'SES-102') {
     return {
-      abstract: `ĐẶT VẤN ĐỀ: Co thắt tụ máu sau căng da mặt là biến chứng đáng ngại ảnh hưởng thẩm mỹ và thần kinh mặt. Báo cáo đánh giá quy trình quản lý tụ máu sớm kết hợp cắt bỏ chọn lọc một phần tuyến nước bọt dưới hàm phì đại.\n\nPHƯƠNG PHÁP: Nghiên cứu trên 70 ca căng da mặt sâu có can thiệp bóc tách sâu khoang SMAS và điều chỉnh tuyến dưới hàm dư thừa.\n\nKẾT QUẢ: Tỷ lệ tụ máu giảm đáng kể nhờ kiểm soát huyết áp động mạch tỉ mỉ. Kết quả đường viền hàm thon gọn nâng cao tính thẩm mỹ hài lòng của bệnh nhân.\n\nKẾT LUẬN: Bóc tách chọn lọc và cắt bỏ tuyến nước bọt dưới hàm là phương án an toàn giúp định hình hàm mặt tối ưu khi kết hợp SMAS Facelift.`,
-      bio: `TS.BS. Arturo Ramírez Montañana là chuyên gia phẫu thuật thẩm mỹ và tạo hình nổi tiếng người Mexico. Ông hiện là Chủ tịch Hiệp hội Phẫu thuật Tạo hình Thẩm mỹ Quốc tế (ISAPS) với hơn 30 năm đóng góp y học lâm sàng.`
+      abstract: t(
+        `ĐẶT VẤN ĐỀ: Co thắt tụ máu sau căng da mặt là biến chứng đáng ngại ảnh hưởng thẩm mỹ và thần kinh mặt. Báo cáo đánh giá quy trình quản lý tụ máu sớm kết hợp cắt bỏ chọn lọc một phần tuyến nước bọt dưới hàm phì đại.\n\nPHƯƠNG PHÁP: Nghiên cứu trên 70 ca căng da mặt sâu có can thiệp bóc tách sâu khoang SMAS và điều chỉnh tuyến dưới hàm dư thừa.\n\nKẾT QUẢ: Tỷ lệ tụ máu giảm đáng kể nhờ kiểm soát huyết áp động mạch tỉ mỉ. Kết quả đường viền hàm thon gọn nâng cao tính thẩm mỹ hài lòng của bệnh nhân.\n\nKẾT LUẬN: Bóc tách chọn lọc và cắt bỏ tuyến nước bọt dưới hàm là phương án an toàn giúp định hình hàm mặt tối ưu khi kết hợp SMAS Facelift.`,
+        `BACKGROUND: Hematoma and salivary gland hypertrophy after facelift are challenging. This report evaluates early hematoma management combined with selective partial resection of the submandibular gland.\n\nMETHODS: A study of 70 deep-plane facelift cases with deep SMAS dissection and submandibular adjustment.\n\nRESULTS: Hematoma rate was significantly reduced with blood pressure control. Refined jawline contour improved patient satisfaction.\n\nCONCLUSIONS: Selective submandibular resection is safe and optimizes jawline contours when combined with deep-plane facelift.`
+      ),
+      bio: t(
+        `TS.BS. Arturo Ramírez Montañana là chuyên gia phẫu thuật thẩm mỹ và tạo hình nổi tiếng người Mexico. Ông hiện là Chủ tịch Hiệp hội Phẫu thuật Tạo hình Thẩm mỹ Quốc tế (ISAPS) với hơn 30 năm đóng góp y học lâm sàng.`,
+        `Arturo Ramírez Montañana, MD, PhD is a renowned plastic and reconstructive surgeon from Mexico. He is the current President of the International Society of Aesthetic Plastic Surgery (ISAPS) with over 30 years of clinical contributions.`
+      )
     };
   }
 
@@ -356,14 +368,32 @@ function getSessionEnrichment(session: ConferenceSession) {
   let bio = '';
 
   if (lowerTitle.includes('khai mạc') || lowerTitle.includes('bế mạc') || lowerTitle.includes('đón khách')) {
-    abstract = `Nội dung tổng luận điều hành: Đón tiếp đại biểu và khách mời chính thức. Phát biểu khai mạc Hội nghị Khoa học Quốc tế PARS 2026 bởi Ban tổ chức - Bệnh viện Thẩm mỹ EMCAS. Quán triệt kịch bản y học, xu hướng học thuật thẩm mỹ và phẫu thuật tái sinh chuẩn 2026.\n\nMục tiêu: Định hướng chung cho toàn bộ các bác sĩ hội viên về sự phối hợp giữa tạo hình thẩm mỹ chuyên sâu cùng tôn trọng y đức và an toàn tối đa cho khách hàng.`;
-    bio = `Ban Tổ Chức Hội Nghị và Hội đồng Khoa học Bệnh viện Thẩm mỹ EMCAS điều phối tiếp rước chuyên gia.`;
+    abstract = t(
+      `Nội dung tổng luận điều hành: Đón tiếp đại biểu và khách mời chính thức. Phát biểu khai mạc Hội nghị Khoa học Quốc tế PARS 2026 bởi Ban tổ chức - Bệnh viện Thẩm mỹ EMCAS. Quán triệt kịch bản y học, xu hướng học thuật thẩm mỹ và phẫu thuật tái sinh chuẩn 2026.\n\nMục tiêu: Định hướng chung cho toàn bộ các bác sĩ hội viên về sự phối hợp giữa tạo hình thẩm mỹ chuyên sâu cùng tôn trọng y đức và an toàn tối đa cho khách hàng.`,
+      `Executive Summary: Reception of delegates and official guests. Opening remarks for PARS 2026 by the Organizing Committee - EMCAS Aesthetic Hospital. Review of medical standards, aesthetic trends, and regenerative surgery protocols.\n\nObjective: General alignment for member doctors on coordinating advanced aesthetic procedures with medical ethics and patient safety.`
+    );
+    bio = t(
+      `Ban Tổ Chức Hội Nghị và Hội đồng Khoa học Bệnh viện Thẩm mỹ EMCAS điều phối tiếp rước chuyên gia.`,
+      `Organizing Committee and Scientific Board of EMCAS Aesthetic Hospital coordinating VIP hospitality.`
+    );
   } else if (lowerTitle.includes('ngực') || lowerTitle.includes('vú') || lowerTitle.includes('túi độn')) {
-    abstract = `ĐẶT VẤN ĐỀ: Nâng ngực kết hợp cấy ghép mỡ tự thân (Hybrid Breast Augmentation) và phẫu thuật nội soi robot đang trở thành xu hướng tối ưu hóa thẩm mỹ. Nghiên cứu tập trung phân tích chuẩn an toàn ngăn ngừa biến chứng xơ co thắt và BIA-ALCL.\n\nPHƯƠNG PHÁP: Đánh giá tiến cứu lâm sàng đa trung tâm trên dải bệnh nhân thật trải qua phẫu thuật nâng ngực bảo tồn mô.\n\nKẾT QUẢ: Khả năng tương thích sinh học cao, sẹo rạch nhỏ thẩm mỹ giấu kín, tuyến vú mềm mại tự nhiên và ngăn ngừa biến chứng bao xơ hiệu quả.\n\nKẾT LUẬN: Ứng dụng kỹ thuật bóc tách tối thiểu xâm lấn phối hợp cấy mỡ (cal) mang lại hiệu quả thẩm mỹ vượt bậc và an toàn lâu dài.`;
-    bio = `Báo cáo viên chuyên đề: Chuyên gia hàng đầu về phẫu thuật tuyến vú và tái tạo vóc dáng, diễn giả danh dự tại các hội nghị thẩm mỹ lớn.`;
+    abstract = t(
+      `ĐẶT VẤN ĐỀ: Nâng ngực kết hợp cấy ghép mỡ tự thân (Hybrid Breast Augmentation) và phẫu thuật nội soi robot đang trở thành xu hướng tối ưu hóa thẩm mỹ. Nghiên cứu tập trung phân tích chuẩn an toàn ngăn ngừa biến chứng xơ co thắt và BIA-ALCL.\n\nPHƯƠNG PHÁP: Đánh giá tiến cứu lâm sàng đa trung tâm trên dải bệnh nhân thật trải qua phẫu thuật nâng ngực bảo tồn mô.\n\nKẾT QUẢ: Khả năng tương thích sinh học cao, sẹo rạch nhỏ thẩm mỹ giấu kín, tuyến vú mềm mại tự nhiên và ngăn ngừa biến chứng bao xơ hiệu quả.\n\nKẾT LUẬN: Ứng dụng kỹ thuật bóc tách tối thiểu xâm lấn phối hợp cấy mỡ (cal) mang lại hiệu quả thẩm mỹ vượt bậc và an toàn lâu dài.`,
+      `BACKGROUND: Hybrid breast augmentation and robotic endoscopic surgery are optimized aesthetic trends. This study focuses on safety protocols to prevent capsular contracture and BIA-ALCL.\n\nMETHODS: Prospective multi-center clinical evaluation of patients undergoing tissue-preserving breast surgery.\n\nRESULTS: High biocompatibility, minimal scarring, natural breast softness, and effective prevention of capsular contracture.\n\nCONCLUSIONS: Minimally invasive dissection combined with fat grafting provides outstanding aesthetic results and long-term safety.`
+    );
+    bio = t(
+      `Báo cáo viên chuyên đề: Chuyên gia hàng đầu về phẫu thuật tuyến vú và tái tạo vóc dáng, diễn giả danh dự tại các hội nghị thẩm mỹ lớn.`,
+      `Session Speaker: Leading expert in breast surgery and body contouring, guest speaker at major aesthetic congresses.`
+    );
   } else {
-    abstract = `TÓM TẮT ĐỀ TÀI (ABSTRACT):\nĐặt vấn đề: Nghiên cứu nhằm tổng kết các bằng chứng lâm sàng tiên phong trong khuôn khổ chủ đề khoa học tạo hình thẩm mỹ và y học tái sinh PARS 2026. Giải quyết thách thức lâm sàng, nâng chuẩn chất lượng đào tạo liên tục CME.\n\nPhương pháp: Tiến hành phân tích tiến cứu kết hợp kỹ thuật can thiệp ít xâm lấn và theo dõi dọc sau điều trị.\n\nKết quả: Rút ngắn thời gian dưỡng thương, bảo toàn sự phân bố mô tự nhiên và nâng tỷ lệ thẩm mỹ hài lòng toàn diện.\n\nKết luận: Phương án cải tiến đề xuất mang tính đột phá, xứng đáng tích hợp sâu rộng vào cẩm nang chỉ định điều trị thực tế.`;
-    bio = `Báo cáo viên chuyên đề: ${speakerName} (${speakerTitle}). Nhà khoa học hoạt động nhiệt thành, có đóng góp hữu ích cho hội đồng khoa học y tế.`;
+    abstract = t(
+      `TÓM TẮT ĐỀ TÀI (ABSTRACT):\nĐặt vấn đề: Nghiên cứu nhằm tổng kết các bằng chứng lâm sàng tiên phong trong khuôn khổ chủ đề khoa học tạo hình thẩm mỹ và y học tái sinh PARS 2026. Giải quyết thách thức lâm sàng, nâng chuẩn chất lượng đào tạo liên tục CME.\n\nPhương pháp: Tiến hành phân tích tiến cứu kết hợp kỹ thuật can thiệp ít xâm lấn và theo dõi dọc sau điều trị.\n\nKết quả: Rút ngắn thời gian dưỡng thương, bảo toàn sự phân bố mô tự nhiên và nâng tỷ lệ thẩm mỹ hài lòng toàn diện.\n\nKết luận: Phương án cải tiến đề xuất mang tính đột phá, xứng đáng tích hợp sâu rộng vào cẩm nang chỉ định điều trị thực tế.`,
+      `SCIENTIFIC ABSTRACT:\nBackground: This study summarizes pioneering clinical evidence under the theme of plastic surgery and regenerative medicine at PARS 2026. Focuses on clinical challenges and CME standards.\n\nMethods: Prospective analysis combining minimally invasive interventions and longitudinal follow-up.\n\nResults: Shorter recovery times, preserved natural tissue distribution, and high overall patient satisfaction.\n\nConclusions: The proposed improvements offer breakthrough solutions suitable for clinical integration.`
+    );
+    bio = t(
+      `Báo cáo viên chuyên đề: ${speakerName} (${speakerTitle}). Nhà khoa học hoạt động nhiệt thành, có đóng góp hữu ích cho hội đồng khoa học y tế.`,
+      `Session Speaker: ${speakerName} (${speakerTitle}). Active academic researcher with valuable contributions to the medical board.`
+    );
   }
 
   return { abstract, bio };
@@ -497,6 +527,88 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   };
   // Bilingual IP-based language detection
   const { lang, setLang, t } = useLanguage();
+
+  const translateCountry = (c: string) => {
+    const norm = c.trim().toLowerCase();
+    if (norm === 'nhật bản') return t('Nhật Bản', 'Japan');
+    if (norm === 'ý') return t('Ý', 'Italy');
+    if (norm === 'mỹ') return t('Mỹ', 'USA');
+    if (norm === 'úc') return t('Úc', 'Australia');
+    if (norm === 'thụy điển') return t('Thụy Điển', 'Sweden');
+    if (norm === 'việt nam') return t('Việt Nam', 'Vietnam');
+    return c;
+  };
+
+  const translateHighlight = (name: string, highlight: string) => {
+    const normName = name.toLowerCase();
+    if (normName.includes('kotaro')) {
+      return t(
+        'Trưởng khoa Phẫu thuật Tạo hình, Đại học Y khoa Jichi, Nhật Bản',
+        'Chairman of Department of Plastic Surgery, Jichi Medical University, Japan'
+      );
+    }
+    if (normName.includes('santanelli')) {
+      return t(
+        'Giảng viên tại Đại học Sapienza Rome, Ý',
+        'Lecturer at Sapienza University of Rome, Italy'
+      );
+    }
+    if (normName.includes('parkyn')) {
+      return t(
+        'Trung tâm Phẫu thuật Tuyến vú và Nội tiết Norwood',
+        'Norwood Breast & Endocrine Surgery Centre'
+      );
+    }
+    if (normName.includes('kalaji')) {
+      return t(
+        'Chủ tịch Nhóm Tổng thư ký ISAPS',
+        'Chair of the Membership Committee for ISPRES'
+      );
+    }
+    if (normName.includes('clemens')) {
+      return t(
+        'Chuyên gia đầu ngành về tái tạo tuyến vú và an toàn túi ngực (BIA-ALCL)',
+        'Leading expert in breast reconstruction and breast implant safety (BIA-ALCL)'
+      );
+    }
+    if (normName.includes('yuko')) {
+      return t(
+        'Chuyên gia hàng đầu về phẫu thuật robot và cấy ghép mỡ tự thân tái tạo ngực',
+        'Leading expert in robotic surgery and autologous fat transfer for breast reconstruction'
+      );
+    }
+    if (normName.includes('vũ ngọc lâm')) {
+      return t(
+        'Giám đốc Trung tâm Phẫu thuật Sọ mặt và Tạo hình, Bệnh viện Trung ương Quân đội 108',
+        'Director of the Craniofacial and Plastic Surgery Center, Military Central Hospital 108'
+      );
+    }
+    if (normName.includes('phạm hiếu liêm')) {
+      return t(
+        'Trưởng Bộ môn Phẫu thuật Tạo hình Thẩm mỹ Đại học Y khoa Phạm Ngọc Thạch & Trưởng khoa PTTM Đại học Y Dược TP.HCM',
+        'Head of Plastic Surgery Department, Pham Ngoc Thach University of Medicine & Head of Aesthetic Plastic Surgery, UMP HCMC'
+      );
+    }
+    if (normName.includes('phạm văn phúc')) {
+      return t(
+        'Viện trưởng Viện Tế bào gốc, Đại học Quốc gia TP.HCM',
+        'Director of the Stem Cell Institute, Ho Chi Minh City National University'
+      );
+    }
+    if (normName.includes('nguyễn đình tùng')) {
+      return t(
+        'Thư ký Quốc gia ISAPS Việt Nam',
+        'National Secretary of ISAPS Vietnam'
+      );
+    }
+    if (normName.includes('bửu trúc')) {
+      return t(
+        'Trung tâm Công nghệ Sinh học TP.HCM',
+        'Ho Chi Minh City Biotechnology Center'
+      );
+    }
+    return highlight;
+  };
 
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
@@ -1019,7 +1131,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 onClick={() => scrollToSection('speakers')} 
                 className="mt-6 text-xs font-bold text-indigo-650 hover:text-indigo-750 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                {block2BtnText}
+                {t(block2BtnText, 'View Speaker List')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1030,16 +1142,16 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-amber-55 text-amber-600 flex items-center justify-center font-bold">
                   03
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">{block3Title}</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{t(block3Title, 'Scientific Program')}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {block3Desc}
+                  {t(block3Desc, '2-Day Agenda: Day 1 (12/09) Opening, multi-track scientific reports, teabreak & Gala Dinner. Day 2 (13/09) Special sessions, panel discussions & closing.')}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('program')} 
                 className="mt-6 text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                {block3BtnText}
+                {t(block3BtnText, 'Explore Timeline')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1050,16 +1162,16 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
                   04
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">{block4Title}</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{t(block4Title, 'Premium Venue')}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {block4Desc}
+                  {t(block4Desc, 'Grandly organized at Meliá Hanoi Hotel – 44B Ly Thuong Kiet, Hoan Kiem, Hanoi. The most modern convention hall in the Capital.')}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('location')} 
                 className="mt-6 text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                {block4BtnText}
+                {t(block4BtnText, 'Explore Venue')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -1124,7 +1236,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   {/* Country & Flag pill badge */}
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 w-fit text-[10px] text-teal-400 font-extrabold uppercase tracking-wider">
                     {getCountryFlag(spk.country)}
-                    <span>{spk.country}</span>
+                    <span>{translateCountry(spk.country)}</span>
                   </div>
 
                   {/* Name & Role */}
@@ -1140,7 +1252,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
                 {/* Highlight box */}
                 <div className="bg-white/5 border border-white/5 p-3.5 rounded-2xl text-[10.5px] text-slate-300 leading-relaxed italic border-t border-white/10 mt-4 text-left">
-                  {spk.highlight}
+                  {translateHighlight(spk.name, spk.highlight)}
                 </div>
               </div>
             ))}
@@ -1203,7 +1315,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   {/* Country & Flag pill badge */}
                   <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-100 border border-slate-200 w-fit text-[10px] text-teal-600 font-extrabold uppercase tracking-wider">
                     {getCountryFlag(spk.country)}
-                    <span>{spk.country}</span>
+                    <span>{translateCountry(spk.country)}</span>
                   </div>
 
                   {/* Name & Role */}
@@ -1218,8 +1330,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 </div>
 
                 {/* Highlight box */}
-                <div className="bg-teal-50/45 border border-teal-100/40 p-3.5 rounded-2xl text-[10.5px] text-slate-650 leading-relaxed italic mt-4 text-left">
-                  {spk.highlight}
+                <div className="bg-teal-50/45 border border-teal-100/40 p-3.5 rounded-2xl text-[10.5px] text-slate-655 leading-relaxed italic mt-4 text-left">
+                  {translateHighlight(spk.name, spk.highlight)}
                 </div>
               </div>
             ))}
@@ -1232,15 +1344,15 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       <section id="register" className="py-16 md:py-24 bg-slate-100 border-y border-slate-200 scroll-mt-20" style={sectionStyle.register}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10 max-w-xl mx-auto space-y-2">
-            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">SECURE REGISTRATION</span>
-            <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-900 leading-none">ĐĂNG KÝ THAM DỰ</h2>
+            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('DANG KY CHINH THUC', 'SECURE REGISTRATION')}</span>
+            <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-900 leading-none">{t('DANG KY THAM DU', 'REGISTER TO ATTEND')}</h2>
             <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-              Vui lòng hoàn thiện đúng 4 bước thông tin đăng ký bên dưới. Thẻ đại biểu chứa mã QR check-in và chứng chỉ CME (4.5h) sẽ phát hành tự động qua Email & Zalo của bác sĩ.
+              {t('Vui long hoan thien form 4 buoc thong tin dang ky ben duoi. The dai bieu chua ma QR check-in va chung chi CME (4.5h) se phat hanh tu dong qua Email & Zalo cua bac si.', 'Please complete the 4-step registration form below. Your delegate badge with QR code check-in and CME certificate (4.5h) will be automatically issued via your Email & Zalo.')}
             </p>
           </div>
 
           <div className="max-w-6xl mx-auto">
-            <PublicDelegateRegister onNavigate={onNavigate} isInline={true} />
+            <PublicDelegateRegister onNavigate={onNavigate} isInline={true} lang={lang} />
           </div>
         </div>
       </section>
@@ -1298,8 +1410,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             {ROOMS_CONFIG.map(r => (
               <div key={r.id} className="flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
                 <span className={`w-2.5 h-2.5 rounded-full ${r.id === 'Hội trường 1' ? 'bg-rose-500' : 'bg-indigo-500'}`} />
-                <span className="font-bold">{r.vietnameseName}</span>
-                <span className="text-slate-400 hidden sm:inline">— {r.subtitle}</span>
+                <span className="font-bold">{t(r.vietnameseName, r.id === 'Hội trường 1' ? 'Hall A' : 'Hall B')}</span>
+                <span className="text-slate-400 hidden sm:inline">— {t(r.subtitle, r.id === 'Hội trường 1' ? 'Facial Aesthetics, Rhinoplasty & Lipofilling' : 'Breast Surgery, Body Contouring & Regenerative Medicine')}</span>
               </div>
             ))}
           </div>
@@ -1308,7 +1420,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {daySessions.length === 0 ? (
             <div className="bg-slate-50 py-12 rounded-2xl border border-slate-200 text-center space-y-2">
               <Info className="w-8 h-8 text-slate-300 mx-auto" />
-              <p className="text-sm font-semibold text-slate-500">Không có phiên nào trong ngày này.</p>
+              <p className="text-sm font-semibold text-slate-500">{t('Không có phiên nào trong ngày này.', 'No sessions on this day.')}</p>
             </div>
           ) : (
             <div className="bg-slate-50 border border-slate-200 rounded-2xl overflow-hidden">
@@ -1318,13 +1430,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 {/* Header */}
                 <div className="grid grid-cols-[80px_1fr_1fr] bg-slate-900 text-white text-[10px] font-bold uppercase tracking-wider divide-x divide-slate-700/50 select-none">
                   <div className="px-3 py-3 flex items-center justify-center gap-1.5 text-slate-400 font-mono">
-                    <Clock className="w-3.5 h-3.5 text-teal-600 shrink-0" /> Giờ
+                    <Clock className="w-3.5 h-3.5 text-teal-600 shrink-0" /> {t('Giờ', 'Time')}
                   </div>
                   {ROOMS_CONFIG.map(room => (
                     <div key={room.id} className="px-4 py-3 flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full shrink-0 ${room.id === 'Hội trường 1' ? 'bg-rose-400' : 'bg-indigo-400'}`} />
-                      <span className="font-extrabold">{room.vietnameseName}</span>
-                      <span className="text-slate-400 font-normal normal-case text-[9px] hidden lg:inline truncate">— {room.subtitle}</span>
+                      <span className="font-extrabold">{t(room.vietnameseName, room.id === 'Hội trường 1' ? 'Hall A' : 'Hall B')}</span>
+                      <span className="text-slate-400 font-normal normal-case text-[9px] hidden lg:inline truncate">— {t(room.subtitle, room.id === 'Hội trường 1' ? 'Facial Aesthetics, Rhinoplasty & Lipofilling' : 'Breast Surgery, Body Contouring & Regenerative Medicine')}</span>
                     </div>
                   ))}
                 </div>
@@ -1417,7 +1529,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                         <div className={`w-[3px] self-stretch shrink-0 rounded-full ${matchingRoom?.id === 'Hội trường 1' ? 'bg-rose-400' : matchingRoom ? 'bg-indigo-400' : 'bg-teal-600'}`} />
                         <div className="flex-1 min-w-0">
                           {matchingRoom && (
-                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${matchingRoom.tagBg}`}>{matchingRoom.vietnameseName}</span>
+                            <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${matchingRoom.tagBg}`}>{t(matchingRoom.vietnameseName, matchingRoom.id === 'Hội trường 1' ? 'Hall A' : 'Hall B')}</span>
                           )}
                           <p className="font-bold text-slate-800 text-xs leading-snug mt-0.5 line-clamp-2">{session.title}</p>
                           {session.speakerName && (
@@ -1440,12 +1552,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     {programExpanded ? (
                       <>
                         <ChevronRight className="w-4 h-4 -rotate-90 transition-transform" />
-                        Thu gọn
+                        {t('Thu gon', 'Collapse')}
                       </>
                     ) : (
                       <>
                         <ChevronRight className="w-4 h-4 rotate-90 transition-transform" />
-                        Xem thêm {hiddenCount} phiên còn lại
+                        {t('Xem thêm ' + hiddenCount + ' phiên còn lại', 'Show ' + hiddenCount + ' more sessions')}
                       </>
                     )}
                   </button>
@@ -1455,10 +1567,10 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               {/* Footer */}
               <div className="px-4 py-2 bg-slate-100/80 border-t border-slate-200/60 flex items-center justify-between">
                 <span className="text-[10px] text-slate-400 font-semibold font-mono">
-                  {programExpanded ? sortedTimeBlocks.length : Math.min(INITIAL_SHOW, sortedTimeBlocks.length)}/{sortedTimeBlocks.length} phiên · {selectedDate === '2026-09-12' ? 'Ngày 1 – 12/09/2026' : 'Ngày 2 – 13/09/2026'}
+                  {programExpanded ? sortedTimeBlocks.length : Math.min(INITIAL_SHOW, sortedTimeBlocks.length)}/{sortedTimeBlocks.length} {t('phiên', 'sessions')} · {selectedDate === '2026-09-12' ? t('Ngày 1 – 12/09/2026', 'Day 1 – 12/09/2026') : t('Ngày 2 – 13/09/2026', 'Day 2 – 13/09/2026')}
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium">
-                  Nhấp vào bài để xem chi tiết
+                  {t('Nhấp vào bài để xem chi tiết', 'Click on session to view details')}
                 </span>
               </div>
             </div>
@@ -1471,12 +1583,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       {/* 8. SPONSORS */}
       <section id="sponsors" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">CONFERENCE SPONSORS</span>
+          <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('CONFERENCE SPONSORS', 'CONFERENCE SPONSORS')}</span>
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 mb-4 leading-none">
-            NHÀ TÀI TRỢ & ĐỐI TÁC ĐỒNG HÀNH
+            {t('NHÀ TÀI TRỢ & ĐỐI TÁC ĐỒNG HÀNH', 'SPONSORS & PARTNERS')}
           </h2>
           <p className="text-slate-500 text-xs leading-relaxed max-w-xl mx-auto font-semibold mb-12">
-            Hội nghị vinh dự đón nhận sự đồng hành và hỗ trợ từ các tập đoàn thiết bị y tế, dược mỹ phẩm và công nghệ thẩm mỹ danh tiếng trong nước và quốc tế.
+            {t('Hội nghị vinh dự đón nhận sự đồng hành và hỗ trợ từ các tập đoàn thiết bị y tế, dược mỹ phẩm và công nghệ thẩm mỹ danh tiếng trong nước và quốc tế.', 'The conference is honored to receive support and sponsorship from leading domestic and international medical device, pharmaceutical, and aesthetic technology corporations.')}
           </p>
 
           {/* Sponsors grid representation */}
@@ -1514,14 +1626,14 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Call for Sponsorship */}
           <div className="mt-12 p-6 rounded-2xl border border-dashed border-teal-500/30 bg-teal-50/20 max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-left">
-              <h4 className="font-extrabold text-slate-900 text-sm">Đồng hành cùng PARS 2026?</h4>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">Đăng ký tài trợ để quảng bá thương hiệu trực diện tới 500+ Bác sĩ đầu ngành.</p>
+              <h4 className="font-extrabold text-slate-900 text-sm">{t('Đồng hành cùng PARS 2026?', 'Sponsor PARS 2026?')}</h4>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{t('Đăng ký tài trợ để quảng bá thương hiệu trực diện tới 500+ Bác sĩ đầu ngành.', 'Become a sponsor to promote your brand directly to 500+ leading medical professionals.')}</p>
             </div>
             <button 
               onClick={() => onNavigate('register-sponsor')} 
               className="px-4 py-2 bg-teal-650 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer transition-colors border-none"
             >
-              Liên hệ tài trợ
+              {t('Liên hệ tài trợ', 'Contact for Sponsorship')}
             </button>
           </div>
         </div>
@@ -1533,31 +1645,31 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           
           {/* Left info column */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
-            <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block">EVENT VENUE</span>
+            <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('EVENT VENUE', 'EVENT VENUE')}</span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white leading-none">
-              ĐỊA ĐIỂM TỔ CHỨC
+              {t('ĐỊA ĐIỂM TỔ CHỨC', 'CONFERENCE VENUE')}
             </h2>
             <div className="space-y-4 text-slate-350 text-sm leading-relaxed">
               <div className="flex gap-3">
                 <Building className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
                 <p>
-                  <strong className="text-white">Khách sạn Meliá Hà Nội</strong>
+                  <strong className="text-white">{t('Khách sạn Meliá Hà Nội', 'Meliá Hanoi Hotel')}</strong>
                   <br />
-                  Số 44B Lý Thường Kiệt, Phường Cửa Nam, Quận Hoàn Kiếm, TP. Hà Nội.
+                  {t('Số 44B Lý Thường Kiệt, Phường Cửa Nam, Quận Hoàn Kiếm, TP. Hà Nội.', '44B Ly Thuong Kiet Street, Cua Nam Ward, Hoan Kiem District, Hanoi, Vietnam.')}
                 </p>
               </div>
               <div className="flex gap-3">
                 <Phone className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
                 <p>
-                  <strong className="text-white">Hotline hỗ trợ chỉ dẫn:</strong>
+                  <strong className="text-white">{t('Hotline hỗ trợ chỉ dẫn:', 'Support Hotline:')}</strong>
                   <br />
-                  Ban thư ký EMCAS: +84964551151
+                  {t('Ban thư ký EMCAS: +84964551151', 'EMCAS Secretariat: +84964551151')}
                 </p>
               </div>
               <div className="flex gap-3">
                 <Globe className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
                 <p>
-                  <strong className="text-white">Trang chủ khách sạn:</strong>
+                  <strong className="text-white">{t('Trang chủ khách sạn:', 'Hotel Website:')}</strong>
                   <br />
                   <a href="https://www.melia.com" target="_blank" rel="noreferrer" className="text-teal-300 hover:underline flex items-center gap-1">
                     melia.com
@@ -1568,7 +1680,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </div>
             
             <p className="text-xs text-slate-400 leading-relaxed italic bg-white/5 p-4 rounded-xl border border-white/5">
-              💡 <strong>Lưu ý đỗ xe:</strong> Đại biểu di chuyển bằng phương tiện cá nhân vui lòng đỗ xe tại tầng hầm của Khách sạn Meliá hoặc liên hệ lễ tân hướng dẫn vị trí dự phòng bên ngoài.
+              {t('💡 Lưu ý đỗ xe: Đại biểu di chuyển bằng phương tiện cá nhân vui lòng đỗ xe tại tầng hầm của Khách sạn Meliá hoặc liên hệ lễ tân hướng dẫn vị trí dự phòng bên ngoài.', '💡 Parking Note: Delegates traveling by personal vehicles please park in the basement of Meliá Hotel or contact the reception for alternative parking locations.')}
             </p>
           </div>
 
@@ -1584,8 +1696,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <MapPin className="w-8 h-8" />
               </div>
               <div className="space-y-1">
-                <h4 className="font-extrabold text-white text-base">BẢN ĐỒ KHÁCH SẠN MELIÁ HÀ NỘI</h4>
-                <p className="text-xs text-slate-400">44B Lý Thường Kiệt, Hoàn Kiếm, Hà Nội</p>
+                <h4 className="font-extrabold text-white text-base">{t('BẢN ĐỒ KHÁCH SẠN MELIÁ HÀ NỘI', 'MAP OF MELIÁ HANOI HOTEL')}</h4>
+                <p className="text-xs text-slate-400">{t('44B Lý Thường Kiệt, Hoàn Kiếm, Hà Nội', '44B Ly Thuong Kiet, Hoan Kiem, Hanoi')}</p>
               </div>
               <a
                 href="https://maps.google.com/?q=Melia+Hotel+Hanoi+44B+Ly+Thuong+Kiet"
@@ -1593,14 +1705,14 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 rel="noreferrer"
                 className="px-5 py-2.5 bg-teal-500 hover:bg-teal-650 text-white font-bold text-xs rounded-xl shadow-md inline-flex items-center gap-1.5 transition-all decoration-none"
               >
-                Mở trong Google Maps
+                {t('Mở trong Google Maps', 'Open in Google Maps')}
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
 
             {/* Bottom details strip */}
             <div className="bg-slate-900 border-t border-white/5 p-4 text-center text-xs text-slate-500 z-10">
-              Vị trí đắc địa ngay trung tâm Thủ đô, cách Hồ Hoàn Kiếm 10 phút đi bộ.
+              {t('Vị trí đắc địa ngay trung tâm Thủ đô, cách Hồ Hoàn Kiếm 10 phút đi bộ.', 'Prime location in the heart of the Capital, a 10-minute walk to Hoan Kiem Lake.')}
             </div>
           </div>
 
@@ -1620,39 +1732,39 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <span className="text-white font-black uppercase tracking-wider text-sm">PARS 2026</span>
             </div>
             <p className="text-xs leading-relaxed max-w-sm text-slate-400">
-              Hệ thống đăng ký & điều phối học thuật trực tuyến của Hội nghị Khoa học Quốc tế PARS 2026. Chủ trì tổ chức bởi Bệnh viện Thẩm mỹ EMCAS.
+              {t('Hệ thống đăng ký & điều phối học thuật trực tuyến của Hội nghị Khoa học Quốc tế PARS 2026. Chủ trì tổ chức bởi Bệnh viện Thẩm mỹ EMCAS.', 'Online registration & academic coordination system for the PARS 2026 International Scientific Conference. Hosted by EMCAS Aesthetic Hospital.')}
             </p>
             <div className="text-[11px] text-slate-500 pt-2 space-y-1">
-              <p>• <strong>Báo cáo viên:</strong> Hạn nộp tóm tắt abstract đến hết ngày 15/09/2026.</p>
-              <p>• <strong>Đại biểu:</strong> Hoàn thành chuyển khoản lệ phí để kích hoạt vé tự động.</p>
+              <p>• <strong>{t('Báo cáo viên:', 'Presenters:')}</strong> {t('Hạn nộp tóm tắt abstract đến hết ngày 15/09/2026.', 'Abstract submission deadline is September 15, 2026.')}</p>
+              <p>• <strong>{t('Đại biểu:', 'Delegates:')}</strong> {t('Hoàn thành chuyển khoản lệ phí để kích hoạt vé tự động.', 'Complete the registration fee transfer for automatic ticket activation.')}</p>
             </div>
           </div>
 
           {/* Col 2: Navigation Links */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">ĐƯỜNG DẪN NHANH</h4>
+            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">{t('ĐƯỜNG DẪN NHANH', 'QUICK LINKS')}</h4>
             <ul className="text-xs space-y-2.5 font-bold list-none p-0 m-0">
-              <li><button onClick={() => scrollToSection('intro')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">Giới thiệu chung</button></li>
-              <li><button onClick={() => scrollToSection('speakers')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">Báo cáo viên</button></li>
-              <li><button onClick={() => scrollToSection('program')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">Chương trình khoa học</button></li>
-              <li><button onClick={() => scrollToSection('register')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">Đăng ký tham dự</button></li>
+              <li><button onClick={() => scrollToSection('intro')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Giới thiệu chung', 'About')}</button></li>
+              <li><button onClick={() => scrollToSection('speakers')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Báo cáo viên', 'Speakers')}</button></li>
+              <li><button onClick={() => scrollToSection('program')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Chương trình khoa học', 'Scientific Program')}</button></li>
+              <li><button onClick={() => scrollToSection('register')} className="hover:text-teal-400 transition-colors cursor-pointer text-left border-none bg-transparent text-slate-400">{t('Đăng ký tham dự', 'Registration')}</button></li>
             </ul>
           </div>
 
           {/* Col 3: Contact details */}
           <div className="space-y-4">
-            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">LIÊN HỆ BTC</h4>
+            <h4 className="text-xs font-black uppercase text-white tracking-widest font-mono">{t('LIÊN HỆ BTC', 'CONTACT US')}</h4>
             <div className="text-xs space-y-2.5 leading-relaxed">
               <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">Đơn vị tổ chức:</strong>
-                Bệnh viện Thẩm mỹ EMCAS
+                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Đơn vị tổ chức:', 'Organizer:')}</strong>
+                {t('Bệnh viện Thẩm mỹ EMCAS', 'EMCAS Aesthetic Hospital')}
               </p>
               <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">Zalo / Hotline:</strong>
-                +84964551151 (Ban thư ký)
+                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Zalo / Hotline:', 'Zalo / Hotline:')}</strong>
+                {t('+84964551151 (Ban thư ký)', '+84964551151 (Secretariat)')}
               </p>
               <p>
-                <strong className="text-slate-200 uppercase block font-sans text-[10px]">Hỗ trợ kỹ thuật:</strong>
+                <strong className="text-slate-200 uppercase block font-sans text-[10px]">{t('Hỗ trợ kỹ thuật:', 'Technical Support:')}</strong>
                 pars.events@gmail.com
               </p>
             </div>
@@ -1673,7 +1785,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
       {/* 11. ACADEMIC ABSTRACT & BIO DETAIL DIALOG POPUP */}
       {selectedSessionDetail && (() => {
-        const enrichment = getSessionEnrichment(selectedSessionDetail);
+        const enrichment = getSessionEnrichment(selectedSessionDetail, t);
         const isBookmarked = personalAgenda.includes(selectedSessionDetail.id);
         const matchingConf = ROOMS_CONFIG.find(r => selectedSessionDetail.roomName.includes(r.id));
         
@@ -1737,7 +1849,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     }`}
                   >
                     <Star className={`w-3.5 h-3.5 ${isBookmarked ? 'fill-white text-amber-500' : 'text-amber-500'}`} />
-                    {isBookmarked ? 'Đã lưu' : 'Lưu lịch'}
+                    {isBookmarked ? t('Đã lưu', 'Saved') : t('Lưu lịch', 'Save schedule')}
                   </button>
                 </div>
               </div>
@@ -1752,7 +1864,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                       : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
                   }`}
                 >
-                  Tóm Tắt Đề Tài (Abstract)
+                  {t('Tóm Tắt Đề Tài (Abstract)', 'Scientific Abstract')}
                 </button>
                 <button
                   onClick={() => setModalTab('bio')}
@@ -1762,7 +1874,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                       : 'border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50/50'
                   }`}
                 >
-                  Tiểu Sử Báo Cáo Viên (Bio)
+                  {t('Tiểu Sử Báo Cáo Viên (Bio)', 'Presenter Biography')}
                 </button>
               </div>
 
@@ -1772,7 +1884,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   <div className="space-y-4 font-sans">
                     <div className="flex items-center gap-1.5 text-xs text-indigo-700 font-bold uppercase tracking-wider bg-indigo-50 w-fit px-2.5 py-1 rounded">
                       <FileText className="w-3.5 h-3.5" />
-                      Công báo học thuật chính thức
+                      {t('Công báo học thuật chính thức', 'Official Academic Publication')}
                     </div>
                     {/* Render abstract */}
                     <div className="whitespace-pre-line text-slate-800 text-justify text-[13px] bg-white p-4 rounded-2xl border border-slate-100 shadow-xs leading-relaxed">
@@ -1783,7 +1895,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   <div className="space-y-4 font-sans">
                     <div className="flex items-center gap-1.5 text-xs text-emerald-800 font-bold uppercase tracking-wider bg-emerald-50 w-fit px-2.5 py-1 rounded">
                       <Users className="w-3.5 h-3.5 text-emerald-600" />
-                      Lý lịch khoa học trích ngang
+                      {t('Lý lịch khoa học trích ngang', 'Presenter Biography')}
                     </div>
                     
                     <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-xs space-y-3">
@@ -1791,7 +1903,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                         {selectedSessionDetail.speakerName}
                       </p>
                       <p className="text-xs text-teal-700 font-semibold italic bg-teal-50/30 px-2 py-1 rounded border border-teal-100/40 font-mono">
-                        Chức danh: {selectedSessionDetail.speakerTitle}
+                        {t('Chức danh: ', 'Title: ')}{selectedSessionDetail.speakerTitle}
                       </p>
                       <div className="whitespace-pre-line text-slate-700 text-justify text-[13px] pt-1">
                         {enrichment.bio}
@@ -1807,7 +1919,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   onClick={() => setSelectedSessionDetail(null)}
                   className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-all cursor-pointer border-none"
                 >
-                  Đóng cửa sổ
+                  {t('Đóng cửa sổ', 'Close')}
                 </button>
               </div>
             </div>

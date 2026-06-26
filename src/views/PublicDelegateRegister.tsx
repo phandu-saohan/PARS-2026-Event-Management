@@ -1,4 +1,4 @@
-﻿/**
+/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -103,6 +103,7 @@ function FormStepper({ currentStep, isSubmitted, L }: FormStepperProps) {
 interface PublicDelegateRegisterProps {
   onNavigate: (view: string) => void;
   isInline?: boolean;
+  lang?: 'vi' | 'en';
 }
 
 const getInitialLang = (): 'vietname' | 'foreign' => {
@@ -116,7 +117,7 @@ const getInitialLang = (): 'vietname' | 'foreign' => {
   return 'vietname'; // mặc định tiếng Việt
 };
 
-export default function PublicDelegateRegister({ onNavigate, isInline = false }: PublicDelegateRegisterProps) {
+export default function PublicDelegateRegister({ onNavigate, isInline = false, lang }: PublicDelegateRegisterProps) {
   const packages = store.getPackages().filter(p => p.isActive);
   const containerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -211,6 +212,15 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
   const [createdAttendee, setCreatedAttendee] = useState<Attendee | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Sync nationality with lang prop
+  useEffect(() => {
+    if (lang === 'en') {
+      setNationality('foreign');
+    } else if (lang === 'vi') {
+      setNationality('vietname');
+    }
+  }, [lang]);
 
   // Sync packageId khi nationality thay đổi; cũng điều chỉnh payment method mặc định
   useEffect(() => {
