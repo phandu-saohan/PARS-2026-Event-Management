@@ -528,6 +528,64 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   // Bilingual IP-based language detection
   const { lang, setLang, t } = useLanguage();
 
+  // Bilingual section title configurations from DB or fallbacks
+  const titles = sections.sectionTitles || {};
+  
+  const introTitleVal = lang === 'en'
+    ? (titles.introTitleEn || sections.intro?.title || "ABOUT THE CONFERENCE")
+    : (titles.introTitleVi || sections.intro?.title || "GIỚI THIỆU HỘI NGHỊ");
+  const introSubtitleVal = lang === 'en'
+    ? (titles.introSubtitleEn || "GENERAL INTRODUCTION")
+    : (titles.introSubtitleVi || "GIỚI THIỆU CHUNG");
+
+  const spkForeignTitleVal = lang === 'en'
+    ? (titles.speakersForeignTitleEn || "INTERNATIONAL SPEAKERS")
+    : (titles.speakersForeignTitleVi || "BÁO CÁO VIÊN NƯỚC NGOÀI");
+  const spkForeignSubtitleVal = lang === 'en'
+    ? (titles.speakersForeignSubtitleEn || "INTERNATIONAL PRESENTERS")
+    : (titles.speakersForeignSubtitleVi || "DIỄN GIẢ QUỐC TẾ");
+
+  const spkDomesticTitleVal = lang === 'en'
+    ? (titles.speakersDomesticTitleEn || "DOMESTIC SPEAKERS")
+    : (titles.speakersDomesticTitleVi || "BÁO CÁO VIÊN VIỆT NAM");
+  const spkDomesticSubtitleVal = lang === 'en'
+    ? (titles.speakersDomesticSubtitleEn || "DOMESTIC PRESENTERS")
+    : (titles.speakersDomesticSubtitleVi || "DIỄN GIẢ VIỆT NAM");
+
+  const progTitleVal = lang === 'en'
+    ? (titles.programTitleEn || "Detailed Scientific Program")
+    : (titles.programTitleVi || "Chương Trình Khoa Học Chi Tiết");
+  const progSubtitleVal = lang === 'en'
+    ? (titles.programSubtitleEn || "CONFERENCE AGENDA")
+    : (titles.programSubtitleVi || "LỊCH TRÌNH HỘI NGHỊ");
+  const progDescVal = lang === 'en'
+    ? (titles.programDescEn || "2-day conference schedule with multi-track specialized sessions. Click on a session to view the scientific abstract and presenter bio.")
+    : (titles.programDescVi || "Lịch trình 2 ngày hội nghị với các phiên báo cáo chuyên đề đa phòng. Nhấp vào bài để xem tóm tắt khoa học và lý lịch báo cáo viên.");
+
+  const regTitleVal = lang === 'en'
+    ? (titles.registerTitleEn || "REGISTER TO ATTEND")
+    : (titles.registerTitleVi || "ĐĂNG KÝ THAM DỰ");
+  const regSubtitleVal = lang === 'en'
+    ? (titles.registerSubtitleEn || "SECURE REGISTRATION")
+    : (titles.registerSubtitleVi || "ĐĂNG KÝ CHÍNH THỨC");
+  const regDescVal = lang === 'en'
+    ? (titles.registerDescEn || "Please complete the 4-step registration form below. Your delegate badge with QR code check-in and CME certificate (4.5h) will be automatically issued via your Email & Zalo.")
+    : (titles.registerDescVi || "Vui lòng hoàn thiện form 4 bước thông tin đăng ký bên dưới. Thẻ đại biểu chứa mã QR check-in và chứng chỉ CME (4.5h) sẽ phát hành tự động qua Email & Zalo của bác sĩ.");
+
+  const spnsrTitleVal = lang === 'en'
+    ? (titles.sponsorsTitleEn || "SPONSORS & PARTNERS")
+    : (titles.sponsorsTitleVi || "ĐỒNG HÀNH CÙNG HỘI NGHỊ");
+  const spnsrSubtitleVal = lang === 'en'
+    ? (titles.sponsorsSubtitleEn || "CONFERENCE SPONSORS")
+    : (titles.sponsorsSubtitleVi || "NHÀ TÀI TRỢ CHÍNH");
+
+  const locTitleVal = lang === 'en'
+    ? (titles.locationTitleEn || "CONFERENCE VENUE")
+    : (titles.locationTitleVi || "ĐỊA ĐIỂM TỔ CHỨC");
+  const locSubtitleVal = lang === 'en'
+    ? (titles.locationSubtitleEn || "EVENT VENUE")
+    : (titles.locationSubtitleVi || "ĐỊA ĐIỂM SỰ KIỆN");
+
   const translateCountry = (c: string) => {
     const norm = c.trim().toLowerCase();
     if (norm === 'nhật bản') return t('Nhật Bản', 'Japan');
@@ -1026,9 +1084,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Left Column: Brief Summary */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
             <div className="w-12 h-1 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-full" />
-            <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">
-              {t(introTitle, 'ABOUT THE CONFERENCE')}
-            </h3>
+            <div>
+              <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{introSubtitleVal}</span>
+              <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+                {introTitleVal}
+              </h3>
+            </div>
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
               {t(introText1, 'The International Scientific Conference PARS 2026, hosted by EMCAS Aesthetic Hospital, is a premier medical event bringing together world-renowned experts from ISAPS, ASPS, and EURAPS alongside leading Vietnamese specialists.')}
             </p>
@@ -1158,9 +1219,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('DIEN GIA QUOC TE', 'INTERNATIONAL PRESENTERS')}</span>
+              <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{spkForeignSubtitleVal}</span>
               <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white leading-none">
-                {t('BAO CAO VIEN NUOC NGOAI', 'INTERNATIONAL SPEAKERS')}
+                {spkForeignTitleVal}
               </h2>
             </div>
             
@@ -1237,9 +1298,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-teal-600 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('DIEN GIA TRONG NUOC', 'PLENARY SPEAKERS')}</span>
+              <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{spkDomesticSubtitleVal}</span>
               <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 leading-none">
-                {t('BAO CAO VIEN VIET NAM', 'VIETNAMESE SPEAKERS')}
+                {spkDomesticTitleVal}
               </h2>
             </div>
             
@@ -1313,10 +1374,10 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       <section id="register" className="py-10 md:py-16 bg-slate-100 border-y border-slate-200 scroll-mt-20" style={sectionStyle.register}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10 max-w-xl mx-auto space-y-2">
-            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('DANG KY CHINH THUC', 'SECURE REGISTRATION')}</span>
-            <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-900 leading-none">{t('DANG KY THAM DU', 'REGISTER TO ATTEND')}</h2>
+            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{regSubtitleVal}</span>
+            <h2 className="text-2xl md:text-4xl font-black uppercase text-slate-900 leading-none">{regTitleVal}</h2>
             <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-              {t('Vui long hoan thien form 4 buoc thong tin dang ky ben duoi. The dai bieu chua ma QR check-in va chung chi CME (4.5h) se phat hanh tu dong qua Email & Zalo cua bac si.', 'Please complete the 4-step registration form below. Your delegate badge with QR code check-in and CME certificate (4.5h) will be automatically issued via your Email & Zalo.')}
+              {regDescVal}
             </p>
           </div>
 
@@ -1342,12 +1403,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
           {/* ── Section Header ── */}
           <div className="text-center mb-8 max-w-2xl mx-auto space-y-2">
-            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('LICH TRINH HOI NGHI', 'CONFERENCE AGENDA')}</span>
+            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{progSubtitleVal}</span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 leading-none">
-              {t('Chuong Trinh Khoa Hoc Chi Tiet', 'Detailed Scientific Program')}
+              {progTitleVal}
             </h2>
             <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-              {t('Lich trinh 2 ngay hoi nghi voi cac phien bao cao chuyen de da phong. Nhap vao bai de xem tom tat khoa hoc va ly lich bao cao vien.', '2-day conference schedule with multi-track specialized sessions. Click on a session to view the scientific abstract and presenter bio.')}
+              {progDescVal}
             </p>
           </div>
 
@@ -1552,9 +1613,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       {/* 8. SPONSORS */}
       <section id="sponsors" className="py-10 md:py-16 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('CONFERENCE SPONSORS', 'CONFERENCE SPONSORS')}</span>
+          <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{spnsrSubtitleVal}</span>
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 mb-4 leading-none">
-            {t('NHÀ TÀI TRỢ & ĐỐI TÁC ĐỒNG HÀNH', 'SPONSORS & PARTNERS')}
+            {spnsrTitleVal}
           </h2>
           <p className="text-slate-500 text-xs leading-relaxed max-w-xl mx-auto font-semibold mb-12">
             {t('Hội nghị vinh dự đón nhận sự đồng hành và hỗ trợ từ các tập đoàn thiết bị y tế, dược mỹ phẩm và công nghệ thẩm mỹ danh tiếng trong nước và quốc tế.', 'The conference is honored to receive support and sponsorship from leading domestic and international medical device, pharmaceutical, and aesthetic technology corporations.')}
@@ -1614,9 +1675,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           
           {/* Left info column */}
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
-            <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('EVENT VENUE', 'EVENT VENUE')}</span>
+            <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block">{locSubtitleVal}</span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white leading-none">
-              {t('ĐỊA ĐIỂM TỔ CHỨC', 'CONFERENCE VENUE')}
+              {locTitleVal}
             </h2>
             <div className="space-y-4 text-slate-350 text-sm leading-relaxed">
               <div className="flex gap-3">

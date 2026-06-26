@@ -591,6 +591,46 @@ export interface LandingPageSections {
     /** Màu nền section Địa điểm */
     location?: string;
   };
+  sectionTitles?: {
+    introTitleVi?: string;
+    introTitleEn?: string;
+    introSubtitleVi?: string;
+    introSubtitleEn?: string;
+    
+    speakersForeignTitleVi?: string;
+    speakersForeignTitleEn?: string;
+    speakersForeignSubtitleVi?: string;
+    speakersForeignSubtitleEn?: string;
+
+    speakersDomesticTitleVi?: string;
+    speakersDomesticTitleEn?: string;
+    speakersDomesticSubtitleVi?: string;
+    speakersDomesticSubtitleEn?: string;
+
+    programTitleVi?: string;
+    programTitleEn?: string;
+    programSubtitleVi?: string;
+    programSubtitleEn?: string;
+    programDescVi?: string;
+    programDescEn?: string;
+
+    registerTitleVi?: string;
+    registerTitleEn?: string;
+    registerSubtitleVi?: string;
+    registerSubtitleEn?: string;
+    registerDescVi?: string;
+    registerDescEn?: string;
+
+    sponsorsTitleVi?: string;
+    sponsorsTitleEn?: string;
+    sponsorsSubtitleVi?: string;
+    sponsorsSubtitleEn?: string;
+
+    locationTitleVi?: string;
+    locationTitleEn?: string;
+    locationSubtitleVi?: string;
+    locationSubtitleEn?: string;
+  };
   seo?: {
     title?: string;
     description?: string;

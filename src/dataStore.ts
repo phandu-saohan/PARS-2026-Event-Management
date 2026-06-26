@@ -693,6 +693,46 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
       highlight2Desc: "Cấp chứng nhận đào tạo liên tục y khoa theo quy định của Bộ Y tế, do Bác sĩ Phạm Xuân Khiêm ký duyệt.",
       highlight3Title: "Giao lưu chuyên gia đa quốc gia",
       highlight3Desc: "Cơ hội đối thoại trực tiếp và học tập kinh nghiệm thực chiến từ các Giáo sư hàng đầu Hoa Kỳ, Nhật Bản, Thụy Điển, Mexico."
+    },
+    sectionTitles: {
+      introTitleVi: "GIỚI THIỆU HỘI NGHỊ",
+      introTitleEn: "ABOUT THE CONFERENCE",
+      introSubtitleVi: "GIỚI THIỆU CHUNG",
+      introSubtitleEn: "GENERAL INTRODUCTION",
+      
+      speakersForeignTitleVi: "BÁO CÁO VIÊN NƯỚC NGOÀI",
+      speakersForeignTitleEn: "INTERNATIONAL SPEAKERS",
+      speakersForeignSubtitleVi: "DIỄN GIẢ QUỐC TẾ",
+      speakersForeignSubtitleEn: "INTERNATIONAL PRESENTERS",
+
+      speakersDomesticTitleVi: "BÁO CÁO VIÊN VIỆT NAM",
+      speakersDomesticTitleEn: "DOMESTIC SPEAKERS",
+      speakersDomesticSubtitleVi: "DIỄN GIẢ VIỆT NAM",
+      speakersDomesticSubtitleEn: "DOMESTIC PRESENTERS",
+
+      programTitleVi: "Chương Trình Khoa Học Chi Tiết",
+      programTitleEn: "Detailed Scientific Program",
+      programSubtitleVi: "LỊCH TRÌNH HỘI NGHỊ",
+      programSubtitleEn: "CONFERENCE AGENDA",
+      programDescVi: "Lịch trình 2 ngày hội nghị với các phiên báo cáo chuyên đề đa phòng. Nhấp vào bài để xem tóm tắt khoa học và lý lịch báo cáo viên.",
+      programDescEn: "2-day conference schedule with multi-track specialized sessions. Click on a session to view the scientific abstract and presenter bio.",
+
+      registerTitleVi: "ĐĂNG KÝ THAM DỰ",
+      registerTitleEn: "REGISTER TO ATTEND",
+      registerSubtitleVi: "ĐĂNG KÝ CHÍNH THỨC",
+      registerSubtitleEn: "SECURE REGISTRATION",
+      registerDescVi: "Vui lòng hoàn thiện form 4 bước thông tin đăng ký bên dưới. Thẻ đại biểu chứa mã QR check-in và chứng chỉ CME (4.5h) sẽ phát hành tự động qua Email & Zalo của bác sĩ.",
+      registerDescEn: "Please complete the 4-step registration form below. Your delegate badge with QR code check-in and CME certificate (4.5h) will be automatically issued via your Email & Zalo.",
+
+      sponsorsTitleVi: "ĐỒNG HÀNH CÙNG HỘI NGHỊ",
+      sponsorsTitleEn: "SPONSORS & PARTNERS",
+      sponsorsSubtitleVi: "NHÀ TÀI TRỢ CHÍNH",
+      sponsorsSubtitleEn: "CONFERENCE SPONSORS",
+
+      locationTitleVi: "ĐỊA ĐIỂM TỔ CHỨC",
+      locationTitleEn: "CONFERENCE VENUE",
+      locationSubtitleVi: "ĐỊA ĐIỂM SỰ KIỆN",
+      locationSubtitleEn: "EVENT VENUE"
     }
   },
 

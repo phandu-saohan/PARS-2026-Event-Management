@@ -59,7 +59,8 @@ import {
   EmbedScript,
   AddOnService,
   CmeTemplateConfig,
-  SpeakerConfig
+  SpeakerConfig,
+  LandingPageSections
 } from '../types';
 import RichTextEditor from '../components/RichTextEditor';
 import { uploadToSupabaseStorage } from '../lib/supabase';
@@ -191,6 +192,9 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
 
   // Track which image field is currently being uploaded to Supabase Storage
   const [uploadingField, setUploadingField] = useState<string | null>(null);
+
+  // Active tab for the Landing Page Section Titles editor
+  const [sectionTitleTab, setSectionTitleTab] = useState<'intro_speakers' | 'program_register' | 'sponsors_location'>('intro_speakers');
 
   const getSpeakers = (type: 'foreign' | 'domestic'): SpeakerConfig[] => {
     return businessConfig.landingPageSections?.speakers?.[type] || [];
@@ -1306,6 +1310,79 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
     if (formType === 'speaker') viewName = 'register-speaker';
     if (formType === 'sponsor') viewName = 'register-sponsor';
     return `${origin}/?view=${viewName}`;
+  };
+  // Helper to render section title and subtitle inputs for Landing Page settings
+  const renderTitleInput = (
+    label: string,
+    keyVi: (keyof Exclude<Required<LandingPageSections>['sectionTitles'], undefined>) & string,
+    keyEn: (keyof Exclude<Required<LandingPageSections>['sectionTitles'], undefined>) & string,
+    placeholderVi: string,
+    placeholderEn: string,
+    isTextarea: boolean = false
+  ) => {
+    const sections = businessConfig.landingPageSections || {};
+    const titles = sections.sectionTitles || {};
+    
+    const handleValueChange = (key: string, val: string) => {
+      setBusinessConfig({
+        ...businessConfig,
+        landingPageSections: {
+          ...sections,
+          sectionTitles: {
+            ...titles,
+            [key]: val
+          }
+        }
+      });
+    };
+
+    return (
+      <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+        <span className="text-[10px] font-black text-indigo-950 uppercase tracking-wider block">{label}</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1 text-left">
+            <label className="text-[9.5px] font-bold text-slate-500 block">Tiếng Việt</label>
+            {isTextarea ? (
+              <textarea
+                rows={2}
+                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                value={titles[keyVi] || ''}
+                onChange={(e) => handleValueChange(keyVi, e.target.value)}
+                placeholder={placeholderVi}
+              />
+            ) : (
+              <input
+                type="text"
+                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800"
+                value={titles[keyVi] || ''}
+                onChange={(e) => handleValueChange(keyVi, e.target.value)}
+                placeholder={placeholderVi}
+              />
+            )}
+          </div>
+          <div className="space-y-1 text-left">
+            <label className="text-[9.5px] font-bold text-slate-500 block">Tiếng Anh (English)</label>
+            {isTextarea ? (
+              <textarea
+                rows={2}
+                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold text-slate-800"
+                value={titles[keyEn] || ''}
+                onChange={(e) => handleValueChange(keyEn, e.target.value)}
+                placeholder={placeholderEn}
+              />
+            ) : (
+              <input
+                type="text"
+                className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-800"
+                value={titles[keyEn] || ''}
+                onChange={(e) => handleValueChange(keyEn, e.target.value)}
+                placeholder={placeholderEn}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -6475,6 +6552,141 @@ ON CONFLICT (code) DO UPDATE SET
                   })}
                 </div>
                 <p className="text-[9px] text-slate-400 italic">💡 Nhấn vào ô màu để mở bảng chọn màu. Nhấn ✕ để khôi phục màu mặc định. Nhớ nhấn "Lưu Toàn Bộ" để áp dụng.</p>
+              </div>
+
+              {/* 4.1. SECTION TITLES EDIT CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-650 flex items-center justify-center text-sm font-bold">
+                    📝
+                  </div>
+                  <div className="text-left">
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Section 4.1: Tiêu đề & Mô tả các Section</h4>
+                    <p className="text-[10px] text-slate-450 mt-0.5">Tùy chỉnh tiêu đề chính (Title) và tiêu đề phụ (Subtitle) cho tất cả các phần trên trang landing page.</p>
+                  </div>
+                </div>
+
+                {/* Sub Tab Switcher */}
+                <div className="flex bg-slate-100 p-1 rounded-xl gap-2 w-full max-w-md">
+                  {[
+                    { id: 'intro_speakers' as const, label: 'Giới thiệu & Diễn giả' },
+                    { id: 'program_register' as const, label: 'Lịch trình & Đăng ký' },
+                    { id: 'sponsors_location' as const, label: 'Tài trợ & Địa điểm' }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setSectionTitleTab(tab.id)}
+                      className={`flex-1 py-2 text-[10.5px] font-extrabold rounded-lg transition-all cursor-pointer border-none ${
+                        sectionTitleTab === tab.id
+                          ? 'bg-indigo-950 text-white shadow-sm'
+                          : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Input Fields Grid based on active sub tab */}
+                <div className="space-y-4 pt-1">
+                  {sectionTitleTab === 'intro_speakers' && (
+                    <>
+                      {renderTitleInput(
+                        '1. Section Giới thiệu hội nghị (Intro Title)',
+                        'introTitleVi', 'introTitleEn',
+                        'GIỚI THIỆU HỘI NGHỊ', 'ABOUT THE CONFERENCE'
+                      )}
+                      {renderTitleInput(
+                        '2. Phụ đề/Tag Giới thiệu hội nghị (Intro Subtitle)',
+                        'introSubtitleVi', 'introSubtitleEn',
+                        'GIỚI THIỆU CHUNG', 'GENERAL INTRODUCTION'
+                      )}
+                      {renderTitleInput(
+                        '3. Section Diễn giả Quốc tế (Foreign Speakers Title)',
+                        'speakersForeignTitleVi', 'speakersForeignTitleEn',
+                        'BÁO CÁO VIÊN NƯỚC NGOÀI', 'INTERNATIONAL SPEAKERS'
+                      )}
+                      {renderTitleInput(
+                        '4. Phụ đề Diễn giả Quốc tế (Foreign Speakers Subtitle)',
+                        'speakersForeignSubtitleVi', 'speakersForeignSubtitleEn',
+                        'DIỄN GIẢ QUỐC TẾ', 'INTERNATIONAL PRESENTERS'
+                      )}
+                      {renderTitleInput(
+                        '5. Section Diễn giả Trong nước (Domestic Speakers Title)',
+                        'speakersDomesticTitleVi', 'speakersDomesticTitleEn',
+                        'BÁO CÁO VIÊN VIỆT NAM', 'DOMESTIC SPEAKERS'
+                      )}
+                      {renderTitleInput(
+                        '6. Phụ đề Diễn giả Trong nước (Domestic Speakers Subtitle)',
+                        'speakersDomesticSubtitleVi', 'speakersDomesticSubtitleEn',
+                        'DIỄN GIẢ VIỆT NAM', 'DOMESTIC PRESENTERS'
+                      )}
+                    </>
+                  )}
+
+                  {sectionTitleTab === 'program_register' && (
+                    <>
+                      {renderTitleInput(
+                        '1. Section Lịch trình khoa học (Program Title)',
+                        'programTitleVi', 'programTitleEn',
+                        'Chương Trình Khoa Học Chi Tiết', 'Detailed Scientific Program'
+                      )}
+                      {renderTitleInput(
+                        '2. Phụ đề Lịch trình khoa học (Program Subtitle)',
+                        'programSubtitleVi', 'programSubtitleEn',
+                        'LỊCH TRÌNH HỘI NGHỊ', 'CONFERENCE AGENDA'
+                      )}
+                      {renderTitleInput(
+                        '3. Mô tả ngắn dưới tiêu đề Lịch trình (Program Desc)',
+                        'programDescVi', 'programDescEn',
+                        'Lịch trình 2 ngày hội nghị...', '2-day conference schedule...',
+                        true
+                      )}
+                      {renderTitleInput(
+                        '4. Section Form Đăng ký tham dự (Register Title)',
+                        'registerTitleVi', 'registerTitleEn',
+                        'ĐĂNG KÝ THAM DỰ', 'REGISTER TO ATTEND'
+                      )}
+                      {renderTitleInput(
+                        '5. Phụ đề Form Đăng ký tham dự (Register Subtitle)',
+                        'registerSubtitleVi', 'registerSubtitleEn',
+                        'ĐĂNG KÝ CHÍNH THỨC', 'SECURE REGISTRATION'
+                      )}
+                      {renderTitleInput(
+                        '6. Mô tả ngắn dưới tiêu đề Đăng ký (Register Desc)',
+                        'registerDescVi', 'registerDescEn',
+                        'Vui lòng hoàn thiện form...', 'Please complete the...',
+                        true
+                      )}
+                    </>
+                  )}
+
+                  {sectionTitleTab === 'sponsors_location' && (
+                    <>
+                      {renderTitleInput(
+                        '1. Section Nhà tài trợ hội nghị (Sponsors Title)',
+                        'sponsorsTitleVi', 'sponsorsTitleEn',
+                        'ĐỒNG HÀNH CÙNG HỘI NGHỊ', 'SPONSORS & PARTNERS'
+                      )}
+                      {renderTitleInput(
+                        '2. Phụ đề Nhà tài trợ hội nghị (Sponsors Subtitle)',
+                        'sponsorsSubtitleVi', 'sponsorsSubtitleEn',
+                        'NHÀ TÀI TRỢ CHÍNH', 'CONFERENCE SPONSORS'
+                      )}
+                      {renderTitleInput(
+                        '3. Section Địa điểm tổ chức (Location Title)',
+                        'locationTitleVi', 'locationTitleEn',
+                        'ĐỊA ĐIỂM TỔ CHỨC', 'CONFERENCE VENUE'
+                      )}
+                      {renderTitleInput(
+                        '4. Phụ đề Địa điểm tổ chức (Location Subtitle)',
+                        'locationSubtitleVi', 'locationSubtitleEn',
+                        'ĐỊA ĐIỂM SỰ KIỆN', 'EVENT VENUE'
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* 5. SPEAKER MANAGEMENT SECTION CARD */}
