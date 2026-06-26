@@ -496,7 +496,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
     location:         bg.location         ? { backgroundColor: bg.location }           : undefined,
   };
   // Bilingual IP-based language detection
-  const { lang, setLang, isLoading: langLoading, t } = useLanguage();
+  const { lang, setLang, t } = useLanguage();
 
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
@@ -677,9 +677,6 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             
             {/* Language Flags Selector */}
             <div className="hidden sm:flex items-center gap-2">
-              {langLoading && (
-                <span className="text-[9px] text-slate-400 font-mono animate-pulse">detecting...</span>
-              )}
               <button 
                 title="English" 
                 onClick={() => setLang('en')}
