@@ -6024,6 +6024,261 @@ ON CONFLICT (code) DO UPDATE SET
                       </div>
                     </div>
                   </div>
+
+                  {/* 4 Blocks Settings */}
+                  <div className="border-t border-slate-100 pt-4 space-y-3.5">
+                    <span className="text-[10.5px] font-extrabold text-slate-600 block uppercase tracking-wide">4 Khối thông tin giới thiệu (4 Blocks)</span>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      {/* Block 1 */}
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-3">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Khối 1: Đăng ký</span>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề khối</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block1Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block1Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Đăng ký đại biểu"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả ngắn</label>
+                          <textarea
+                            rows={2.5}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.block1Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block1Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Lệ phí tham dự 1.000.000 vnđ..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Nhãn nút hành động</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block1BtnText || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block1BtnText: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Đăng ký trực tiếp"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Block 2 */}
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-3">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Khối 2: Báo cáo viên</span>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề khối</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block2Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block2Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Dàn báo cáo viên"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả ngắn</label>
+                          <textarea
+                            rows={2.5}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.block2Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block2Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Quy tụ 17+ Giáo sư, Tiến sĩ..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Nhãn nút hành động</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block2BtnText || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block2BtnText: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Xem danh sách diễn giả"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Block 3 */}
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-3">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Khối 3: Chương trình</span>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề khối</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block3Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block3Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Chương trình khoa học"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả ngắn</label>
+                          <textarea
+                            rows={2.5}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.block3Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block3Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Lịch trình 2 ngày: Ngày 1..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Nhãn nút hành động</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block3BtnText || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block3BtnText: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Khám phá timeline nghị sự"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Block 4 */}
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-150 space-y-3">
+                        <span className="text-[9.5px] font-black text-slate-400 block uppercase">Khối 4: Địa điểm</span>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Tiêu đề khối</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block4Title || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block4Title: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Địa điểm cao cấp"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Mô tả ngắn</label>
+                          <textarea
+                            rows={2.5}
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[10.5px] font-semibold text-slate-600 leading-normal"
+                            value={businessConfig.landingPageSections?.intro?.block4Desc || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block4Desc: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Tổ chức trang trọng tại Khách sạn Meliá Hà Nội..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[9.5px] font-bold text-slate-550 block">Nhãn nút hành động</label>
+                          <input
+                            type="text"
+                            className="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-800"
+                            value={businessConfig.landingPageSections?.intro?.block4BtnText || ''}
+                            onChange={(e) => {
+                              const sections = businessConfig.landingPageSections || {};
+                              setBusinessConfig({
+                                ...businessConfig,
+                                landingPageSections: {
+                                  ...sections,
+                                  intro: { ...(sections.intro || {}), block4BtnText: e.target.value }
+                                }
+                              });
+                            }}
+                            placeholder="Chỉ dẫn đường đi"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

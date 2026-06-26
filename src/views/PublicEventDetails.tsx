@@ -425,6 +425,23 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const introHighlight3Title = sections.intro?.highlight3Title || "Giao lưu chuyên gia đa quốc gia";
   const introHighlight3Desc = sections.intro?.highlight3Desc || "Cơ hội đối thoại trực tiếp và học tập kinh nghiệm thực chiến từ các Giáo sư hàng đầu Hoa Kỳ, Nhật Bản, Thụy Điển, Mexico.";
 
+  // Intro 4 blocks dynamic elements with fallbacks
+  const block1Title = sections.intro?.block1Title || "Đăng ký đại biểu";
+  const block1Desc = sections.intro?.block1Desc || "Lệ phí tham dự 1.000.000 vnđ (bao gồm ăn trưa). Add-on CME: 350.000 vnđ. Gala Dinner: 500.000 vnđ. Cổng đăng ký tự động cấp QR code check-in nhanh.";
+  const block1BtnText = sections.intro?.block1BtnText || "Đăng ký trực tiếp";
+
+  const block2Title = sections.intro?.block2Title || "Dàn báo cáo viên";
+  const block2Desc = sections.intro?.block2Desc || "Quy tụ 17+ Giáo sư, Tiến sĩ, Bác sĩ danh tiếng quốc tế (ISAPS, ASPS, EURAPS) và Việt Nam trình bày các đề tài nghiên cứu lâm sàng xuất sắc chuẩn CME.";
+  const block2BtnText = sections.intro?.block2BtnText || "Xem danh sách diễn giả";
+
+  const block3Title = sections.intro?.block3Title || "Chương trình khoa học";
+  const block3Desc = sections.intro?.block3Desc || "Lịch trình 2 ngày: Ngày 1 (12/09) khai mạc, báo cáo khoa học đa phòng, teabreak & Gala Dinner. Ngày 2 (13/09) chuyên đề đặc biệt, thảo luận bàn tròn & bế mạc.";
+  const block3BtnText = sections.intro?.block3BtnText || "Khám phá timeline nghị sự";
+
+  const block4Title = sections.intro?.block4Title || "Địa điểm cao cấp";
+  const block4Desc = sections.intro?.block4Desc || "Tổ chức trang trọng tại Khách sạn Meliá Hà Nội – Số 44B Lý Thường Kiệt, Hoàn Kiếm, Hà Nội. Phòng hội nghị lớn hiện đại bậc nhất Thủ đô.";
+  const block4BtnText = sections.intro?.block4BtnText || "Chỉ dẫn đường đi";
+
   // Resolve configured images or fall back to defaults
   const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
   const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1782198647752.png';
@@ -932,36 +949,36 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
                   01
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">Đăng ký đại biểu</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{block1Title}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Lệ phí tham dự 1.000.000 vnđ (bao gồm ăn trưa). Add-on CME: 350.000 vnđ. Gala Dinner: 500.000 vnđ. Cổng đăng ký tự động cấp QR code check-in nhanh.
+                  {block1Desc}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('register')} 
                 className="mt-6 text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                Đăng ký trực tiếp
+                {block1BtnText}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {/* Block 2: Báo cáo viên */}
+            {/* Block 2: Diễn giả */}
             <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group hover:border-teal-500/20">
               <div className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
                   02
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">Dàn báo cáo viên</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{block2Title}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Quy tụ 17+ Giáo sư, Tiến sĩ, Bác sĩ danh tiếng quốc tế (ISAPS, ASPS, EURAPS) và Việt Nam trình bày các đề tài nghiên cứu lâm sàng xuất sắc chuẩn CME.
+                  {block2Desc}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('speakers')} 
                 className="mt-6 text-xs font-bold text-indigo-650 hover:text-indigo-750 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                Xem danh sách diễn giả
+                {block2BtnText}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -972,16 +989,16 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-amber-55 text-amber-600 flex items-center justify-center font-bold">
                   03
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">Chương trình khoa học</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{block3Title}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Lịch trình 2 ngày: Ngày 1 (12/09) khai mạc, báo cáo khoa học đa phòng, teabreak & Gala Dinner. Ngày 2 (13/09) chuyên đề đặc biệt, thảo luận bàn tròn & bế mạc.
+                  {block3Desc}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('program')} 
                 className="mt-6 text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                Khám phá timeline nghị sự
+                {block3BtnText}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -992,16 +1009,16 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
                   04
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">Địa điểm cao cấp</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{block4Title}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  Tổ chức trang trọng tại Khách sạn Meliá Hà Nội – Số 44B Lý Thường Kiệt, Hoàn Kiếm, Hà Nội. Phòng hội nghị lớn hiện đại bậc nhất Thủ đô.
+                  {block4Desc}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('location')} 
                 className="mt-6 text-xs font-bold text-rose-600 hover:text-rose-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                Chỉ dẫn đường đi
+                {block4BtnText}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
