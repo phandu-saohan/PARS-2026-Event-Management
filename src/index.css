@@ -244,3 +244,24 @@ aside.w-64 .bg-rose-950\/20 svg {
   }
 }
 
+/* ==========================================
+   MICRO-ANIMATIONS & TRANSITIONS (PREMIUM)
+   ========================================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+

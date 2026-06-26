@@ -787,59 +787,28 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Right Section: Flags & Action Button */}
           <div className="flex items-center gap-4">
             
-            {/* Language Flags Selector */}
-            <div className="hidden sm:flex items-center gap-2">
-              <button 
-                title="English" 
-                onClick={() => setLang('en')}
-                className={`focus:outline-none transition-all hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center rounded-sm ${lang === 'en' ? 'ring-2 ring-amber-400 ring-offset-1 shadow-md' : 'opacity-60 hover:opacity-100'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7410 3900" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
-                  <rect width="7410" height="3900" fill="#b22234"/>
-                  <path d="M0,300H7410M0,900H7410M0,1500H7410M0,2100H7410M0,2700H7410M0,3300H7410" stroke="#fff" strokeWidth="300"/>
-                  <rect width="2964" height="2100" fill="#3c3b6e"/>
-                  <g fill="#fff">
-                    <circle cx="400" cy="300" r="80" />
-                    <circle cx="900" cy="300" r="80" />
-                    <circle cx="1400" cy="300" r="80" />
-                    <circle cx="1900" cy="300" r="80" />
-                    <circle cx="2400" cy="300" r="80" />
-                    <circle cx="650" cy="600" r="80" />
-                    <circle cx="1150" cy="600" r="80" />
-                    <circle cx="1650" cy="600" r="80" />
-                    <circle cx="2150" cy="600" r="80" />
-                    <circle cx="400" cy="900" r="80" />
-                    <circle cx="900" cy="900" r="80" />
-                    <circle cx="1400" cy="900" r="80" />
-                    <circle cx="1900" cy="900" r="80" />
-                    <circle cx="2400" cy="900" r="80" />
-                    <circle cx="650" cy="1200" r="80" />
-                    <circle cx="1150" cy="1200" r="80" />
-                    <circle cx="1650" cy="1200" r="80" />
-                    <circle cx="2150" cy="1200" r="80" />
-                    <circle cx="400" cy="1500" r="80" />
-                    <circle cx="900" cy="1500" r="80" />
-                    <circle cx="1400" cy="1500" r="80" />
-                    <circle cx="1900" cy="1500" r="80" />
-                    <circle cx="2400" cy="1500" r="80" />
-                    <circle cx="650" cy="1800" r="80" />
-                    <circle cx="1150" cy="1800" r="80" />
-                    <circle cx="1650" cy="1800" r="80" />
-                    <circle cx="2150" cy="1800" r="80" />
-                  </g>
-                </svg>
-              </button>
-              <button 
-                title="Tiếng Việt" 
-                onClick={() => setLang('vi')}
-                className={`focus:outline-none transition-all hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center rounded-sm ${lang === 'vi' ? 'ring-2 ring-red-500 ring-offset-1 shadow-md' : 'opacity-60 hover:opacity-100'}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
-                  <rect width="3" height="2" fill="#da251d"/>
-                  <polygon points="1.5,0.4 1.62,0.78 2.01,0.78 1.7,1.02 1.82,1.4 1.5,1.16 1.18,1.4 1.3,1.02 0.99,0.78 1.38,0.78" fill="#ffff00"/>
-                </svg>
-              </button>
-            </div>
+            {/* Compact Language Toggle (VI / EN) */}
+            <button 
+              onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border border-slate-200 bg-[#FAF8F5]/85 hover:bg-slate-100 text-slate-700 font-extrabold text-[10px] md:text-xs transition-all cursor-pointer select-none shadow-xs border-none"
+              title={lang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'}
+            >
+              {lang === 'vi' ? (
+                <>
+                  <span className="w-4 h-3 bg-red-650 inline-block rounded-xs overflow-hidden relative border border-slate-300 shrink-0">
+                    <span className="absolute inset-0 bg-[#da251d] flex items-center justify-center text-[7px] text-yellow-300 font-sans">★</span>
+                  </span>
+                  <span>VI</span>
+                </>
+              ) : (
+                <>
+                  <span className="w-4 h-3 bg-blue-900 inline-block rounded-xs overflow-hidden relative border border-slate-300 shrink-0">
+                    <span className="absolute inset-0 bg-[#3c3b6e] flex items-center justify-center text-[7px] text-white font-sans">★</span>
+                  </span>
+                  <span>EN</span>
+                </>
+              )}
+            </button>
 
             {/* Red outlined action button */}
             <div className="relative" ref={ticketDropdownRef}>
@@ -998,27 +967,27 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex items-baseline justify-center">
+            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex flex-wrap items-baseline justify-center">
               <span className="text-white">{heroTitle}</span>
-              <span className="text-[#C59B27] ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">{heroYear}</span>
+              <span className="text-[#C59B27] ml-2 sm:ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">{heroYear}</span>
             </h1>
           </div>
 
           {/* Theme / Subject - language-aware */}
-          <div className="max-w-4xl space-y-2 mx-auto">
-            <p className="text-base md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
+          <div className="max-w-4xl space-y-2 mx-auto px-2">
+            <p className="text-sm md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
               {lang === 'vi' ? heroThemeVi : heroThemeEn}
             </p>
-            <p className="text-xs md:text-base lg:text-lg font-sans font-semibold text-slate-300 tracking-wide uppercase opacity-90">
+            <p className="text-[10px] md:text-base lg:text-lg font-sans font-semibold text-slate-350 tracking-wide uppercase opacity-90">
               {lang === 'vi' ? heroThemeEn : heroThemeVi}
             </p>
           </div>
 
-          {/* Actions: 2 Buttons */}
-          <div className="flex flex-wrap items-center justify-center gap-4 pt-2 z-30">
+          {/* Actions: 2 Buttons (Stacked on mobile, row on desktop) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-2 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
             <button
               onClick={() => scrollToSection('register')}
-              className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center gap-2.5 cursor-pointer border-none"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer border-none"
             >
               <span>{t(heroBtnRegisterText, 'Register Now')}</span>
               <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
@@ -1026,21 +995,21 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             
             <button
               onClick={() => scrollToSection('program')}
-              className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center gap-2.5 cursor-pointer backdrop-blur-md"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer backdrop-blur-md"
             >
               <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
               <span>{t(heroBtnProgramText, 'Scientific Program')}</span>
             </button>
           </div>
 
-          {/* Date + Location Info Badge - Centered at the bottom */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
-              <Calendar className="w-4.5 h-4.5 text-amber-400" />
+          {/* Date + Location Info Badge - Centered (Stacked on mobile, row on desktop) */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto px-4">
+            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
+              <Calendar className="w-4.5 h-4.5 text-amber-400 shrink-0" />
               <span>{heroDate}</span>
             </div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none">
-              <MapPin className="w-4.5 h-4.5 text-rose-400" />
+            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
+              <MapPin className="w-4.5 h-4.5 text-rose-400 shrink-0" />
               <span>{heroLocation}</span>
             </div>
           </div>
