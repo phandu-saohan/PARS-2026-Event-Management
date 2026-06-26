@@ -6741,6 +6741,87 @@ ON CONFLICT (code) DO UPDATE SET
                 )}
               </div>
 
+              {/* 6. SEO SETTINGS CARD */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm font-bold">
+                    🔍
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider">Cấu hình SEO cho trang tin sự kiện</h4>
+                    <p className="text-[10px] text-slate-455 mt-0.5">Tối ưu hoá công cụ tìm kiếm Google, thiết lập tiêu đề trang, mô tả ngắn và từ khoá tìm kiếm hiển thị ở trang ngoài.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* SEO Title */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">SEO Title (Tiêu đề hiển thị trên tab trình duyệt) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.seo?.title || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        const seo = sections.seo || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            seo: { ...seo, title: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="vd: Hội Nghị Thẩm Mỹ Quốc Tế PARS 2026 - Vietnamese Society of Aesthetic Plastic Surgery"
+                    />
+                  </div>
+
+                  {/* SEO Description */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">SEO Meta Description (Mô tả hiển thị trên Google) *</label>
+                    <textarea
+                      rows={3}
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 leading-relaxed"
+                      value={businessConfig.landingPageSections?.seo?.description || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        const seo = sections.seo || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            seo: { ...seo, description: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="vd: Hội nghị Khoa học Quốc tế PARS 2026 quy tụ các chuyên gia phẫu thuật tạo hình thẩm mỹ hàng đầu thế giới cập nhật công nghệ mới..."
+                    />
+                  </div>
+
+                  {/* SEO Keywords */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] font-bold text-slate-500 block">SEO Keywords (Từ khoá tìm kiếm - cách nhau bằng dấu phẩy) *</label>
+                    <input
+                      type="text"
+                      className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-800"
+                      value={businessConfig.landingPageSections?.seo?.keywords || ''}
+                      onChange={(e) => {
+                        const sections = businessConfig.landingPageSections || {};
+                        const seo = sections.seo || {};
+                        setBusinessConfig({
+                          ...businessConfig,
+                          landingPageSections: {
+                            ...sections,
+                            seo: { ...seo, keywords: e.target.value }
+                          }
+                        });
+                      }}
+                      placeholder="vd: pars 2026, hoi nghi tham my, phau thuat tao hinh, vsaps"
+                    />
+                  </div>
+                </div>
+              </div>
+
               {/* Bottom Action Button */}
               <div className="flex justify-end pt-2">
                 <button

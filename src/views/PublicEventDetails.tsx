@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -13,6 +13,7 @@ import {
 import { store } from '../dataStore';
 import { ConferenceSession } from '../types';
 import PublicDelegateRegister from './PublicDelegateRegister';
+import { useLanguage } from '../hooks/useLanguage';
 
 interface PublicEventDetailsProps {
   onNavigate: (view: string) => void;
@@ -401,6 +402,35 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
     };
   }, []);
 
+  // Dynamically set SEO metadata tags
+  useEffect(() => {
+    const seo = businessConfig.landingPageSections?.seo;
+    const defaultTitle = "Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế PARS 2026";
+    const defaultDesc = "Hệ thống quản lý Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên PARS 2026 - Vietnamese Society of Aesthetic Plastic Surgery";
+    const defaultKeywords = "pars 2026, hội nghị thẩm mỹ, phẫu thuật tạo hình, emcas";
+
+    // 1. Update Document Title
+    document.title = seo?.title || defaultTitle;
+
+    // 2. Update Meta Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', seo?.description || defaultDesc);
+
+    // 3. Update Meta Keywords
+    let metaKeywords = document.querySelector('meta[name="keywords"]');
+    if (!metaKeywords) {
+      metaKeywords = document.createElement('meta');
+      metaKeywords.setAttribute('name', 'keywords');
+      document.head.appendChild(metaKeywords);
+    }
+    metaKeywords.setAttribute('content', seo?.keywords || defaultKeywords);
+  }, [businessConfig]);
+
   const sections = businessConfig.landingPageSections || {};
   
   // Hero section dynamic elements with fallbacks
@@ -465,6 +495,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
     sponsors:         bg.sponsors         ? { backgroundColor: bg.sponsors }           : undefined,
     location:         bg.location         ? { backgroundColor: bg.location }           : undefined,
   };
+  // Bilingual IP-based language detection
+  const { lang, setLang, isLoading: langLoading, t } = useLanguage();
+
   // Interactive schedule states
   const [selectedDate, setSelectedDate] = useState<string>('2026-09-12'); // Default to Day 1
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -558,7 +591,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               onClick={() => scrollToSection('intro')} 
               className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              INTRODUCE
+              {t('GIỚI THIỆU', 'ABOUT')}
             </button>
             
             {/* PARS Dropdown Menu */}
@@ -576,19 +609,19 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   onClick={() => scrollToSection('program')}
                   className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                 >
-                  Chương trình khoa học
+                  {t('Chương trình khoa học', 'Scientific Program')}
                 </button>
                 <button 
                   onClick={() => scrollToSection('speakers')}
                   className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                 >
-                  Báo cáo viên nước ngoài
+                  {t('Báo cáo viên quốc tế', 'International Speakers')}
                 </button>
                 <button 
                   onClick={() => scrollToSection('speakers')}
                   className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                 >
-                  Báo cáo viên trong nước
+                  {t('Báo cáo viên Việt Nam', 'Vietnamese Speakers')}
                 </button>
               </div>
             </div>
@@ -598,7 +631,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <button 
                 className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent flex items-center uppercase tracking-wider"
               >
-                NEWS
+                {t('TIN TỨC', 'NEWS')}
                 <svg className="w-3 h-3 ml-1 opacity-70 transition-transform group-hover:rotate-180 duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -608,13 +641,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   onClick={() => scrollToSection('program')}
                   className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                 >
-                  Tin tức sự kiện
+                  {t('Tin tức sự kiện', 'Event News')}
                 </button>
                 <button 
                   onClick={() => scrollToSection('program')}
                   className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                 >
-                  Ấn phẩm y khoa
+                  {t('Ấn phẩm y khoa', 'Medical Publications')}
                 </button>
               </div>
             </div>
@@ -623,19 +656,19 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               onClick={() => scrollToSection('register')} 
               className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              REGISTER
+              {t('ĐĂNG KÝ', 'REGISTER')}
             </button>
             <button 
               onClick={() => scrollToSection('sponsors')} 
               className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              SPONSORS
+              {t('NHÀ TÀI TRỢ', 'SPONSORS')}
             </button>
             <button 
               onClick={() => scrollToSection('footer')} 
               className="text-xs md:text-sm font-extrabold text-[#4E2A14] hover:opacity-85 transition-opacity cursor-pointer border-none bg-transparent uppercase tracking-wider"
             >
-              CONTACT US
+              {t('LIÊN HỆ', 'CONTACT')}
             </button>
           </nav>
 
@@ -644,9 +677,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             
             {/* Language Flags Selector */}
             <div className="hidden sm:flex items-center gap-2">
+              {langLoading && (
+                <span className="text-[9px] text-slate-400 font-mono animate-pulse">detecting...</span>
+              )}
               <button 
                 title="English" 
-                className="focus:outline-none transition-transform hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center"
+                onClick={() => setLang('en')}
+                className={`focus:outline-none transition-all hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center rounded-sm ${lang === 'en' ? 'ring-2 ring-amber-400 ring-offset-1 shadow-md' : 'opacity-60 hover:opacity-100'}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7410 3900" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
                   <rect width="7410" height="3900" fill="#b22234"/>
@@ -685,7 +722,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               </button>
               <button 
                 title="Tiếng Việt" 
-                className="focus:outline-none transition-transform hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center"
+                onClick={() => setLang('vi')}
+                className={`focus:outline-none transition-all hover:scale-110 cursor-pointer border-none bg-transparent p-0 flex items-center rounded-sm ${lang === 'vi' ? 'ring-2 ring-red-500 ring-offset-1 shadow-md' : 'opacity-60 hover:opacity-100'}`}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" className="w-6 h-4 rounded-xs shadow-xs border border-slate-200">
                   <rect width="3" height="2" fill="#da251d"/>
@@ -694,13 +732,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               </button>
             </div>
 
-            {/* Red outlined action button (Tra cứu vé / Đăng nhập) */}
+            {/* Red outlined action button */}
             <div className="relative" ref={ticketDropdownRef}>
               <button
                 onClick={() => setShowTicketDropdown(!showTicketDropdown)}
                 className="px-4 py-2.5 rounded-full border border-red-550 hover:bg-red-500/5 text-red-600 font-black text-[10px] md:text-[11px] transition-all tracking-wider uppercase cursor-pointer flex items-center gap-1.5"
               >
-                TRA CỨU VÉ / ĐĂNG NHẬP
+                {t('TRA CỨU VÉ', 'MY TICKET')}
                 <svg className={`w-3.5 h-3.5 transition-transform ${showTicketDropdown ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
                 </svg>
@@ -715,7 +753,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-50 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
                   >
                     <Search className="w-3.5 h-3.5 text-slate-400" />
-                    Tra cứu vé đại biểu
+                    {t('Tra cứu vé đại biểu', 'Check my registration')}
                   </button>
                   <div className="h-px bg-slate-100 my-1" />
                   <button
@@ -726,7 +764,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     className="w-full text-left px-4 py-2.5 text-xs font-extrabold text-slate-700 hover:bg-slate-50 hover:text-indigo-600 transition-colors border-none bg-transparent cursor-pointer flex items-center gap-2"
                   >
                     <Building className="w-3.5 h-3.5 text-slate-400" />
-                    Đăng nhập Ban tổ chức
+                    {t('Đăng nhập Ban tổ chức', 'Admin Login')}
                   </button>
                 </div>
               )}
@@ -750,7 +788,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             <div className="w-72 bg-white h-full p-6 shadow-2xl flex flex-col justify-between animate-slide-in">
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <span className="font-extrabold text-slate-900 text-sm">MENU ĐIỀU HƯỚNG</span>
+                  <span className="font-extrabold text-slate-900 text-sm">{t('MENU ĐIỀU HƯỚNG', 'NAVIGATION')}</span>
                   <button 
                     onClick={() => setIsMobileMenuOpen(false)} 
                     className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 cursor-pointer border-none bg-transparent"
@@ -764,37 +802,37 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('intro'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    INTRODUCE
+                    {t('GIỚI THIỆU', 'ABOUT')}
                   </button>
                   <button 
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('program'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    PROGRAMS (PARS)
+                    {t('CHƯƠNG TRÌNH (PARS)', 'PROGRAMS (PARS)')}
                   </button>
                   <button 
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('speakers'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    SPEAKERS
+                    {t('DIỄN GIẢ', 'SPEAKERS')}
                   </button>
                   <button 
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('register'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    REGISTER
+                    {t('ĐĂNG KÝ', 'REGISTER')}
                   </button>
                   <button 
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('sponsors'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    SPONSORS
+                    {t('NHÀ TÀI TRỢ', 'SPONSORS')}
                   </button>
                   <button 
                     onClick={() => { setIsMobileMenuOpen(false); scrollToSection('footer'); }} 
                     className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
                   >
-                    CONTACT US
+                    {t('LIÊN HỆ', 'CONTACT')}
                   </button>
                 </div>
               </div>
@@ -802,14 +840,20 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <div className="border-t border-slate-100 pt-6 space-y-4">
                 {/* Flags in Mobile */}
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-slate-400">Ngôn ngữ:</span>
-                  <button className="w-7 h-5 rounded border border-slate-200 flex items-center justify-center p-0 cursor-pointer bg-transparent">
+                  <span className="text-xs font-bold text-slate-400">{t('Ngôn ngữ:', 'Language:')}</span>
+                  <button 
+                    onClick={() => { setLang('vi'); setIsMobileMenuOpen(false); }}
+                    className={`w-7 h-5 rounded border flex items-center justify-center p-0 cursor-pointer bg-transparent transition-all ${lang === 'vi' ? 'border-red-400 ring-1 ring-red-400' : 'border-slate-200 opacity-60'}`}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2" className="w-full h-full">
                       <rect width="3" height="2" fill="#da251d"/>
                       <polygon points="1.5,0.4 1.62,0.78 2.01,0.78 1.7,1.02 1.82,1.4 1.5,1.16 1.18,1.4 1.3,1.02 0.99,0.78 1.38,0.78" fill="#ffff00"/>
                     </svg>
                   </button>
-                  <button className="w-7 h-5 rounded border border-slate-200 flex items-center justify-center p-0 cursor-pointer bg-transparent">
+                  <button 
+                    onClick={() => { setLang('en'); setIsMobileMenuOpen(false); }}
+                    className={`w-7 h-5 rounded border flex items-center justify-center p-0 cursor-pointer bg-transparent transition-all ${lang === 'en' ? 'border-blue-400 ring-1 ring-blue-400' : 'border-slate-200 opacity-60'}`}
+                  >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 7410 3900" className="w-full h-full">
                       <rect width="7410" height="3900" fill="#b22234"/>
                       <path d="M0,300H7410M0,900H7410M0,1500H7410M0,2100H7410M0,2700H7410M0,3300H7410" stroke="#fff" strokeWidth="300"/>
@@ -851,13 +895,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </h1>
           </div>
 
-          {/* Theme / Subject */}
+          {/* Theme / Subject - language-aware */}
           <div className="max-w-4xl space-y-2 mx-auto">
             <p className="text-base md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
-              {heroThemeEn}
+              {lang === 'vi' ? heroThemeVi : heroThemeEn}
             </p>
             <p className="text-xs md:text-base lg:text-lg font-sans font-semibold text-slate-300 tracking-wide uppercase opacity-90">
-              {heroThemeVi}
+              {lang === 'vi' ? heroThemeEn : heroThemeVi}
             </p>
           </div>
 
@@ -867,7 +911,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               onClick={() => scrollToSection('register')}
               className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center gap-2.5 cursor-pointer border-none"
             >
-              <span>{heroBtnRegisterText}</span>
+              <span>{t(heroBtnRegisterText, 'Register Now')}</span>
               <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
             </button>
             
@@ -876,7 +920,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               className="px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center gap-2.5 cursor-pointer backdrop-blur-md"
             >
               <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
-              <span>{heroBtnProgramText}</span>
+              <span>{t(heroBtnProgramText, 'Scientific Program')}</span>
             </button>
           </div>
 
@@ -905,13 +949,13 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="lg:col-span-5 space-y-6 flex flex-col justify-center">
             <div className="w-12 h-1 bg-gradient-to-r from-teal-500 to-indigo-600 rounded-full" />
             <h3 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight uppercase">
-              {introTitle}
+              {t(introTitle, 'ABOUT THE CONFERENCE')}
             </h3>
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
-              {introText1}
+              {t(introText1, 'The International Scientific Conference PARS 2026, hosted by EMCAS Aesthetic Hospital, is a premier medical event bringing together world-renowned experts from ISAPS, ASPS, and EURAPS alongside leading Vietnamese specialists.')}
             </p>
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
-              {introText2}
+              {t(introText2, 'The conference focuses on cutting-edge clinical advances, technology transfer in aesthetic surgery, body contouring, facial rejuvenation, structural rhinoplasty, and comprehensive management of breast implant safety (BIA-ALCL).')}
             </p>
 
             {/* Bullet Highlights */}
@@ -919,22 +963,22 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight1Title}</span>
-                  <p className="text-xs text-slate-500">{introHighlight1Desc}</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{t(introHighlight1Title, 'Prestigious Host Institution')}</span>
+                  <p className="text-xs text-slate-500">{t(introHighlight1Desc, 'EMCAS Aesthetic Hospital holds full professional competence and delivers international-standard quality services.')}</p>
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight2Title}</span>
-                  <p className="text-xs text-slate-500">{introHighlight2Desc}</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{t(introHighlight2Title, 'CME Certificate 4.5h')}</span>
+                  <p className="text-xs text-slate-500">{t(introHighlight2Desc, 'Continuing Medical Education (CME) certificate issued as per Ministry of Health regulations, approved by Dr. Pham Xuan Khiem.')}</p>
                 </div>
               </div>
               <div className="flex gap-3 items-start">
                 <CheckCircle className="text-teal-600 w-5 h-5 shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{introHighlight3Title}</span>
-                  <p className="text-xs text-slate-500">{introHighlight3Desc}</p>
+                  <span className="font-extrabold text-slate-850 text-xs uppercase block tracking-wider">{t(introHighlight3Title, 'International Expert Exchange')}</span>
+                  <p className="text-xs text-slate-500">{t(introHighlight3Desc, 'Direct dialogue and practical learning from leading professors from USA, Japan, Sweden, and Mexico.')}</p>
                 </div>
               </div>
             </div>
@@ -949,16 +993,16 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold">
                   01
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">{block1Title}</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{t(block1Title, 'Delegate Registration')}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {block1Desc}
+                  {t(block1Desc, 'Registration fee: 1,000,000 VND (includes lunch). CME Add-on: 350,000 VND. Gala Dinner: 500,000 VND. Auto-registration system with QR code check-in.')}
                 </p>
               </div>
               <button 
                 onClick={() => scrollToSection('register')} 
                 className="mt-6 text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center gap-1 cursor-pointer w-fit group-hover:translate-x-1 transition-transform border-none bg-transparent"
               >
-                {block1BtnText}
+                {t(block1BtnText, 'Register Now')}
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
@@ -969,9 +1013,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
                   02
                 </div>
-                <h4 className="text-base font-black text-slate-900 uppercase">{block2Title}</h4>
+                <h4 className="text-base font-black text-slate-900 uppercase">{t(block2Title, 'International Speakers')}</h4>
                 <p className="text-xs text-slate-500 leading-relaxed">
-                  {block2Desc}
+                  {t(block2Desc, 'Gathering 17+ renowned professors, doctors from ISAPS, ASPS, and EURAPS presenting outstanding clinical research papers at CME standard.')}
                 </p>
               </div>
               <button 
@@ -1036,9 +1080,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">INTERNATIONAL PRESENTERS</span>
+              <span className="text-teal-400 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('DIEN GIA QUOC TE', 'INTERNATIONAL PRESENTERS')}</span>
               <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-white leading-none">
-                BÁO CÁO VIÊN NƯỚC NGOÀI
+                {t('BAO CAO VIEN NUOC NGOAI', 'INTERNATIONAL SPEAKERS')}
               </h2>
             </div>
             
@@ -1115,9 +1159,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-teal-600 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">PLENARY SPEAKERS</span>
+              <span className="text-teal-600 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('DIEN GIA TRONG NUOC', 'PLENARY SPEAKERS')}</span>
               <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 leading-none">
-                BÁO CÁO VIÊN TRONG NƯỚC
+                {t('BAO CAO VIEN VIET NAM', 'VIETNAMESE SPEAKERS')}
               </h2>
             </div>
             
@@ -1220,12 +1264,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
           {/* ── Section Header ── */}
           <div className="text-center mb-8 max-w-2xl mx-auto space-y-2">
-            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">CONFERENCE AGENDA</span>
+            <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('LICH TRINH HOI NGHI', 'CONFERENCE AGENDA')}</span>
             <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 leading-none">
-              Chương Trình Khoa Học Chi Tiết
+              {t('Chuong Trinh Khoa Hoc Chi Tiet', 'Detailed Scientific Program')}
             </h2>
             <p className="text-slate-500 text-xs leading-relaxed font-semibold">
-              Lịch trình 2 ngày hội nghị với các phiên báo cáo chuyên đề đa phòng. Nhấp vào bài để xem tóm tắt khoa học và lý lịch báo cáo viên.
+              {t('Lich trinh 2 ngay hoi nghi voi cac phien bao cao chuyen de da phong. Nhap vao bai de xem tom tat khoa hoc va ly lich bao cao vien.', '2-day conference schedule with multi-track specialized sessions. Click on a session to view the scientific abstract and presenter bio.')}
             </p>
           </div>
 
@@ -1233,8 +1277,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="flex justify-center mb-6">
             <div className="inline-flex bg-slate-100 rounded-xl p-1 border border-slate-200">
               {[
-                { date: '2026-09-12', label: 'Ngày 1', sub: '12/09/2026', desc: 'Khai mạc & Báo cáo khoa học' },
-                { date: '2026-09-13', label: 'Ngày 2', sub: '13/09/2026', desc: 'Chuyên đề nâng cao & Bế mạc' },
+                { date: '2026-09-12', label: t('Ngay 1', 'Day 1'), sub: '12/09/2026', desc: t('Khai mac & Bao cao khoa hoc', 'Opening & Scientific Sessions') },
+                { date: '2026-09-13', label: t('Ngay 2', 'Day 2'), sub: '13/09/2026', desc: t('Chuyen de nang cao & Be mac', 'Advanced Topics & Closing Ceremony') },
               ].map((d) => (
                 <button
                   key={d.date}

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -534,20 +534,17 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
         store.sendEmail(saved);
         store.sendWhatsapp(saved);
       } catch (err) {
-        console.error('Lỗi khi gửi thông báo tự động:', err);
+        console.error('Failed to send notifications:', err);
       }
-
       setCreatedAttendee(saved);
       setIsSubmitted(true);
-    } catch (err: any) {
-      console.error('Lỗi lưu đăng ký đại biểu:', err);
-      setErrorMsg(`Không thể hoàn tất đăng ký do lỗi cơ sở dữ liệu: ${err.message || err.details || 'Lỗi mạng hoặc phân quyền.'}`);
+    } catch (outerErr) {
+      setErrorMsg('Xay ra loi khi dang ky. Vui long thu lai.');
+      console.error('Registration error:', outerErr);
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // Dynamic provinces list comes from administrative helper
 
   if (isSubmitted && createdAttendee) {
     const checkinQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(createdAttendee.qrCodeValue)}`;
@@ -557,16 +554,15 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
       .replace(/[đĐ]/g, 'D')
       .replace(/[^A-Z0-9\s]/g, '');
     const transferMessageSub = `${cleanFullNameAsciiSub} ${createdAttendee.phone}`;
-    const vietQrSuccessUrl = `https://img.vietqr.io/image/VCB-0331000516283-compact.png?amount=${createdAttendee.packageFee}&addInfo=${encodeURIComponent(transferMessageSub)}&accountName=HOI%20PHAU%20THUAT%2520TAO%2520HINH%2520THAM%2520MY%2520VIET%2520NAM`;
 
     return (
-      <div className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans"}>
+      <div className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-4 md:py-6 px-4 text-slate-800 font-sans"}>
         <div className={isInline ? "bg-white rounded-3xl border border-slate-250 shadow-md overflow-hidden" : "max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden"}>
           {/* FormStepper indicating step 3 is active */}
           <FormStepper currentStep={3} isSubmitted={true} L={L} />
 
           {/* Header alert */}
-          <div className="bg-teal-900 text-amber-400 p-8 text-center relative border-b border-teal-800">
+          <div className="bg-teal-900 text-amber-400 p-6 text-center relative border-b border-teal-800">
             <div className="absolute top-4 left-4">
               <button
                 id="btn-confirm-return"
@@ -577,42 +573,46 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                 Về trang chủ
               </button>
             </div>
-            <div className="w-14 h-14 rounded-full bg-amber-400/10 flex items-center justify-center mx-auto mb-3 border border-amber-400/25">
-              <CheckCircle className="w-7 h-7 text-amber-400" />
+            <div className="w-10 h-10 rounded-full bg-amber-400/10 flex items-center justify-center mx-auto mb-2 border border-amber-400/25">
+              <CheckCircle className="w-5 h-5 text-amber-400" />
             </div>
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight text-white">Đăng Ký Thành Công</h2>
-            <p className="text-xs text-teal-200 uppercase tracking-widest font-mono mt-1">Hội Nghị Thường Niên PARS 2026</p>
+            <h2 className="text-lg md:text-xl font-black uppercase tracking-tight text-white">Đăng Ký Thành Công</h2>
+            <p className="text-[10px] text-teal-200 uppercase tracking-widest font-mono mt-0.5">Hội Nghị Thường Niên PARS 2026</p>
           </div>
 
-          <div className="p-6 md:p-8 space-y-6">
+          <div className="p-4 md:p-6 space-y-4">
 
             {/* Confirmation notification box */}
-            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-5 text-emerald-900 text-xs space-y-3">
+            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-4 text-emerald-900 text-xs space-y-2">
               <div className="flex items-center gap-1.5 font-bold text-emerald-950 font-sans text-sm">
                 <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 animate-pulse" />
                 <span>Thông tin đăng ký đã được gửi thành công qua Email và Zalo của đại biểu.</span>
               </div>
-              <p className="text-slate-600 leading-relaxed font-sans">
+              <p className="text-slate-650 leading-relaxed font-sans">
                 Mẫu đăng ký tham gia của đại biểu <strong>{createdAttendee.title} {createdAttendee.fullName}</strong> đã được lưu trữ thành công trên hệ thống hội nghị PARS 2026.
               </p>
-              <div className="space-y-1 text-slate-650 font-sans pl-1 border-l-2 border-emerald-350">
+              <div className="space-y-0.5 text-slate-600 font-sans pl-1 border-l-2 border-emerald-350">
                 <p>• <strong>Zalo OA:</strong> Phiếu check-in kèm mã QR đã được gửi tự động tới SĐT Zalo: <strong className="text-slate-900">{createdAttendee.phone}</strong></p>
                 <p>• <strong>Email liên hệ:</strong> Thẻ điện tử và hướng dẫn chi tiết hội nghị đã được gửi đến hòm thư: <strong className="text-slate-900">{createdAttendee.email}</strong></p>
               </div>
             </div>
 
-            {/* Electronic Ticket & Payment Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-100 pt-6">
+            {/* Electronic Ticket & Registration summary */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 border-t border-slate-100 pt-4">
 
               {/* Left Column: CHECK-IN PASS GỒM ẢNH QR VÉ */}
-              <div className="border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-sm flex flex-col justify-between">
-                <div className="bg-teal-950 text-white p-3.5 text-center border-b border-teal-900">
-                  <span className="text-[10px] uppercase font-bold tracking-widest text-amber-400 block font-mono">THẺ CHECK-IN ĐẠI BIỂU</span>
-                  <span className="text-[9px] text-slate-350 tracking-wider">XUẤT TRÌNH KHI ĐẾN LỄ TÂN</span>
+              <div className="border border-slate-200 rounded-3xl overflow-hidden bg-white shadow-lg flex flex-col justify-between relative">
+                {/* Decorative side ticket notches */}
+                <div className="absolute top-1/2 -left-3 w-6 h-6 bg-slate-100 rounded-full border border-slate-200 z-10" />
+                <div className="absolute top-1/2 -right-3 w-6 h-6 bg-slate-100 rounded-full border border-slate-200 z-10" />
+                
+                <div className="bg-gradient-to-r from-teal-950 to-teal-900 text-white p-5 text-center border-b border-teal-850">
+                  <span className="text-[10px] uppercase font-black tracking-widest text-amber-400 block font-mono">THẺ CHECK-IN ĐẠI BIỂU</span>
+                  <span className="text-[9px] text-teal-200 tracking-wider mt-0.5">XUẤT TRÌNH TẠI LỄ TÂN HỘI NGHỊ</span>
                 </div>
 
-                <div className="p-5 flex flex-col items-center flex-1 justify-center">
-                  <div className="p-2 border-2 border-dashed border-teal-600/30 rounded-2xl bg-white mb-3 shadow-inner">
+                <div className="p-4 flex flex-col items-center justify-center">
+                  <div className="p-2 border-2 border-dashed border-teal-600/30 rounded-2xl bg-white mb-3 shadow-md transition-transform hover:scale-105 duration-305">
                     <img
                       src={checkinQrUrl}
                       alt="Checkin QR"
@@ -620,195 +620,158 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       className="w-36 h-36 object-contain"
                     />
                   </div>
-                  <div className="text-center space-y-1 w-full">
-                    <span className="text-[11px] font-mono font-bold text-teal-800 bg-teal-50 px-2.5 py-0.5 rounded-full inline-block">{createdAttendee.id}</span>
-                    <div className="flex items-center justify-center gap-2.5 mt-2 mb-1.5 px-4">
-                      {createdAttendee.avatarUrl && (
+                  <div className="text-center space-y-1.5 w-full">
+                    <span className="text-xs font-mono font-bold text-teal-900 bg-teal-50/70 border border-teal-150 px-3 py-0.5 rounded-full inline-block">
+                      MÃ ĐẠI BIỂU: {createdAttendee.id}
+                    </span>
+                    
+                    <div className="flex items-center justify-center gap-3 mt-3 mb-1 px-2">
+                      {createdAttendee.avatarUrl ? (
                         <img
                           src={createdAttendee.avatarUrl}
                           alt="Avatar"
-                          className="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0"
+                          className="w-12 h-12 rounded-full object-cover border-2 border-teal-600/25 shadow-md shrink-0"
                         />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-teal-50 border-2 border-teal-600/20 flex items-center justify-center text-teal-700 font-black text-sm shrink-0">
+                          {createdAttendee.fullName.charAt(0)}
+                        </div>
                       )}
-                      <div className={createdAttendee.avatarUrl ? 'text-left' : 'text-center w-full'}>
-                        <p className="text-xs md:text-sm font-black text-slate-900 uppercase leading-snug">
+                      <div className="text-left">
+                        <p className="text-xs font-black text-slate-905 uppercase leading-tight">
                           {createdAttendee.title} {createdAttendee.fullName}
                         </p>
-                        <p className="text-[10.5px] text-slate-500 font-semibold leading-tight">{createdAttendee.organization}</p>
+                        <p className="text-[10.5px] text-slate-550 font-bold leading-normal mt-0.5">{createdAttendee.organization}</p>
                       </div>
                     </div>
-                    <p className="text-[10px] text-slate-400 italic font-medium">Năm sinh: {createdAttendee.yearOfBirth}</p>
                   </div>
                 </div>
 
-                <div className="bg-slate-50 p-2.5 text-center text-[10px] text-slate-500 font-medium font-mono border-t border-slate-100">
-                  MÃ SỐ ĐẠI BIỂU: {createdAttendee.qrCodeValue}
+                <div className="bg-slate-50/80 p-3 text-center text-[10px] text-slate-500 font-bold font-mono border-t border-dashed border-slate-200">
+                  {L.t('MÃ HÓA BẢO MẬT HỆ THỐNG PARS 2026', 'SECURE TICKET KEY: ')} {createdAttendee.qrCodeValue}
                 </div>
               </div>
 
-              {/* Right Column: THANH TOÁN — conditional theo payment method đã chọn */}
-              {createdAttendee.paymentMethod === 'stripe' ? (
-                /* Stripe Card Payment Panel */
-                <div className="border border-indigo-200 rounded-2xl overflow-hidden bg-indigo-50/20 shadow-sm flex flex-col justify-between">
-                  <div className="bg-indigo-700 text-white p-3.5 text-center border-b border-indigo-600">
-                    <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN THẺ QUỐC TẾ</span>
-                    <span className="text-[9px] text-indigo-200 font-medium">VISA / MASTERCARD · POWERED BY STRIPE</span>
-                  </div>
-                  <div className="p-5 flex flex-col items-center justify-center flex-1 space-y-4 text-center">
-                    <div className="flex items-center gap-2 justify-center">
-                      <svg viewBox="0 0 48 16" className="h-7 w-auto"><rect width="48" height="16" rx="3" fill="#1A1F71" /><text x="6" y="12" fontFamily="Arial" fontWeight="bold" fontSize="11" fill="white" letterSpacing="1">VISA</text></svg>
-                      <svg viewBox="0 0 36 24" className="h-7 w-auto"><circle cx="13" cy="12" r="10" fill="#EB001B" /><circle cx="23" cy="12" r="10" fill="#F79E1B" /><path d="M18 5.5a10 10 0 0 1 0 13A10 10 0 0 1 18 5.5Z" fill="#FF5F00" /></svg>
+              {/* Right Column: REGISTRATION DETAILS & INSTRUCTIONS */}
+              <div className="space-y-4">
+                
+                {/* Box 1: Chi Tiết Đăng Ký */}
+                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider border-b border-slate-200 pb-1.5">
+                    {L.t('Chi Tiết Gói Đăng Ký', 'Registration Details')}
+                  </h4>
+                  <div className="text-xs space-y-2 font-semibold text-slate-700">
+                    <div className="flex justify-between">
+                      <span className="text-slate-505">{L.t('Gói hội nghị:', 'Package:')}</span>
+                      <span className="text-slate-900 font-bold">{createdAttendee.packageName}</span>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-black text-indigo-900">{createdAttendee.packageFee.toLocaleString()} VNĐ</p>
-                      <p className="text-[10px] text-slate-500">≈ ${Math.round(createdAttendee.packageFee / 25000)} USD</p>
+                    
+                    {/* Add-on services display */}
+                    {(createdAttendee.cmeRequired || createdAttendee.galaRequired || createdAttendee.masterclassRequired || createdAttendee.tourRequired) && (
+                      <div className="space-y-1 pt-0.5">
+                        <span className="text-slate-505 block mb-1">{L.t('Dịch vụ đi kèm:', 'Add-ons selected:')}</span>
+                        {createdAttendee.cmeRequired && (
+                          <div className="flex items-center gap-1.5 text-teal-800 bg-teal-50/50 border border-teal-100 p-1 rounded-lg pl-2">
+                            <Check className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                            <span>{L.t('Cấp Chứng Chỉ CME Y Khoa', 'CME Certification')}</span>
+                          </div>
+                        )}
+                        {createdAttendee.galaRequired && (
+                          <div className="flex items-center gap-1.5 text-amber-800 bg-amber-50/50 border border-amber-100 p-1 rounded-lg pl-2">
+                            <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>{L.t('Tiệc Tối Gala Dinner', 'Gala Dinner')}</span>
+                          </div>
+                        )}
+                        {createdAttendee.masterclassRequired && (
+                          <div className="flex items-center gap-1.5 text-purple-800 bg-purple-50/50 border border-purple-100 p-1 rounded-lg pl-2">
+                            <Check className="w-3.5 h-3.5 text-purple-600 shrink-0" />
+                            <span>{L.t('Khóa Học Master Class', 'Master Class')}</span>
+                          </div>
+                        )}
+                        {createdAttendee.tourRequired && (
+                          <div className="flex items-center gap-1.5 text-pink-800 bg-pink-50/50 border border-pink-100 p-1 rounded-lg pl-2">
+                            <Check className="w-3.5 h-3.5 text-pink-650 shrink-0" />
+                            <span>{L.t('Tour Tham Quan Dã Ngoại', 'Sightseeing Tour')}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <div className="flex justify-between border-t border-slate-200 pt-2">
+                      <span className="text-slate-505">{L.t('Phương thức thanh toán:', 'Payment Method:')}</span>
+                      <span className="text-slate-900 uppercase font-mono font-bold text-right">
+                        {createdAttendee.paymentMethod === 'stripe' ? 'Stripe Checkout' : 
+                         createdAttendee.paymentMethod === 'vnpay' ? 'VNPay QR' : 'VietQR / Bank Transfer'}
+                      </span>
                     </div>
-                    <p className="text-[10.5px] text-slate-600 leading-relaxed text-left">
-                      {L.t('Nhấn nút bên dưới để thanh toán bằng thẻ Visa/Mastercard qua cổng Stripe bảo mật. Thông tin đăng ký đã được lưu.', 'Click below to pay by Visa/Mastercard via secure Stripe checkout. Your registration is saved.')}
-                    </p>
-                    {businessConfig.paymentConfig?.stripe?.publishableKey ? (
-                      <a
-                        href={`https://buy.stripe.com/test_link?prefilled_email=${encodeURIComponent(createdAttendee.email)}&client_reference_id=${createdAttendee.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full py-3 bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase rounded-xl flex items-center justify-center gap-2 transition-all no-underline cursor-pointer"
-                        style={{ textDecoration: 'none' }}
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        {L.t('Thanh toán bằng thẻ ngay →', 'Pay with Card Now →')}
-                      </a>
-                    ) : (
-                      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-[10px] text-amber-800 text-left w-full">
-                        ⚠️ {L.t('Liên hệ BTC để thanh toán quốc tế: info@pars.vn', 'Contact organizer for international payment: info@pars.vn')}
+
+                    <div className="flex justify-between border-t border-slate-200 pt-2">
+                      <span className="text-slate-550">{L.t('Trạng thái đóng phí:', 'Payment Status:')}</span>
+                      <span className="px-2 py-0.5 rounded font-bold text-[9px] bg-amber-100 text-amber-800 border border-amber-200">
+                        {L.t('Chờ đối soát đối chiếu', 'Awaiting Verification')}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between text-teal-900 bg-teal-50 border border-teal-200 p-2 rounded-xl text-xs md:text-sm font-black mt-3">
+                      <span>{L.t('TỔNG LỆ PHÍ ĐÃ ĐÓNG:', 'TOTAL FEE PAID:')}</span>
+                      <span className="font-mono">{createdAttendee.packageFee.toLocaleString()} VNĐ</span>
+                    </div>
+
+                    {/* Stripe pay link if needed */}
+                    {createdAttendee.paymentMethod === 'stripe' && businessConfig.paymentConfig?.stripe?.publishableKey && (
+                      <div className="mt-2">
+                        <a
+                          href={`https://buy.stripe.com/test_link?prefilled_email=${encodeURIComponent(createdAttendee.email)}&client_reference_id=${createdAttendee.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-black text-xs uppercase rounded-xl flex items-center justify-center gap-2 transition-all no-underline cursor-pointer shadow-md hover:shadow-lg"
+                          style={{ textDecoration: 'none' }}
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          {L.t('Thanh toán bằng thẻ qua Stripe →', 'Pay with Card via Stripe →')}
+                        </a>
                       </div>
                     )}
                   </div>
-                  <div className="p-2 bg-indigo-50 text-center text-[9px] text-indigo-600 font-sans border-t border-indigo-200">
-                    🔒 Mã hóa 256-bit SSL · Thông tin thẻ không lưu tại máy chủ BTC
+                </div>
+
+                {/* Box 2: Hướng Dẫn Kế Tiếp */}
+                <div className="bg-emerald-50/40 border border-emerald-100 rounded-2xl p-4 text-emerald-950 text-xs space-y-2.5">
+                  <h4 className="text-xs font-black text-emerald-900 uppercase tracking-wide border-b border-emerald-100 pb-1 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span>{L.t('Hướng Dẫn & Bước Tiếp Theo', 'Instructions & Next Steps')}</span>
+                  </h4>
+                  <ul className="space-y-1.5 text-slate-655 leading-relaxed font-sans list-none p-0 m-0 text-[11px]">
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-teal-600 font-bold select-none mt-0.5">1.</span>
+                      <span>
+                        {L.t('Ban thư ký hội nghị sẽ kiểm tra thông tin đăng ký và đối soát giao dịch thanh toán trong thời gian sớm nhất.', 
+                             'The conference secretariat will verify your registration info and crosscheck the payment transfer shortly.')}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-teal-600 font-bold select-none mt-0.5">2.</span>
+                      <span>
+                        {L.t('Khi hồ sơ được kích hoạt thành công, bạn sẽ nhận được thông báo qua Zalo OA và Email liên hệ kèm hướng dẫn nhận thẻ đại biểu chính thức.', 
+                             'Once approved, you will receive a notification via Zalo OA and Email with instructions to claim your official physical badge.')}
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-1.5">
+                      <span className="text-teal-605 font-bold select-none mt-0.5">3.</span>
+                      <span>
+                        {L.t('Vui lòng lưu giữ Thẻ Check-in Điện Tử (mã QR bên trái) trên điện thoại để quét mã nhanh khi làm thủ tục check-in tại sảnh chính hội nghị.', 
+                             'Please save the Electronic Check-in Ticket (left QR) on your phone for rapid barcode scanning at the reception desk.')}
+                      </span>
+                    </li>
+                  </ul>
+                  
+                  <div className="pt-1.5 border-t border-emerald-100/60 text-[10px] text-slate-500">
+                    {L.t('Hotline ban thư ký đối soát khẩn cấp: 090.xxx.xxxx | Email: info@pars.vn', 'Support hotline: 090.xxx.xxxx | Email: info@pars.vn')}
                   </div>
                 </div>
-              ) : createdAttendee.paymentMethod === 'vnpay' ? (
-                /* VNPay QR Panel */
-                <div className="border border-blue-200 rounded-2xl overflow-hidden bg-blue-50/20 shadow-sm flex flex-col justify-between">
-                  <div className="bg-blue-600 text-white p-3.5 text-center border-b border-blue-500">
-                    <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN VNPAY QR</span>
-                    <span className="text-[9px] text-blue-100 font-medium">LIÊN NGÂN HÀNG QUỐC GIA</span>
-                  </div>
-                  <div className="p-4 flex flex-col items-center justify-between flex-1 space-y-3">
-                    <div className="p-2 bg-white border border-blue-200 rounded-xl shadow-inner">
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`VNPAYQR|${businessConfig.paymentConfig?.vnpay?.merchantId || 'PARS2026'}|${createdAttendee.packageFee}|${transferMessageSub}`)}`}
-                        alt="VNPay QR"
-                        referrerPolicy="no-referrer"
-                        className="w-36 h-36 object-contain"
-                      />
-                    </div>
-                    <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700">
-                      <p>• Trạng thái: <span className="font-bold text-blue-700 bg-blue-100/60 px-2 py-0.5 rounded">Chờ xác minh</span></p>
-                      <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{createdAttendee.packageFee.toLocaleString()}đ</strong></p>
-                      <p>• Nội dung: <strong className="text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessageSub}</strong></p>
-                    </div>
-                  </div>
-                  <div className="p-2 bg-blue-50 text-center text-[9px] text-blue-800 font-sans border-t border-blue-200">
-                    📱 Mở ứng dụng ngân hàng / VNPay và quét mã QR phía trên
-                  </div>
-                </div>
-              ) : (
-                /* VietQR (bank_transfer) — mặc định */
-                <div className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/20 shadow-sm flex flex-col justify-between">
-                  <div className="bg-amber-500 text-amber-950 p-3.5 text-center border-b border-amber-300">
-                    <span className="text-[10px] uppercase font-black tracking-wider block">QUYỂN THANH TOÁN VIETQR</span>
-                    <span className="text-[9px] text-amber-900 font-medium">BẮT BUỘC ĐỂ BTC KHỞI TẠO CME</span>
-                  </div>
 
-                  <div className="p-4 flex flex-col items-center justify-between flex-1 space-y-3">
-                    {/* VietQR automatic dynamic generation code */}
-                    <div className="p-1 px-[10px] bg-white border border-slate-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-transform hover:scale-[1.02]">
-                      <img
-                        src={vietQrSuccessUrl}
-                        alt="VietQR code"
-                        referrerPolicy="no-referrer"
-                        className="w-40 h-auto object-contain mx-auto"
-                      />
-                    </div>
-
-                    <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700">
-                      <p>• Trạng thái: <span className="font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded">Chờ xác minh</span></p>
-                      <p>• Ngân hàng: <strong className="text-slate-900 font-mono">VIETCOMBANK</strong></p>
-                      <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">0331000516283</strong></p>
-                      <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">Hoi phau thuat tao hinh tham my Viet Nam</strong></p>
-                      <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{createdAttendee.packageFee.toLocaleString()}đ</strong></p>
-                      <p>• Nội dung CK: <strong className="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessageSub}</strong></p>
-                    </div>
-                  </div>
-
-                  <div className="p-2 bg-amber-100/40 text-center text-[9px] text-amber-900 font-sans border-t border-amber-200">
-                    ⚠️ Quét QR bằng ứng dụng ngân hàng để tự điền nội dung & số tiền chính xác.
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Proof of Payment file uploader on Step 4 */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
-                <Upload className="w-4 h-4 text-teal-600 animate-bounce" />
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                  {L.t('Đính Kèm Biên Lai Chuyển Khoản (Để BTC Đối Soát Nhanh)', 'Attach Payment Receipt (For Fast Verification)')}
-                </h4>
               </div>
-              <p className="text-[10.5px] text-slate-500 leading-normal font-medium">
-                {L.t('Sau khi quét mã QR thanh toán phía trên, đại biểu vui lòng tải lên hình ảnh biên nhận chuyển khoản thành công. Ban thư ký sẽ đối soát giao dịch và phê duyệt hồ sơ của đại biểu tức thì.', 'After scanning the VietQR code above, please upload the payment receipt. The secretariat will verify the transaction and approve your registration immediately.')}
-              </p>
-              <div className="flex items-center gap-3">
-                <div 
-                  role="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-350 cursor-pointer text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all w-fit select-none"
-                >
-                  <Upload className="w-4 h-4 text-slate-500" />
-                  {L.t('Đính kèm hóa đơn chuyển khoản', 'Attach Receipt')}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProofUploadInSuccess}
-                    className="hidden"
-                  />
-                </div>
-                {isUploading && <span className="text-[10px] text-slate-400 font-mono animate-pulse">{L.t('Đang nạp file...', 'Uploading...')}</span>}
-                {createdAttendee.transactionProofUrl && <span className="text-xs text-emerald-650 font-bold flex items-center gap-1">{L.t('✓ Đã tải ảnh hóa đơn thành công!', '✓ Receipt uploaded successfully!')}</span>}
-              </div>
-              {createdAttendee.transactionProofUrl && (
-                <div className="relative w-fit mt-2 border border-slate-200 rounded-xl p-1 bg-slate-50 shadow-inner">
-                  <img
-                    src={createdAttendee.transactionProofUrl}
-                    alt="Transaction Proof"
-                    className="h-28 w-auto object-contain rounded-lg border border-slate-200"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleRemoveProofInSuccess}
-                    className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white leading-none rounded-full w-5 h-5 text-[10px] font-black border border-white flex items-center justify-center cursor-pointer hover:bg-rose-700 shadow-sm"
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-            </div>
 
-            {/* CME specific confirmation data display if requested */}
-            {createdAttendee.cmeRequired && (
-              <div className="bg-teal-50/50 border border-teal-100 p-4 rounded-2xl text-[11px] text-teal-950 space-y-1">
-                <p className="font-bold text-teal-900 uppercase tracking-wide text-[10px]">ĐĂNG KÝ CẤP CHỨNG CHỈ CME ĐÃ GHI NHẬN:</p>
-                <p>• Đại biểu có nhu cầu cấp CME y tế liên tục: <strong>Có</strong></p>
-                <p>• Nơi nhận chứng chỉ giấy: <strong>{createdAttendee.address || createdAttendee.province}</strong></p>
-              </div>
-            )}
-
-            {/* Instruction Footer action buttons */}
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-[10px] text-slate-500 leading-relaxed">
-              <strong>* Ban Tổ Chức Hướng Dẫn:</strong> Sau khi hoàn thành chuyển tiền qua QR ngân hàng và tải lên biên lai, trạng thái đóng phí của đại biểu sẽ được duyệt sang màu xanh <strong>PAID (Đã đóng phí)</strong> trên ứng dụng.
             </div>
 
             {/* SePay auto payment check */}
@@ -824,16 +787,16 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
               );
             })()}
 
-            <div className="pt-4 flex flex-col md:flex-row gap-3">
+            <div className="pt-3 flex flex-col md:flex-row gap-3 border-t border-slate-100">
               <button
                 onClick={() => window.location.href = 'https://pars.vn'}
-                className="flex-1 py-3 text-xs bg-slate-900 hover:bg-slate-950 text-white font-black uppercase text-center rounded-xl tracking-wider transition-all cursor-pointer"
+                className="flex-1 py-2.5 text-xs bg-slate-900 hover:bg-slate-950 text-white font-black uppercase text-center rounded-xl tracking-wider transition-all cursor-pointer border-none"
               >
                 Quay về trang chủ: Pars.vn
               </button>
               <button
                 onClick={() => window.print()}
-                className="px-6 py-3 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold uppercase rounded-xl tracking-wider transition-all cursor-pointer"
+                className="px-5 py-2.5 text-xs bg-white border border-slate-200 hover:bg-slate-55 text-slate-700 font-bold uppercase rounded-xl tracking-wider transition-all cursor-pointer"
               >
                 In Thẻ & Hóa Đơn 🖨️
               </button>

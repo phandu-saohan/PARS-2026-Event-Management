@@ -560,6 +560,18 @@ export interface LandingPageSections {
     highlight2Desc?: string;
     highlight3Title?: string;
     highlight3Desc?: string;
+    block1Title?: string;
+    block1Desc?: string;
+    block1BtnText?: string;
+    block2Title?: string;
+    block2Desc?: string;
+    block2BtnText?: string;
+    block3Title?: string;
+    block3Desc?: string;
+    block3BtnText?: string;
+    block4Title?: string;
+    block4Desc?: string;
+    block4BtnText?: string;
   };
   speakers?: {
     foreign: SpeakerConfig[];
@@ -578,6 +590,12 @@ export interface LandingPageSections {
     sponsors?: string;
     /** Màu nền section Địa điểm */
     location?: string;
+  };
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string;
   };
 }
 
