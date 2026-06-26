@@ -3975,38 +3975,115 @@ ON CONFLICT (code) DO UPDATE SET
               <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
                 <div>
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                    💰 Quản Lý Cổng Thanh Toán Tích Hợp
+                    💰 Phương Thức Thanh Toán
                   </h3>
                   <p className="text-[11px] text-slate-450 mt-0.5">
-                    Cấu hình thông tin tài khoản VietQR, cổng VNPay và cổng thẻ quốc tế Stripe Checkout.
+                    Bật/tắt và cấu hình tài khoản VietQR, VNPay QR và cổng thẻ quốc tế Stripe Checkout hiển thị trên form đăng ký.
                   </p>
                 </div>
               </div>
 
-              {/* Info banner */}
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-[10.5px] text-blue-800 space-y-1.5">
-                <p className="font-black text-[11px] text-blue-900">💡 Hướng dẫn cấu hình:</p>
-                <p>1. <strong>VietQR:</strong> Cho hiển thị mã QR chuyển khoản tự động kèm thông tin số tài khoản và nội dung nạp tiền cho đại biểu.</p>
-                <p>2. <strong>VNPay QR:</strong> Yêu cầu Merchant ID liên kết của ban tổ chức để sinh mã thanh toán.</p>
-                <p>3. <strong>Stripe Checkout:</strong> Giải pháp thanh toán thẻ quốc tế Visa/Mastercard an toàn (redirect). Cần cung cấp Publishable Key (pk_live_...) để kích hoạt.</p>
+              {/* Status Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* VietQR status */}
+                <div className={`rounded-2xl border-2 p-4 flex items-center gap-3 transition-all ${
+                  (businessConfig.paymentConfig?.vietqr?.isEnabled !== false)
+                    ? 'border-teal-200 bg-teal-50/60'
+                    : 'border-slate-200 bg-slate-50 opacity-60'
+                }`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 ${
+                    (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'bg-teal-100' : 'bg-slate-100'
+                  }`}>🏦</div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-700 uppercase tracking-wide">VietQR</p>
+                    <p className={`text-[9.5px] font-bold mt-0.5 ${
+                      (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'text-teal-700' : 'text-slate-400'
+                    }`}>
+                      {(businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? '● Đang hoạt động' : '○ Đã tắt'}
+                    </p>
+                    <p className="text-[9px] text-slate-400 truncate font-mono mt-0.5">
+                      {businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB'} · {(businessConfig.paymentConfig?.vietqr?.accountNo || '').slice(0,8) || '---'}...
+                    </p>
+                  </div>
+                </div>
+
+                {/* VNPay status */}
+                <div className={`rounded-2xl border-2 p-4 flex items-center gap-3 transition-all ${
+                  businessConfig.paymentConfig?.vnpay?.isEnabled
+                    ? 'border-blue-200 bg-blue-50/60'
+                    : 'border-slate-200 bg-slate-50 opacity-60'
+                }`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 ${
+                    businessConfig.paymentConfig?.vnpay?.isEnabled ? 'bg-blue-100' : 'bg-slate-100'
+                  }`}>📱</div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-700 uppercase tracking-wide">VNPay QR</p>
+                    <p className={`text-[9.5px] font-bold mt-0.5 ${
+                      businessConfig.paymentConfig?.vnpay?.isEnabled ? 'text-blue-700' : 'text-slate-400'
+                    }`}>
+                      {businessConfig.paymentConfig?.vnpay?.isEnabled ? '● Đang hoạt động' : '○ Chưa kích hoạt'}
+                    </p>
+                    <p className="text-[9px] text-slate-400 truncate font-mono mt-0.5">
+                      {businessConfig.paymentConfig?.vnpay?.merchantId ? `ID: ${businessConfig.paymentConfig.vnpay.merchantId}` : 'Chưa có Merchant ID'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stripe status */}
+                <div className={`rounded-2xl border-2 p-4 flex items-center gap-3 transition-all ${
+                  businessConfig.paymentConfig?.stripe?.isEnabled && businessConfig.paymentConfig?.stripe?.publishableKey
+                    ? 'border-indigo-200 bg-indigo-50/60'
+                    : 'border-slate-200 bg-slate-50 opacity-60'
+                }`}>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 ${
+                    businessConfig.paymentConfig?.stripe?.isEnabled ? 'bg-indigo-100' : 'bg-slate-100'
+                  }`}>💳</div>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black text-slate-700 uppercase tracking-wide">Stripe</p>
+                    <p className={`text-[9.5px] font-bold mt-0.5 ${
+                      businessConfig.paymentConfig?.stripe?.isEnabled && businessConfig.paymentConfig?.stripe?.publishableKey
+                        ? 'text-indigo-700'
+                        : 'text-slate-400'
+                    }`}>
+                      {businessConfig.paymentConfig?.stripe?.isEnabled && businessConfig.paymentConfig?.stripe?.publishableKey
+                        ? (businessConfig.paymentConfig.stripe.publishableKey.startsWith('pk_live') ? '● Live Mode' : '● Test Mode')
+                        : '○ Chưa kích hoạt'
+                      }
+                    </p>
+                    <p className="text-[9px] text-slate-400 truncate font-mono mt-0.5">
+                      {businessConfig.paymentConfig?.stripe?.publishableKey
+                        ? businessConfig.paymentConfig.stripe.publishableKey.slice(0, 16) + '...'
+                        : 'Chưa có API key'}
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
                   store.saveBusinessConfig(businessConfig);
-                  alert('Đã lưu cấu hình Cổng Thanh Toán thành công!');
+                  alert('Đã lưu cấu hình Phương Thức Thanh Toán thành công!');
                   reloadData();
                 }}
-                className="space-y-6"
+                className="space-y-5"
               >
                 {/* 1. VietQR Config */}
-                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest flex items-center gap-2">
-                      <Wallet className="w-4 h-4 text-teal-655" />
-                      CHUYỂN KHOẢN TIẾNG VIỆT (VIETQR)
-                    </span>
+                <div className={`p-5 rounded-2xl border-2 space-y-4 transition-all ${
+                  (businessConfig.paymentConfig?.vietqr?.isEnabled !== false)
+                    ? 'border-teal-200 bg-teal-50/20'
+                    : 'border-slate-200 bg-slate-50/40'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-teal-100 flex items-center justify-center">
+                        <Wallet className="w-4 h-4 text-teal-700" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-wide">Chuyển khoản VietQR</p>
+                        <p className="text-[9.5px] text-slate-500">Quét mã bằng bất kỳ ứng dụng ngân hàng nào</p>
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
@@ -4020,93 +4097,125 @@ ON CONFLICT (code) DO UPDATE SET
                           }
                         });
                       }}
-                      className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer border-none ${
+                      className={`relative w-11 h-6 rounded-full transition-colors cursor-pointer border-none ${
                         (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'bg-teal-600' : 'bg-slate-300'
                       }`}
                     >
-                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                      <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
                         (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'translate-x-5' : 'translate-x-0'
                       }`} />
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Bank Code */}
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-slate-600 block">Ngân hàng thụ hưởng *</label>
-                      <select
-                        value={businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB'}
-                        onChange={(e) => {
-                          const pc = businessConfig.paymentConfig || {};
-                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
-                          setBusinessConfig({
-                            ...businessConfig,
-                            paymentConfig: { ...pc, vietqr: { ...vq, bankCode: e.target.value } }
-                          });
-                        }}
-                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-850 focus:outline-none"
-                      >
-                        <option value="VCB">Vietcombank (VCB)</option>
-                        <option value="TCB">Techcombank (TCB)</option>
-                        <option value="MB">MB Bank</option>
-                        <option value="ACB">ACB Bank</option>
-                        <option value="VPB">VPBank</option>
-                        <option value="BIDV">BIDV</option>
-                        <option value="CTG">Vietinbank (CTG)</option>
-                        <option value="TPB">TPBank</option>
-                        <option value="MSB">MSB</option>
-                        <option value="VIB">VIB</option>
-                        <option value="HDB">HDBank</option>
-                      </select>
-                    </div>
+                  {(businessConfig.paymentConfig?.vietqr?.isEnabled !== false) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                      {/* Bank Code */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-600 block">Ngân hàng thụ hưởng *</label>
+                        <select
+                          value={businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB'}
+                          onChange={(e) => {
+                            const pc = businessConfig.paymentConfig || {};
+                            const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                            setBusinessConfig({
+                              ...businessConfig,
+                              paymentConfig: { ...pc, vietqr: { ...vq, bankCode: e.target.value } }
+                            });
+                          }}
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-850 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                        >
+                          <option value="VCB">Vietcombank (VCB)</option>
+                          <option value="TCB">Techcombank (TCB)</option>
+                          <option value="MB">MB Bank</option>
+                          <option value="ACB">ACB Bank</option>
+                          <option value="VPB">VPBank</option>
+                          <option value="BIDV">BIDV</option>
+                          <option value="CTG">Vietinbank (CTG)</option>
+                          <option value="TPB">TPBank</option>
+                          <option value="MSB">MSB</option>
+                          <option value="VIB">VIB</option>
+                          <option value="HDB">HDBank</option>
+                        </select>
+                      </div>
 
-                    {/* Account Number */}
-                    <div className="space-y-1">
-                      <label className="text-[11px] font-bold text-slate-600 block">Số tài khoản nhận tiền *</label>
-                      <input
-                        type="text"
-                        value={businessConfig.paymentConfig?.vietqr?.accountNo || ''}
-                        onChange={(e) => {
-                          const pc = businessConfig.paymentConfig || {};
-                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
-                          setBusinessConfig({
-                            ...businessConfig,
-                            paymentConfig: { ...pc, vietqr: { ...vq, accountNo: e.target.value } }
-                          });
-                        }}
-                        placeholder="Ví dụ: 0331000516283"
-                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none"
-                      />
-                    </div>
+                      {/* Account Number */}
+                      <div className="space-y-1">
+                        <label className="text-[11px] font-bold text-slate-600 block">Số tài khoản nhận tiền *</label>
+                        <input
+                          type="text"
+                          value={businessConfig.paymentConfig?.vietqr?.accountNo || ''}
+                          onChange={(e) => {
+                            const pc = businessConfig.paymentConfig || {};
+                            const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                            setBusinessConfig({
+                              ...businessConfig,
+                              paymentConfig: { ...pc, vietqr: { ...vq, accountNo: e.target.value } }
+                            });
+                          }}
+                          placeholder="Ví dụ: 0331000516283"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                        />
+                      </div>
 
-                    {/* Account Name */}
-                    <div className="space-y-1 md:col-span-2">
-                      <label className="text-[11px] font-bold text-slate-600 block">Tên chủ tài khoản *</label>
-                      <input
-                        type="text"
-                        value={businessConfig.paymentConfig?.vietqr?.accountName || ''}
-                        onChange={(e) => {
-                          const pc = businessConfig.paymentConfig || {};
-                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
-                          setBusinessConfig({
-                            ...businessConfig,
-                            paymentConfig: { ...pc, vietqr: { ...vq, accountName: e.target.value.toUpperCase() } }
-                          });
-                        }}
-                        placeholder="Ví dụ: HOI PHAU THUAT TAO HINH THAM MY VIET NAM"
-                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold uppercase text-slate-850 focus:outline-none"
-                      />
+                      {/* Account Name */}
+                      <div className="space-y-1 md:col-span-2">
+                        <label className="text-[11px] font-bold text-slate-600 block">Tên chủ tài khoản (IN HOA, không dấu) *</label>
+                        <input
+                          type="text"
+                          value={businessConfig.paymentConfig?.vietqr?.accountName || ''}
+                          onChange={(e) => {
+                            const pc = businessConfig.paymentConfig || {};
+                            const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                            setBusinessConfig({
+                              ...businessConfig,
+                              paymentConfig: { ...pc, vietqr: { ...vq, accountName: e.target.value.toUpperCase() } }
+                            });
+                          }}
+                          placeholder="Ví dụ: HOI PHAU THUAT TAO HINH THAM MY VIET NAM"
+                          className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold uppercase text-slate-850 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                        />
+                      </div>
+
+                      {/* VietQR Live Preview */}
+                      {businessConfig.paymentConfig?.vietqr?.accountNo && businessConfig.paymentConfig?.vietqr?.accountName && (
+                        <div className="md:col-span-2 bg-white border border-teal-100 rounded-xl p-3 flex items-center gap-4">
+                          <div className="p-1.5 bg-white border border-slate-100 rounded-xl shadow-sm shrink-0">
+                            <img
+                              src={`https://img.vietqr.io/image/${businessConfig.paymentConfig.vietqr.bankCode}-${businessConfig.paymentConfig.vietqr.accountNo}-compact.png?amount=0&addInfo=PREVIEW&accountName=${encodeURIComponent(businessConfig.paymentConfig.vietqr.accountName)}`}
+                              alt="VietQR Preview"
+                              className="w-24 h-24 object-contain"
+                              referrerPolicy="no-referrer"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                          <div className="text-[10.5px] space-y-1 text-slate-700">
+                            <p className="font-black text-[11px] text-teal-800">✅ Preview QR tài khoản nhận tiền</p>
+                            <p>Ngân hàng: <strong className="font-mono">{businessConfig.paymentConfig.vietqr.bankCode}</strong></p>
+                            <p>Số TK: <strong className="font-mono">{businessConfig.paymentConfig.vietqr.accountNo}</strong></p>
+                            <p>Tên TK: <strong>{businessConfig.paymentConfig.vietqr.accountName}</strong></p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 {/* 2. VNPay QR Config */}
-                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
-                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                    <span className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest flex items-center gap-2">
-                      <Smartphone className="w-4 h-4 text-blue-655" />
-                      CỔNG QUÉT MÃ VNPAY QR
-                    </span>
+                <div className={`p-5 rounded-2xl border-2 space-y-4 transition-all ${
+                  businessConfig.paymentConfig?.vnpay?.isEnabled
+                    ? 'border-blue-200 bg-blue-50/20'
+                    : 'border-slate-200 bg-slate-50/40'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center">
+                        <Smartphone className="w-4 h-4 text-blue-700" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-black text-slate-900 uppercase tracking-wide">VNPay QR</p>
+                        <p className="text-[9.5px] text-slate-500">Liên ngân hàng, ví điện tử VNPay</p>
+                      </div>
+                    </div>
                     <button
                       type="button"
                       onClick={() => {
