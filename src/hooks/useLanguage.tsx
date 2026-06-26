@@ -41,16 +41,39 @@ function getSessionLang(): Lang | null {
   return null;
 }
 
-async function detectCountryFromIP(): Promise<'VN' | 'other'> {
+function isLikelyVietnamese(): boolean {
+  try {
+    // 1. Check local timezone (Vietnam is Asia/Ho_Chi_Minh or Asia/Saigon)
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    if (tz === 'Asia/Ho_Chi_Minh' || tz === 'Asia/Saigon') {
+      return true;
+    }
+  } catch { /* ignore */ }
+
+  try {
+    // 2. Check browser language preferences
+    const languages = navigator.languages || [navigator.language];
+    for (const lang of languages) {
+      if (lang.toLowerCase().startsWith('vi')) {
+        return true;
+      }
+    }
+  } catch { /* ignore */ }
+
+  return false;
+}
+
+async function detectCountryFromIP(): Promise<'VN' | 'other' | 'failed'> {
   try {
     // Use ipapi.co - free, no key needed, 1000 req/day
     const res = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(4000) });
     if (res.ok) {
       const data = await res.json();
       if (data.country_code === 'VN') return 'VN';
+      if (data.country_code) return 'other';
     }
-  } catch { /* network error - fallback */ }
-  return 'other';
+  } catch { /* network error or ad-blocker blocking the request */ }
+  return 'failed';
 }
 
 import React from 'react';
@@ -73,11 +96,20 @@ export function useLanguage(): LanguageHelper {
       setIsLoading(false);
       return;
     }
-    // Detect via IP
+    // 1. Fast local checks (skips network requests entirely if user is likely in VN)
+    if (isLikelyVietnamese()) {
+      setLangState('vi');
+      setIsLoading(false);
+      return;
+    }
+    // 2. Detect via IP for non-VN browser configurations
     setIsLoading(true);
-    detectCountryFromIP().then(country => {
-      const detected: Lang = country === 'VN' ? 'vi' : 'en';
-      setLangState(detected);
+    detectCountryFromIP().then(result => {
+      if (result === 'other') {
+        setLangState('en');
+      } else if (result === 'VN') {
+        setLangState('vi');
+      } // If 'failed', keep the default state ('vi')
       setIsLoading(false);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
