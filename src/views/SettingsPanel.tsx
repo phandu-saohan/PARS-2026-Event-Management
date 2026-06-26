@@ -4136,6 +4136,60 @@ ON CONFLICT (code) DO UPDATE SET
                 </div>
               </div>
 
+              {/* Collapsible Detailed Guide Card */}
+              <div className="bg-indigo-50/40 border border-indigo-100 rounded-2xl p-5 space-y-4">
+                <details className="group">
+                  <summary className="flex items-center justify-between font-black text-xs text-indigo-950 uppercase tracking-wider cursor-pointer list-none select-none">
+                    <span className="flex items-center gap-2">
+                      💡 HƯỚNG DẪN CẤU HÌNH CHI TIẾT CÁC CỔNG THANH TOÁN
+                    </span>
+                    <span className="transition-transform group-open:rotate-180 text-base">👇</span>
+                  </summary>
+                  <div className="mt-4 pt-3 border-t border-indigo-100/60 space-y-5 text-slate-700 text-[10.5px] leading-relaxed">
+                    
+                    {/* 1. VietQR */}
+                    <div className="space-y-1.5 text-left">
+                      <p className="font-extrabold text-indigo-900 text-xs">1. Chuyển khoản nhanh VietQR:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Chọn ngân hàng trong danh sách, điền đúng <strong>Số tài khoản nhận tiền</strong>.</li>
+                        <li><strong>Tên chủ tài khoản</strong> nhập bằng tiếng Việt viết hoa không dấu (ví dụ: <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">CONG TY BENH VIEN EMCAS</code>).</li>
+                        <li>Mã QR động sẽ tự động sinh trên Form đăng ký theo số tiền gói và mã check-in của đại biểu.</li>
+                      </ul>
+                    </div>
+
+                    {/* 2. SePay Auto-reconciliation */}
+                    <div className="space-y-1.5 text-left">
+                      <p className="font-extrabold text-indigo-900 text-xs">2. Tự động đối soát chuyển khoản (SePay Auto-verify):</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>Bước 1</strong>: Liên kết tài khoản ngân hàng thụ hưởng tại trang <a href="https://my.sepay.vn" target="_blank" rel="noreferrer" className="text-indigo-650 underline font-bold">my.sepay.vn</a>.</li>
+                        <li><strong>Bước 2</strong>: Vào API Access tạo API Token và dán vào tab <strong>Tích hợp SePay</strong> bên trên.</li>
+                        <li><strong>Bước 3</strong>: Tạo Webhook trên SePay với URL là <code className="bg-slate-100 px-1 py-0.5 rounded text-[10px]">{businessConfig.appUrl ? `${businessConfig.appUrl.replace(/\/$/, '')}/api/sepay-webhook` : '[Chưa cấu hình Domain App URL]'}</code>, sự kiện là <strong>Biến động số dư</strong>, đặt Webhook Secret và dán lại vào tab SePay của hệ thống.</li>
+                      </ul>
+                    </div>
+
+                    {/* 3. Stripe */}
+                    <div className="space-y-1.5 text-left">
+                      <p className="font-extrabold text-indigo-900 text-xs">3. Cổng thẻ quốc tế Stripe (Visa / Mastercard):</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Đăng nhập Stripe Dashboard, truy cập Developers, API Keys.</li>
+                        <li>Lấy <strong>Publishable key</strong> (tiền tố <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[9px]">pk_live_...</code> hoặc <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-[9px]">pk_test_...</code>) dán vào phần cấu hình Stripe bên dưới.</li>
+                        <li>Bật Live hoặc Test mode tự động dựa trên tiền tố API key bạn đã cấu hình.</li>
+                      </ul>
+                    </div>
+
+                    {/* 4. VNPay */}
+                    <div className="space-y-1.5 text-left">
+                      <p className="font-extrabold text-indigo-900 text-xs">4. Cổng VNPay QR:</p>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li>Cần đăng ký hợp đồng và nhận Terminal ID / Merchant ID từ VNPay.</li>
+                        <li>Dán mã Terminal ID vào ô cấu hình VNPay bên dưới và bật kích hoạt.</li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </details>
+              </div>
+
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
