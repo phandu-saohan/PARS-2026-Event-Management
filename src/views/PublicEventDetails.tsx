@@ -1684,35 +1684,98 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             </p>
           </div>
 
-          {/* Right map mock column */}
-          <div className="lg:col-span-7 border border-white/10 rounded-3xl overflow-hidden bg-slate-950 flex flex-col justify-between h-[320px] md:h-[400px] shadow-2xl relative group">
-            {/* Ambient Map Grid Design */}
-            <div className="absolute inset-0 bg-teal-950/20 opacity-60 pointer-events-none z-0" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(20,184,166,0.1),transparent)] z-0" />
-            
-            {/* Map Placeholder Content */}
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center p-6 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 animate-pulse">
-                <MapPin className="w-8 h-8" />
+          {/* Right hotel recommendations column */}
+          <div className="lg:col-span-7 border border-white/10 rounded-3xl overflow-hidden bg-slate-950 flex flex-col justify-between h-[360px] md:h-[420px] shadow-2xl relative">
+            {/* Header */}
+            <div className="bg-slate-900/60 border-b border-white/5 px-6 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400">
+                  <Building className="w-4.5 h-4.5" />
+                </div>
+                <div className="text-left">
+                  <h4 className="font-extrabold text-sm text-white tracking-wider uppercase">
+                    {t('GỢI Ý KHÁCH SẠN LÂN CẬN', 'SUGGESTED ACCOMMODATIONS')}
+                  </h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    {t('Điểm lưu trú chất lượng cao cách Meliá Hanoi dưới 10 phút đi bộ', 'High-quality stays within a 10-minute walk from Meliá Hanoi')}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <h4 className="font-extrabold text-white text-base">{t('BẢN ĐỒ KHÁCH SẠN MELIÁ HÀ NỘI', 'MAP OF MELIÁ HANOI HOTEL')}</h4>
-                <p className="text-xs text-slate-400">{t('44B Lý Thường Kiệt, Hoàn Kiếm, Hà Nội', '44B Ly Thuong Kiet, Hoan Kiem, Hanoi')}</p>
-              </div>
-              <a
-                href="https://maps.google.com/?q=Melia+Hotel+Hanoi+44B+Ly+Thuong+Kiet"
-                target="_blank"
-                rel="noreferrer"
-                className="px-5 py-2.5 bg-teal-500 hover:bg-teal-650 text-white font-bold text-xs rounded-xl shadow-md inline-flex items-center gap-1.5 transition-all decoration-none"
-              >
-                {t('Mở trong Google Maps', 'Open in Google Maps')}
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
             </div>
 
-            {/* Bottom details strip */}
-            <div className="bg-slate-900 border-t border-white/5 p-4 text-center text-xs text-slate-500 z-10">
-              {t('Vị trí đắc địa ngay trung tâm Thủ đô, cách Hồ Hoàn Kiếm 10 phút đi bộ.', 'Prime location in the heart of the Capital, a 10-minute walk to Hoan Kiem Lake.')}
+            {/* List */}
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 text-left">
+              {[
+                {
+                  name: t('Khách sạn Mövenpick Hà Nội Center', 'Mövenpick Hotel Hanoi Center'),
+                  stars: 5,
+                  distance: t('300m (4 phút đi bộ)', '300m (4 mins walk)'),
+                  address: t('83A Lý Thường Kiệt, Hoàn Kiếm, Hà Nội', '83A Ly Thuong Kiet, Hoan Kiem, Hanoi'),
+                  link: 'https://maps.google.com/?q=Movenpick+Hotel+Hanoi+83A+Ly+Thuong+Kiet'
+                },
+                {
+                  name: t('Căn hộ Somerset Grand Hà Nội', 'Somerset Grand Hanoi Apartments'),
+                  stars: 5,
+                  distance: t('250m (3 phút đi bộ)', '250m (3 mins walk)'),
+                  address: t('49 Hai Bà Trưng, Hoàn Kiếm, Hà Nội', '49 Hai Ba Trung, Hoan Kiem, Hanoi'),
+                  link: 'https://maps.google.com/?q=Somerset+Grand+Hanoi+49+Hai+Ba+Trung'
+                },
+                {
+                  name: t('Khách sạn Mercure Hà Nội La Gare', 'Mercure Hanoi La Gare Hotel'),
+                  stars: 4,
+                  distance: t('450m (6 phút đi bộ)', '450m (6 mins walk)'),
+                  address: t('94 Lý Thường Kiệt, Cửa Nam, Hoàn Kiếm, Hà Nội', '94 Ly Thuong Kiet, Cua Nam, Hoan Kiem, Hanoi'),
+                  link: 'https://maps.google.com/?q=Mercure+Hanoi+La+Gare+94+Ly+Thuong+Kiet'
+                },
+                {
+                  name: t('M Village Dã Tượng', 'M Village Da Tuong'),
+                  stars: 3,
+                  distance: t('350m (5 phút đi bộ)', '350m (5 mins walk)'),
+                  address: t('Khu vực Lý Thường Kiệt - Dã Tượng, Hoàn Kiếm, Hà Nội', 'Ly Thuong Kiet - Da Tuong Area, Hoan Kiem, Hanoi'),
+                  link: 'https://maps.google.com/?q=M+Village+Da+Tuong+Hanoi'
+                }
+              ].map((hotel, index) => (
+                <div key={index} className="flex items-start gap-4 p-3 bg-white/5 border border-white/5 hover:border-teal-500/20 hover:bg-white/10 rounded-2xl transition-all duration-200">
+                  <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 shrink-0 mt-0.5">
+                    <Building className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <h5 className="font-extrabold text-white text-sm truncate">
+                        {hotel.name}
+                      </h5>
+                      <div className="flex items-center gap-0.5 text-amber-400 shrink-0 mt-0.5">
+                        {Array.from({ length: hotel.stars }).map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-current" />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-teal-500/10 text-teal-300 text-[11px] font-bold border border-teal-500/20">
+                        <MapPin className="w-3 h-3" />
+                        {hotel.distance}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400 mt-1.5 truncate">
+                      {hotel.address}
+                    </p>
+                    <a
+                      href={hotel.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-teal-400 hover:text-teal-300 font-bold inline-flex items-center gap-1 mt-2.5 hover:underline decoration-none"
+                    >
+                      {t('Xem trên bản đồ', 'View on Map')}
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom info strip */}
+            <div className="bg-slate-900 border-t border-white/5 p-4 text-center text-xs text-slate-500 shrink-0">
+              {t('💡 Các khách sạn trên đều nằm ở vị trí trung tâm, rất thuận tiện đi lại đến địa điểm tổ chức chính.', '💡 The above hotels are centrally located, making it very convenient to travel to the main conference venue.')}
             </div>
           </div>
 
