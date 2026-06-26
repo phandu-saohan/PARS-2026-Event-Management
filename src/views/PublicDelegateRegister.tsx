@@ -22,13 +22,12 @@ interface FormStepperProps {
 
 function FormStepper({ currentStep, isSubmitted, L }: FormStepperProps) {
   const steps = [
-    { number: 1, label: L ? L.t('Thông tin đại biểu', 'Delegate Info') : 'Thông tin đại biểu', desc: L ? L.t('Nhập thông tin cá nhân', 'Enter personal details') : 'Nhập thông tin cá nhân' },
-    { number: 2, label: L ? L.t('Chọn gói đăng ký', 'Select Package') : 'Chọn gói đăng ký', desc: L ? L.t('Lựa chọn gói hội nghị', 'Choose registration package') : 'Lựa chọn gói hội nghị' },
-    { number: 3, label: L ? L.t('Dịch vụ phụ trợ', 'Optional Services') : 'Dịch vụ phụ trợ', desc: L ? L.t('CME, Gala, Masterclass, Tour', 'CME, Gala, Masterclass, Tour') : 'CME, Gala, Masterclass, Tour' },
-    { number: 4, label: L ? L.t('Thanh toán & Cảm ơn', 'Payment & Complete') : 'Thanh toán & Cảm ơn', desc: L ? L.t('Vé check-in & Quét QR', 'Check-in ticket & QR scan') : 'Vé check-in & Quét QR' }
+    { number: 1, label: L ? L.t('Thông tin đăng ký', 'Registration Info') : 'Thông tin đăng ký', desc: L ? L.t('Thông tin & Gói', 'Info & Package') : 'Thông tin & Gói' },
+    { number: 2, label: L ? L.t('Thanh toán', 'Payment') : 'Thanh toán', desc: L ? L.t('Chọn phương thức & QR', 'Select method & QR') : 'Chọn phương thức & QR' },
+    { number: 3, label: L ? L.t('Xác nhận & Vé', 'Confirmation & Ticket') : 'Xác nhận & Vé', desc: L ? L.t('Vé check-in & Hoàn tất', 'Check-in ticket & Complete') : 'Vé check-in & Hoàn tất' }
   ];
 
-  const activeStep = isSubmitted ? 4 : currentStep;
+  const activeStep = isSubmitted ? 3 : currentStep;
 
   return (
     <div className="bg-slate-50 border-b border-slate-200 px-6 py-5 md:py-6">
@@ -73,7 +72,7 @@ function FormStepper({ currentStep, isSubmitted, L }: FormStepperProps) {
         <div className="md:hidden flex items-center justify-between">
           <div className="space-y-1">
             <span className="text-[10px] font-extrabold text-teal-600 uppercase tracking-widest font-mono">
-              {L ? L.t('Bước', 'Step') : 'Bước'} {activeStep} / 4
+              {L ? L.t('Bước', 'Step') : 'Bước'} {activeStep} / 3
             </span>
             <h4 className="text-sm font-black text-slate-900 uppercase">
               {steps[activeStep - 1].label}
@@ -419,6 +418,14 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (currentStep === 1) {
+      if (validateStep1()) {
+        setCurrentStep(2);
+        scrollToFormTop();
+      }
+      return;
+    }
+
     if (!fullName) {
       setErrorMsg('Vui lòng điền họ và tên đại biểu.');
       return;
@@ -555,8 +562,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
     return (
       <div className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-8 md:py-12 px-4 text-slate-800 font-sans"}>
         <div className={isInline ? "bg-white rounded-3xl border border-slate-250 shadow-md overflow-hidden" : "max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-2xl overflow-hidden"}>
-          {/* FormStepper indicating step 4 is active */}
-          <FormStepper currentStep={4} isSubmitted={true} L={L} />
+          {/* FormStepper indicating step 3 is active */}
+          <FormStepper currentStep={3} isSubmitted={true} L={L} />
 
           {/* Header alert */}
           <div className="bg-teal-900 text-amber-400 p-8 text-center relative border-b border-teal-800">
@@ -909,6 +916,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                   </div>
                 )}
 
+                {currentStep === 1 && (
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
                   {/* LEFT COLUMN: Personal Info, Package selection, CME & Gala */}
@@ -924,7 +932,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       </div>
 
                       {/* Hàng 1 — 2 cột: Avatar | Họ và Tên */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
                         {/* Cột trái: Avatar upload */}
                         <div className="flex flex-col gap-3">
                           <label className="block text-xs font-bold text-slate-700 mb-1">
@@ -1164,6 +1172,11 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       </div>
                     </div>
 
+                  </div>
+
+                  {/* RIGHT COLUMN: other add-ons, note fields, cumulative fee panel, submit button */}
+                  <div className="lg:col-span-5 space-y-8">
+
                     {/* CME & Gala Dinner selections */}
                     {(() => {
                       const leftAddOns = addOnServices.filter(svc => svc.isEnabled && (svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala')));
@@ -1226,11 +1239,6 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                         </div>
                       );
                     })()}
-
-                  </div>
-
-                  {/* RIGHT COLUMN: other add-ons, note fields, cumulative fee panel, submit button */}
-                  <div className="lg:col-span-5 space-y-8">
 
                     {/* Other services */}
                     {(() => {
@@ -1295,15 +1303,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       );
                     })()}
 
-                    {/* Payment Method Selector */}
-                    <PaymentMethodSelector
-                      nationality={nationality}
-                      selectedMethod={selectedPaymentMethod}
-                      onSelect={setSelectedPaymentMethod}
-                      paymentConfig={businessConfig.paymentConfig}
-                      totalFee={calculatedTotalFee}
-                      lang={nationality === 'vietname' ? 'vi' : 'en'}
-                    />
+
 
                     {/* Note fields */}
                     <div className="space-y-4">
@@ -1353,22 +1353,228 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                       </div>
                     </div>
 
-                    {/* Submit Button */}
+                    {/* Next Button Step 1 */}
                     <div className="pt-6 border-t border-slate-100 flex justify-end">
                       <button
-                        id="btn-submit-delegate"
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
+                        type="button"
+                        onClick={() => {
+                          if (validateStep1()) {
+                            setCurrentStep(2);
+                            scrollToFormTop();
+                          }
+                        }}
+                        className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
-                        {isSubmitting ? L.t('Đang gửi thông tin đăng ký...', 'Submitting registration details...') : L.t('Xác Nhận Đăng Ký & Đi Đến Thanh Toán ⚡', 'Confirm Registration & Go to Payment ⚡')}
+                        {L.t('Tiếp Tục Chọn Phương Thức Thanh Toán ➜', 'Continue to Payment Method ➜')}
                       </button>
                     </div>
 
                   </div>
 
                 </div>
+              )}
+
+              {currentStep === 2 && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+                  {/* Left Column: Payment selector and QR display */}
+                  <div className="lg:col-span-7 space-y-6">
+                    <PaymentMethodSelector
+                      nationality={nationality}
+                      selectedMethod={selectedPaymentMethod}
+                      onSelect={setSelectedPaymentMethod}
+                      paymentConfig={businessConfig.paymentConfig}
+                      totalFee={calculatedTotalFee}
+                      lang={nationality === 'vietname' ? 'vi' : 'en'}
+                    />
+
+                    {/* Payment Details Container */}
+                    {selectedPaymentMethod === 'stripe' ? (
+                      <div className="border border-indigo-250 rounded-2xl overflow-hidden bg-indigo-50/10 shadow-sm flex flex-col justify-between">
+                        <div className="bg-indigo-700 text-white p-3.5 text-center border-b border-indigo-600">
+                          <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN THẺ QUỐC TẾ</span>
+                          <span className="text-[9px] text-indigo-200 font-medium">VISA / MASTERCARD · POWERED BY STRIPE</span>
+                        </div>
+                        <div className="p-5 flex flex-col items-center justify-center space-y-4 text-center">
+                          <div className="flex items-center gap-2 justify-center">
+                            <svg viewBox="0 0 48 16" className="h-7 w-auto"><rect width="48" height="16" rx="3" fill="#1A1F71" /><text x="6" y="12" fontFamily="Arial" fontWeight="bold" fontSize="11" fill="white" letterSpacing="1">VISA</text></svg>
+                            <svg viewBox="0 0 36 24" className="h-7 w-auto"><circle cx="13" cy="12" r="10" fill="#EB001B" /><circle cx="23" cy="12" r="10" fill="#F79E1B" /><path d="M18 5.5a10 10 0 0 1 0 13A10 10 0 0 1 18 5.5Z" fill="#FF5F00" /></svg>
+                          </div>
+                          <div className="space-y-1">
+                            <p className="text-sm font-black text-indigo-900">{calculatedTotalFee.toLocaleString()} VNĐ</p>
+                            <p className="text-[10px] text-slate-500">≈ ${Math.round(calculatedTotalFee / 25000)} USD</p>
+                          </div>
+                          <p className="text-[10.5px] text-slate-600 leading-relaxed text-left">
+                            {L.t('Đại biểu sẽ thanh toán qua cổng Stripe bảo mật ở bước tiếp theo sau khi hoàn tất đăng ký.', 'You will be redirected to pay by Card via secure Stripe checkout in the next step after confirming registration.')}
+                          </p>
+                        </div>
+                        <div className="p-2 bg-indigo-50 text-center text-[9px] text-indigo-600 font-sans border-t border-indigo-200">
+                          🔒 Mã hóa 256-bit SSL · Thông tin bảo mật tuyệt đối
+                        </div>
+                      </div>
+                    ) : selectedPaymentMethod === 'vnpay' ? (
+                      <div className="border border-blue-200 rounded-2xl overflow-hidden bg-blue-50/10 shadow-sm flex flex-col justify-between">
+                        <div className="bg-blue-600 text-white p-3.5 text-center border-b border-blue-500">
+                          <span className="text-[10px] uppercase font-black tracking-wider block">THANH TOÁN VNPAY QR</span>
+                          <span className="text-[9px] text-blue-100 font-medium">LIÊN NGÂN HÀNG QUỐC GIA</span>
+                        </div>
+                        <div className="p-5 flex flex-col items-center justify-between space-y-4">
+                          <div className="p-2 bg-white border border-blue-200 rounded-xl shadow-inner">
+                            <img
+                              src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(`VNPAYQR|${businessConfig.paymentConfig?.vnpay?.merchantId || 'PARS2026'}|${calculatedTotalFee}|${transferMessage}`)}`}
+                              alt="VNPay QR"
+                              referrerPolicy="no-referrer"
+                              className="w-36 h-36 object-contain"
+                            />
+                          </div>
+                          <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                            <p>• Ngân hàng thanh toán: <span className="font-bold text-blue-705">VNPay QR hỗ trợ mọi ứng dụng ngân hàng</span></p>
+                            <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{calculatedTotalFee.toLocaleString()}đ</strong></p>
+                            <p>• Nội dung: <strong className="text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessage}</strong></p>
+                          </div>
+                        </div>
+                        <div className="p-2 bg-blue-50 text-center text-[9px] text-blue-800 font-sans border-t border-blue-200">
+                          📱 Mở ứng dụng ngân hàng / VNPay và quét mã QR phía trên
+                        </div>
+                      </div>
+                    ) : (
+                      /* VietQR / Bank Transfer */
+                      <div className="space-y-6">
+                        <div className="border border-amber-200 rounded-2xl overflow-hidden bg-amber-50/10 shadow-sm flex flex-col justify-between">
+                          <div className="bg-amber-500 text-amber-950 p-3.5 text-center border-b border-amber-300">
+                            <span className="text-[10px] uppercase font-black tracking-wider block">QUÉT MÃ THANH TOÁN VIETQR</span>
+                            <span className="text-[9px] text-amber-900 font-medium">BẮT BUỘC ĐỂ BTC KHỞI TẠO CME</span>
+                          </div>
+
+                          <div className="p-5 flex flex-col items-center justify-between space-y-4">
+                            <div className="p-1 px-[10px] bg-white border border-slate-200 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-transform hover:scale-[1.02]">
+                              <img
+                                src={currentVietQRUrl}
+                                alt="VietQR code"
+                                referrerPolicy="no-referrer"
+                                className="w-40 h-auto object-contain mx-auto"
+                              />
+                            </div>
+
+                            <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                              <p>• Ngân hàng: <strong className="text-slate-900 font-mono">VIETCOMBANK</strong></p>
+                              <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">0331000516283</strong></p>
+                              <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">Hoi phau thuat tao hinh tham my Viet Nam</strong></p>
+                              <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{calculatedTotalFee.toLocaleString()}đ</strong></p>
+                              <p>• Nội dung CK: <strong className="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessage}</strong></p>
+                            </div>
+                          </div>
+
+                          <div className="p-2 bg-amber-100/40 text-center text-[9px] text-amber-900 font-sans border-t border-amber-200">
+                            ⚠️ Quét QR bằng ứng dụng ngân hàng để tự điền nội dung & số tiền chính xác.
+                          </div>
+                        </div>
+
+                        {/* Proof Upload in Step 2 */}
+                        <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3">
+                          <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
+                            <Upload className="w-4 h-4 text-teal-600 animate-bounce" />
+                            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
+                              {L.t('Đính Kèm Biên Lai Chuyển Khoản (Để BTC Đối Soát Nhanh)', 'Attach Payment Receipt (For Fast Verification)')}
+                            </h4>
+                          </div>
+                          <p className="text-[10.5px] text-slate-500 leading-normal font-medium">
+                            {L.t('Sau khi quét mã QR thanh toán phía trên, đại biểu vui lòng tải lên hình ảnh biên nhận chuyển khoản thành công. Ban thư ký sẽ đối soát giao dịch và phê duyệt hồ sơ của đại biểu tức thì.', 'After scanning the VietQR code above, please upload the payment receipt. The secretariat will verify the transaction and approve your registration immediately.')}
+                          </p>
+                          <div className="flex items-center gap-3">
+                            <div 
+                              role="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 hover:border-slate-350 cursor-pointer text-xs font-bold text-slate-700 flex items-center gap-1.5 transition-all w-fit select-none"
+                            >
+                              <Upload className="w-4 h-4 text-slate-500" />
+                              {L.t('Đính kèm hóa đơn chuyển khoản', 'Attach Receipt')}
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileUpload}
+                                className="hidden"
+                              />
+                            </div>
+                            {isUploading && <span className="text-[10px] text-slate-400 font-mono animate-pulse">{L.t('Đang nạp file...', 'Uploading...')}</span>}
+                            {proofImage && <span className="text-xs text-emerald-650 font-bold flex items-center gap-1">{L.t('✓ Đã đính kèm ảnh hóa đơn!', '✓ Receipt attached!')}</span>}
+                          </div>
+                          {proofImage && (
+                            <div className="relative w-fit mt-2 border border-slate-200 rounded-xl p-1 bg-slate-50 shadow-inner">
+                              <img
+                                src={proofImage}
+                                alt="Transaction Proof"
+                                className="h-28 w-auto object-contain rounded-lg border border-slate-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setProofImage(null)}
+                                className="absolute -top-1.5 -right-1.5 bg-rose-600 text-white leading-none rounded-full w-5 h-5 text-[10px] font-black border border-white flex items-center justify-center cursor-pointer hover:bg-rose-700 shadow-sm"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right Column: Fee summary and submission buttons */}
+                  <div className="lg:col-span-5 space-y-6">
+                    {/* Cumulative Fee Panel */}
+                    <div className="bg-slate-50 p-5 rounded-2xl border border-slate-250 space-y-3 shadow-inner">
+                      <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block border-b border-slate-200 pb-2">
+                        {L.t('TỔNG HỢP CHI PHÍ ĐĂNG KÝ HỘI NGHỊ', 'REGISTRATION FEE SUMMARY')}
+                      </span>
+                      <div className="space-y-2 text-xs font-semibold text-slate-700">
+                        <div className="flex justify-between">
+                          <span>{L.t('Phí Gói Đăng Ký', 'Package Fee')} ({selectedPackage?.name}):</span>
+                          <span className="font-mono text-slate-905">
+                            {selectedPackage?.id === 'pkg-foreign' ? (
+                              `$${Math.round(baseFee / 25000)} (${baseFee.toLocaleString()} VNĐ)`
+                            ) : (
+                              `${baseFee.toLocaleString()} VNĐ`
+                            )}
+                          </span>
+                        </div>
+                        {addOnFeeDetails.map(d => (
+                          <div key={d.id} className="flex justify-between">
+                            <span>• {L.t(d.nameVi, d.nameEn)}:</span>
+                            <span className="font-mono text-slate-905">+{d.fee.toLocaleString()} VNĐ</span>
+                          </div>
+                        ))}
+                        <div className="flex justify-between text-teal-900 bg-teal-50 border border-teal-200 p-3 rounded-xl text-xs md:text-sm font-black mt-3">
+                          <span>{L.t('TỔNG LỆ PHÍ ĐĂNG KÝ CẦN ĐÓNG:', 'TOTAL REGISTRATION FEE:')}</span>
+                          <span className="font-mono">{calculatedTotalFee.toLocaleString()} VNĐ</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation buttons */}
+                    <div className="pt-6 border-t border-slate-100 flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => { setCurrentStep(1); scrollToFormTop(); }}
+                        className="px-6 py-3.5 rounded-xl border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-700 font-extrabold text-xs uppercase tracking-wider cursor-pointer transition-all"
+                      >
+                        {L.t('Quay Lại', 'Back')}
+                      </button>
+                      
+                      <button
+                        id="btn-submit-delegate"
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1 max-w-[240px] px-6 py-3.5 rounded-xl bg-teal-900 hover:bg-teal-950 disabled:opacity-50 text-white font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow-lg hover:shadow-xl transition-all border border-amber-400/40 relative group overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-amber-400/10 via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000 ease-in-out" />
+                        {isSubmitting ? L.t('Đang gửi...', 'Submitting...') : L.t('Xác Nhận & Hoàn Tất ⚡', 'Confirm & Complete ⚡')}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
             </form>
 
