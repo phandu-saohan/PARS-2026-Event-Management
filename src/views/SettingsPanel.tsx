@@ -37,7 +37,9 @@ import {
   Printer,
   Loader2,
   RefreshCw,
-  Award
+  Award,
+  CreditCard,
+  Wallet
 } from 'lucide-react';
 import { store, DEFAULT_CME_TEMPLATE_CONFIG } from '../dataStore';
 import { 
@@ -68,7 +70,7 @@ interface SettingsPanelProps {
 
 export default function SettingsPanel({ role }: SettingsPanelProps) {
   // Navigation tab state
-  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'roles' | 'embeds' | 'printers' | 'sepay' | 'forms' | 'onesignal' | 'cme-layout' | 'backup' | 'landing-page'>('business');
+  const [activeSubTab, setActiveSubTab] = useState<'business' | 'packages' | 'sponsor-packages' | 'integrations' | 'operators' | 'roles' | 'embeds' | 'printers' | 'sepay' | 'payment-gateway' | 'forms' | 'onesignal' | 'cme-layout' | 'backup' | 'landing-page'>('business');
   const [formActiveSection, setFormActiveSection] = useState<'delegate' | 'speaker' | 'sponsor'>('delegate');
 
   // Printer config states (saved to localStorage for device-specific setup)
@@ -1434,6 +1436,18 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
           >
             <Printer className="w-4 h-4 shrink-0" />
             <span>🖨️ Cấu hình Máy In Nhãn</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab('payment-gateway')}
+            className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2.5 cursor-pointer border-none ${
+              activeSubTab === 'payment-gateway'
+                ? 'bg-teal-700 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-teal-50 hover:text-teal-805 bg-transparent'
+            }`}
+          >
+            <span className="shrink-0 text-base">💰</span>
+            <span>Cổng Thanh Toán</span>
           </button>
 
           <button
@@ -3952,6 +3966,252 @@ ON CONFLICT (code) DO UPDATE SET
                   <li>Lưu cấu hình → Deploy ứng dụng → Test bằng tính năng <em>Gửi thử</em> trên SePay</li>
                 </ol>
               </div>
+            </div>
+          )}
+
+          {/* ================= SECTION 8.5: PAYMENT GATEWAY CONFIGURATION ================= */}
+          {activeSubTab === 'payment-gateway' && (
+            <div className="space-y-6 animate-fade-in text-slate-800">
+              <div className="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                    💰 Quản Lý Cổng Thanh Toán Tích Hợp
+                  </h3>
+                  <p className="text-[11px] text-slate-450 mt-0.5">
+                    Cấu hình thông tin tài khoản VietQR, cổng VNPay và cổng thẻ quốc tế Stripe Checkout.
+                  </p>
+                </div>
+              </div>
+
+              {/* Info banner */}
+              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-[10.5px] text-blue-800 space-y-1.5">
+                <p className="font-black text-[11px] text-blue-900">💡 Hướng dẫn cấu hình:</p>
+                <p>1. <strong>VietQR:</strong> Cho hiển thị mã QR chuyển khoản tự động kèm thông tin số tài khoản và nội dung nạp tiền cho đại biểu.</p>
+                <p>2. <strong>VNPay QR:</strong> Yêu cầu Merchant ID liên kết của ban tổ chức để sinh mã thanh toán.</p>
+                <p>3. <strong>Stripe Checkout:</strong> Giải pháp thanh toán thẻ quốc tế Visa/Mastercard an toàn (redirect). Cần cung cấp Publishable Key (pk_live_...) để kích hoạt.</p>
+              </div>
+
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  store.saveBusinessConfig(businessConfig);
+                  alert('Đã lưu cấu hình Cổng Thanh Toán thành công!');
+                  reloadData();
+                }}
+                className="space-y-6"
+              >
+                {/* 1. VietQR Config */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest flex items-center gap-2">
+                      <Wallet className="w-4 h-4 text-teal-655" />
+                      CHUYỂN KHOẢN TIẾNG VIỆT (VIETQR)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pc = businessConfig.paymentConfig || {};
+                        const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                        setBusinessConfig({
+                          ...businessConfig,
+                          paymentConfig: {
+                            ...pc,
+                            vietqr: { ...vq, isEnabled: !vq.isEnabled }
+                          }
+                        });
+                      }}
+                      className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer border-none ${
+                        (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'bg-teal-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        (businessConfig.paymentConfig?.vietqr?.isEnabled !== false) ? 'translate-x-5' : 'translate-x-0'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Bank Code */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-600 block">Ngân hàng thụ hưởng *</label>
+                      <select
+                        value={businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB'}
+                        onChange={(e) => {
+                          const pc = businessConfig.paymentConfig || {};
+                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                          setBusinessConfig({
+                            ...businessConfig,
+                            paymentConfig: { ...pc, vietqr: { ...vq, bankCode: e.target.value } }
+                          });
+                        }}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold text-slate-850 focus:outline-none"
+                      >
+                        <option value="VCB">Vietcombank (VCB)</option>
+                        <option value="TCB">Techcombank (TCB)</option>
+                        <option value="MB">MB Bank</option>
+                        <option value="ACB">ACB Bank</option>
+                        <option value="VPB">VPBank</option>
+                        <option value="BIDV">BIDV</option>
+                        <option value="CTG">Vietinbank (CTG)</option>
+                        <option value="TPB">TPBank</option>
+                        <option value="MSB">MSB</option>
+                        <option value="VIB">VIB</option>
+                        <option value="HDB">HDBank</option>
+                      </select>
+                    </div>
+
+                    {/* Account Number */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-600 block">Số tài khoản nhận tiền *</label>
+                      <input
+                        type="text"
+                        value={businessConfig.paymentConfig?.vietqr?.accountNo || ''}
+                        onChange={(e) => {
+                          const pc = businessConfig.paymentConfig || {};
+                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                          setBusinessConfig({
+                            ...businessConfig,
+                            paymentConfig: { ...pc, vietqr: { ...vq, accountNo: e.target.value } }
+                          });
+                        }}
+                        placeholder="Ví dụ: 0331000516283"
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none"
+                      />
+                    </div>
+
+                    {/* Account Name */}
+                    <div className="space-y-1 md:col-span-2">
+                      <label className="text-[11px] font-bold text-slate-600 block">Tên chủ tài khoản *</label>
+                      <input
+                        type="text"
+                        value={businessConfig.paymentConfig?.vietqr?.accountName || ''}
+                        onChange={(e) => {
+                          const pc = businessConfig.paymentConfig || {};
+                          const vq = pc.vietqr || { bankCode: 'VCB', accountNo: '', accountName: '', isEnabled: true };
+                          setBusinessConfig({
+                            ...businessConfig,
+                            paymentConfig: { ...pc, vietqr: { ...vq, accountName: e.target.value.toUpperCase() } }
+                          });
+                        }}
+                        placeholder="Ví dụ: HOI PHAU THUAT TAO HINH THAM MY VIET NAM"
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-bold uppercase text-slate-850 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. VNPay QR Config */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest flex items-center gap-2">
+                      <Smartphone className="w-4 h-4 text-blue-655" />
+                      CỔNG QUÉT MÃ VNPAY QR
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pc = businessConfig.paymentConfig || {};
+                        const vn = pc.vnpay || { merchantId: '', isEnabled: false };
+                        setBusinessConfig({
+                          ...businessConfig,
+                          paymentConfig: {
+                            ...pc,
+                            vnpay: { ...vn, isEnabled: !vn.isEnabled }
+                          }
+                        });
+                      }}
+                      className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer border-none ${
+                        businessConfig.paymentConfig?.vnpay?.isEnabled ? 'bg-teal-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        businessConfig.paymentConfig?.vnpay?.isEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Merchant ID */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-600 block">VNPay Merchant ID / Terminal ID</label>
+                      <input
+                        type="text"
+                        value={businessConfig.paymentConfig?.vnpay?.merchantId || ''}
+                        onChange={(e) => {
+                          const pc = businessConfig.paymentConfig || {};
+                          const vn = pc.vnpay || { merchantId: '', isEnabled: false };
+                          setBusinessConfig({
+                            ...businessConfig,
+                            paymentConfig: { ...pc, vnpay: { ...vn, merchantId: e.target.value } }
+                          });
+                        }}
+                        placeholder="Mã Terminal do VNPay cấp"
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-800 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Stripe Config */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-4">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <span className="text-[10.5px] font-black text-slate-850 uppercase tracking-widest flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-indigo-655" />
+                      CỔNG THẺ QUỐC TẾ STRIPE (VISA / MASTERCARD)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const pc = businessConfig.paymentConfig || {};
+                        const st = pc.stripe || { publishableKey: '', isEnabled: false };
+                        setBusinessConfig({
+                          ...businessConfig,
+                          paymentConfig: {
+                            ...pc,
+                            stripe: { ...st, isEnabled: !st.isEnabled }
+                          }
+                        });
+                      }}
+                      className={`relative w-10 h-5 rounded-full transition-colors cursor-pointer border-none ${
+                        businessConfig.paymentConfig?.stripe?.isEnabled ? 'bg-teal-600' : 'bg-slate-300'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        businessConfig.paymentConfig?.stripe?.isEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`} />
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Publishable Key */}
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-slate-600 block">Stripe Publishable Key *</label>
+                      <input
+                        type="password"
+                        value={businessConfig.paymentConfig?.stripe?.publishableKey || ''}
+                        onChange={(e) => {
+                          const pc = businessConfig.paymentConfig || {};
+                          const st = pc.stripe || { publishableKey: '', isEnabled: false };
+                          setBusinessConfig({
+                            ...businessConfig,
+                            paymentConfig: { ...pc, stripe: { ...st, publishableKey: e.target.value } }
+                          });
+                        }}
+                        placeholder="pk_live_... hoặc pk_test_..."
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono font-bold text-slate-850 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save button */}
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-slate-905 hover:bg-slate-950 border-none text-white text-xs font-black uppercase tracking-wider rounded-xl cursor-pointer transition-all"
+                >
+                  Lưu cấu hình Cổng Thanh Toán
+                </button>
+              </form>
             </div>
           )}
 

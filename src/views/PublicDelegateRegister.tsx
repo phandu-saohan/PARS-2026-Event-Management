@@ -923,81 +923,63 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                         </h3>
                       </div>
 
-                      {/* Avatar Section */}
-                      <div className="flex flex-col sm:flex-row items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                        <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
-                          {avatarImage ? (
-                            <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
-                          ) : (
-                            <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
-                              {L.t('Chưa có ảnh', 'No Photo')}
-                            </span>
-                          )}
-                          {isAvatarUploading && (
-                            <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
-                              Loading...
-                            </div>
-                          )}
-                        </div>
-                        <div className="space-y-1 text-center sm:text-left flex-1 min-w-0">
-                          <span className="text-xs font-bold text-slate-800 block uppercase tracking-wide">
+                      {/* Hàng 1 — 2 cột: Avatar | Họ và Tên */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-start">
+                        {/* Cột trái: Avatar upload */}
+                        <div className="flex flex-col gap-3">
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('avatar', 'Ảnh Chân Dung / Avatar *', 'Portrait Photo *')}
-                          </span>
-                          <p className="text-[10px] text-slate-500 leading-snug">
-                            {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt tức thì.', 'Recommended clear face portrait for instant facial recognition check-in.')}
-                          </p>
-                          <div className="flex items-center justify-center sm:justify-start gap-2 pt-1.5">
-                            <div 
-                              role="button"
-                              onClick={() => avatarInputRef.current?.click()}
-                              className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
-                            >
-                              {L.t('Tải ảnh chân dung', 'Upload Portrait')}
-                              <input 
-                                ref={avatarInputRef}
-                                type="file" 
-                                accept="image/*" 
-                                onChange={handleAvatarUpload} 
-                                className="hidden" 
-                              />
+                          </label>
+                          <div className="flex items-center gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <div className="relative group shrink-0 w-20 h-20 rounded-full bg-slate-250 border-2 border-dashed border-teal-600/30 flex items-center justify-center overflow-hidden">
+                              {avatarImage ? (
+                                <img src={avatarImage} className="w-full h-full object-cover" alt="Avatar" />
+                              ) : (
+                                <span className="text-slate-400 text-[10px] font-bold text-center p-1 leading-none select-none">
+                                  {L.t('Chưa có ảnh', 'No Photo')}
+                                </span>
+                              )}
+                              {isAvatarUploading && (
+                                <div className="absolute inset-0 bg-slate-900/50 flex items-center justify-center text-[10px] text-white font-mono">
+                                  Loading...
+                                </div>
+                              )}
                             </div>
-                            {avatarImage && (
-                              <button
-                                type="button"
-                                onClick={() => setAvatarImage(null)}
-                                className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
-                              >
-                                {L.t('Xóa', 'Remove')}
-                              </button>
-                            )}
+                            <div className="space-y-2 flex-1 min-w-0">
+                              <p className="text-[10px] text-slate-500 leading-snug">
+                                {L.t('Khuyên dùng ảnh chân dung rõ mặt để check-in nhận diện khuôn mặt.', 'Clear face portrait for instant facial recognition check-in.')}
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <div
+                                  role="button"
+                                  onClick={() => avatarInputRef.current?.click()}
+                                  className="px-3 py-1 bg-white hover:bg-slate-105 border border-slate-350 text-[11px] font-bold rounded-lg cursor-pointer transition-all select-none"
+                                >
+                                  {L.t('Tải ảnh', 'Upload')}
+                                  <input
+                                    ref={avatarInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleAvatarUpload}
+                                    className="hidden"
+                                  />
+                                </div>
+                                {avatarImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setAvatarImage(null)}
+                                    className="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-[11px] font-semibold rounded-lg border-none cursor-pointer"
+                                  >
+                                    {L.t('Xóa', 'Remove')}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      {/* Title & Name */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-4">
-                          <label className="block text-xs font-bold text-slate-700 mb-1">
-                            {L.f('academicTitle', 'Học hàm / Học vị *', 'Academic Title *')}
-                          </label>
-                          <select
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-medium focus:border-teal-600 focus:outline-none focus:bg-white transition-all cursor-pointer"
-                          >
-                            <option value="GS.TS.BS">{L.t('GS.TS.BS (Giáo sư Tiến sĩ Bác sĩ)', 'Prof. Dr. Med.')}</option>
-                            <option value="PGS.TS.BS">{L.t('PGS.TS.BS (Phó Giáo sư Tiến sĩ Bác sĩ)', 'Assoc. Prof. Dr. Med.')}</option>
-                            <option value="TS.BS">{L.t('TS.BS (Tiến sĩ Bác sĩ)', 'Dr. Med. / PhD')}</option>
-                            <option value="ThS.BS">{L.t('ThS.BS (Thạc sĩ Bác sĩ)', 'M.Med. / Master')}</option>
-                            <option value="BSCK1">{L.t('BSCK1 (Bác sĩ Chuyên khoa I)', 'Specialist I')}</option>
-                            <option value="BSCK2">{L.t('BSCK2 (Bác sĩ Chuyên khoa II)', 'Specialist II')}</option>
-                            <option value="BSNT">{L.t('BSNT (Bác sĩ Nội trú)', 'Resident Physician')}</option>
-                            <option value="BS">{L.t('BS (Bác sĩ)', 'MD (Medical Doctor)')}</option>
-                            <option value="Đại biểu">{L.t('Khác... (Đại biểu/Khác)', 'Other / Delegate')}</option>
-                          </select>
-                        </div>
-
-                        <div className="md:col-span-8">
+                        {/* Cột phải: Họ và Tên */}
+                        <div className="flex flex-col justify-center">
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('fullName', 'Họ và Tên (In hoa có dấu) *', 'Full Name (Capitalized) *')}
                           </label>
@@ -1009,12 +991,15 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                             placeholder={L.p('ví dụ: NGUYỄN VĂN A', 'e.g. NGUYEN VAN A')}
                             className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-bold focus:border-teal-600 focus:outline-none focus:bg-white uppercase tracking-wider transition-all placeholder-slate-400"
                           />
+                          <span className="text-[10px] text-slate-400 mt-1.5 block">
+                            {L.t('Nhập đầy đủ họ tên in hoa có dấu để in trên thẻ đại biểu và chứng chỉ', 'Enter full capitalized name for delegate badge and certificate')}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Year of Birth & Contact details */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-4">
+                      {/* Hàng 2 — 3 cột đều nhau: Năm sinh | Số điện thoại | Email */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('yearOfBirth', 'Năm sinh *', 'Year of Birth *')}
                           </label>
@@ -1032,7 +1017,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                           </span>
                         </div>
 
-                        <div className="md:col-span-4">
+                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('phone', 'Số điện thoại di động *', 'Contact Phone Number *')}
                           </label>
@@ -1049,7 +1034,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                           </span>
                         </div>
 
-                        <div className="md:col-span-4">
+                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('email', 'Địa chỉ Email nhận vé & CME *', 'Email for Ticket & CME *')}
                           </label>
@@ -1064,11 +1049,11 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                         </div>
                       </div>
 
-                      {/* Workplace */}
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                        <div className="md:col-span-12">
+                      {/* Hàng 3 — 2 cột: Đơn vị công tác | Địa chỉ liên hệ */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
-                            {L.f('workplace', 'Đơn vị công tác (Bệnh viện/Khoa Y/Viện thẩm mỹ) *', 'Workplace (Hospital/Medical School/Clinic) *')}
+                            {L.f('workplace', 'Đơn vị công tác *', 'Workplace *')}
                           </label>
                           <input
                             type="text"
@@ -1079,11 +1064,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
                         </div>
-                      </div>
 
-                      {/* Address */}
-                      <div className="grid grid-cols-1 gap-4">
-                        <div className="col-span-1">
+                        <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('address', 'Địa chỉ liên hệ *', 'Contact Address *')}
                           </label>
@@ -1092,7 +1074,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                             required
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
-                            placeholder={L.p('ví dụ: Phường Thảo Điền, Thành phố Thủ Đức, Hồ Chí Minh', 'e.g. Thao Dien, Thu Duc City, Ho Chi Minh City')}
+                            placeholder={L.p('ví dụ: Phường Thảo Điền, TP Thủ Đức, Hồ Chí Minh', 'e.g. Thao Dien, Thu Duc City, Ho Chi Minh City')}
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
                         </div>
@@ -1108,7 +1090,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
                         </h3>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {packages
                           .filter((pkg) => {
                             if (nationality === 'vietname') {

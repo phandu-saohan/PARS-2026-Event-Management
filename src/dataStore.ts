@@ -995,6 +995,22 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
       }
     ],
   },
+  paymentConfig: {
+    vietqr: {
+      bankCode: 'VCB',
+      accountNo: '0331000516283',
+      accountName: 'HOI PHAU THUAT TAO HINH THAM MY VIET NAM',
+      isEnabled: true,
+    },
+    vnpay: {
+      merchantId: 'PARS2026',
+      isEnabled: false,
+    },
+    stripe: {
+      publishableKey: '',
+      isEnabled: false,
+    }
+  }
 };
 
 const DEFAULT_SEPAY_CONFIG: SepayConfig = {
