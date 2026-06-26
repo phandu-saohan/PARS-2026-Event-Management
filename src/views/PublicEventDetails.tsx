@@ -978,7 +978,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
             {/* 2. WIDESCREEN HERO BANNER */}
       <section 
-        className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[650px] bg-cover bg-center flex items-center border-b border-slate-200"
+        className="relative w-full min-h-[400px] md:min-h-[500px] lg:min-h-[550px] bg-cover bg-center flex items-center border-b border-slate-200"
         style={{ backgroundImage: `url(${landmarksUrl})` }}
       >
         {/* Dark overlay for rich contrast and legibility */}
@@ -988,7 +988,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none z-10" />
 
         {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-16 md:py-24 w-full text-white flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-10 md:py-16 w-full text-white flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
           
           {/* Conference name and tag */}
           <div className="flex flex-col items-center space-y-1">
@@ -1050,7 +1050,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
 
       {/* 3. EVENT INFO & 4 BLOCKS SECTION */}
-      <section id="intro" className="py-16 md:py-24 scroll-mt-20" style={sectionStyle.intro}>
+      <section id="intro" className="py-10 md:py-16 scroll-mt-20" style={sectionStyle.intro}>
         <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           
@@ -1183,7 +1183,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 4. FOREIGN SPEAKERS CAROUSEL */}
-      <section id="speakers" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.speakersForeign}>
+      <section id="speakers" className="py-10 md:py-16 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.speakersForeign}>
         <div className="max-w-6xl mx-auto px-4">
           
           {/* Section Header */}
@@ -1262,7 +1262,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 5. DOMESTIC SPEAKERS CAROUSEL */}
-      <section className="py-16 md:py-24 bg-white border-b border-slate-200 scroll-mt-20" style={sectionStyle.speakersDomestic}>
+      <section className="py-10 md:py-16 bg-white border-b border-slate-200 scroll-mt-20" style={sectionStyle.speakersDomestic}>
         <div className="max-w-6xl mx-auto px-4">
           
           {/* Section Header */}
@@ -1341,7 +1341,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 6. STEPPER REGISTRATION FORM */}
-      <section id="register" className="py-16 md:py-24 bg-slate-100 border-y border-slate-200 scroll-mt-20" style={sectionStyle.register}>
+      <section id="register" className="py-10 md:py-16 bg-slate-100 border-y border-slate-200 scroll-mt-20" style={sectionStyle.register}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center mb-10 max-w-xl mx-auto space-y-2">
             <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block">{t('DANG KY CHINH THUC', 'SECURE REGISTRATION')}</span>
@@ -1368,7 +1368,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         const hiddenCount = sortedTimeBlocks.length - INITIAL_SHOW;
 
         return (
-      <section id="program" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20">
+      <section id="program" className="py-10 md:py-16 bg-white border-t border-slate-200 scroll-mt-20">
         <div className="max-w-6xl mx-auto px-4">
 
           {/* ── Section Header ── */}
@@ -1581,7 +1581,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       })()}
 
       {/* 8. SPONSORS */}
-      <section id="sponsors" className="py-16 md:py-24 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
+      <section id="sponsors" className="py-10 md:py-16 bg-white border-t border-slate-200 scroll-mt-20" style={sectionStyle.sponsors}>
         <div className="max-w-6xl mx-auto px-4 text-center">
           <span className="text-teal-650 text-xs font-extrabold tracking-widest uppercase font-mono block mb-2">{t('CONFERENCE SPONSORS', 'CONFERENCE SPONSORS')}</span>
           <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-900 mb-4 leading-none">
@@ -1640,7 +1640,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 9. LOCATION & MAP BLOCK */}
-      <section id="location" className="py-16 md:py-24 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.location}>
+      <section id="location" className="py-10 md:py-16 bg-slate-900 text-white scroll-mt-20" style={sectionStyle.location}>
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
           
           {/* Left info column */}
@@ -1720,7 +1720,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </section>
 
       {/* 10. PREMIUM FOOTER */}
-      <footer className="bg-slate-950 text-slate-400 py-16 px-4 border-t border-slate-900">
+      <footer className="bg-slate-950 text-slate-400 py-10 px-4 border-t border-slate-900">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
           
           {/* Col 1: Brand Info */}
