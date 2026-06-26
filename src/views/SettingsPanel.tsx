@@ -2294,7 +2294,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       type="button"
                       onClick={() => {
                         const newId = 'addon-' + Date.now();
-                        const current = businessConfig.addOnServices || [
+                        const current = (businessConfig.addOnServices && businessConfig.addOnServices.length > 0) ? businessConfig.addOnServices : [
                           { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
                           { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
                           { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
@@ -2324,17 +2324,18 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
 
                 {/* Default services if none configured */}
                 {(() => {
-                  const services: AddOnService[] = businessConfig.addOnServices || [
+                  const defaultServices: AddOnService[] = [
                     { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
                     { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
                     { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
                     { id: 'addon-tour', nameVi: 'Tour tham quan', nameEn: 'Sightseeing Tour', descriptionVi: 'Đóng phí Tour tham luận văn hóa dã ngoại theo lịch trình hội nghị.', descriptionEn: 'Register for cultural tour field trips following the official schedule.', fee: 4500000, isEnabled: true, color: 'pink' }
                   ];
+                  const services: AddOnService[] = (businessConfig.addOnServices && businessConfig.addOnServices.length > 0) ? businessConfig.addOnServices : defaultServices;
 
-                  // Initialize defaults if not yet saved
-                  if (!businessConfig.addOnServices) {
+                  // Initialize defaults if not yet saved or empty
+                  if (!businessConfig.addOnServices || businessConfig.addOnServices.length === 0) {
                     setTimeout(() => {
-                      setBusinessConfig(prev => ({ ...prev, addOnServices: services }));
+                      setBusinessConfig(prev => ({ ...prev, addOnServices: defaultServices }));
                     }, 0);
                   }
 

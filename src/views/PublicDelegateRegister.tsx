@@ -124,7 +124,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false }:
   const doctorProofInputRef = useRef<HTMLInputElement>(null);
   const [businessConfig, setBusinessConfig] = useState(() => store.getBusinessConfig());
   const formCfg = businessConfig.delegateFormConfig;
-  const addOnServices: AddOnService[] = businessConfig.addOnServices || [
+  const addOnServices: AddOnService[] = (businessConfig.addOnServices && businessConfig.addOnServices.length > 0) ? businessConfig.addOnServices : [
     { id: 'addon-cme', nameVi: 'Chứng chỉ CME', nameEn: 'CME Certificate', descriptionVi: 'Nhận chứng chỉ đào tạo y khoa liên tục CME sau khi kết thúc khóa học tham luận.', descriptionEn: 'Receive Continuing Medical Education (CME) certificate after completing the sessions.', fee: 350000, isEnabled: true, color: 'teal' },
     { id: 'addon-gala', nameVi: 'Gala Dinner', nameEn: 'Gala Dinner', descriptionVi: 'Đăng ký tiệc tối ẩm thực giao lưu kết nối thân mật y sỹ.', descriptionEn: 'Register for the evening Gala Dinner for friendly medical networking.', fee: 700000, isEnabled: true, color: 'amber' },
     { id: 'addon-masterclass', nameVi: 'Master Class', nameEn: 'Master Class', descriptionVi: 'Nhận truyền thụ và chuyển giao công nghệ thẩm mỹ lâm sàn chuyên sâu.', descriptionEn: 'Receive knowledge sharing and technology transfer for advanced aesthetic clinical methods.', fee: 500000, isEnabled: true, color: 'purple' },
