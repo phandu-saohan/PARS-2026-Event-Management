@@ -168,9 +168,8 @@ export default function NotificationSystem({ defaultTab = 'templates', hideTabs 
 
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff; text-align: left; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);">
-        <div style="text-align: center; border-bottom: 2px solid #be6940; padding-bottom: 15px; margin-bottom: 20px;">
-          <h2 style="color: #1e1b4b; margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold;">Hội Nghị PARS 2026</h2>
-          <p style="color: #be6940; font-size: 11px; margin: 5px 0 0 0; font-weight: bold;">Hội Nghị Khoa Học Thẩm Mỹ Quốc Tế Thường Niên</p>
+        <div style="margin: -25px -25px 20px -25px; border-radius: 12px 12px 0 0; overflow: hidden;">
+          <img src="/pars-email-banner.png" alt="PARS 2026 - Plastic &amp; Aesthetic Regenerative Surgery" style="width: 100%; height: auto; display: block;" />
         </div>
         
         <div class="rich-editor-content" style="font-size: 14px; color: #334155; line-height: 1.6;">
