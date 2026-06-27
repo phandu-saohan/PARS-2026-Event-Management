@@ -7,7 +7,7 @@ import React from 'react';
 import { 
   Users, Award, Calendar, CheckSquare, Coins, Megaphone, Settings, 
   BarChart2, Globe, Shield, User, FileText, RefreshCw, LogOut, Send,
-  HelpCircle, Search, Share2
+  HelpCircle, Search, Share2, FileSignature
 } from 'lucide-react';
 import { Role } from '../types';
 import { useAuth } from './AuthProvider';
@@ -34,6 +34,7 @@ export default function Sidebar({ currentView, onNavigate, currentRole, isOpen, 
     { id: 'tasks', name: 'Công Việc Nội Bộ', icon: CheckSquare, permission: 'tasks.view' },
     { id: 'finances', name: 'Đối Soát Tài Chính', icon: Coins, permission: 'finances.view' },
     { id: 'marketing', name: 'Marketing Sự Kiện', icon: Share2, permission: 'marketing.view' },
+    { id: 'custom-forms', name: 'Tạo Form Đăng Ký', icon: FileSignature, permission: 'settings.view' },
     { id: 'settings', name: 'Cài Đặt Hệ Thống', icon: Settings, permission: 'settings.view' },
     { id: 'user-guide', name: 'Hướng Dẫn Sử Dụng', icon: HelpCircle },
   ];

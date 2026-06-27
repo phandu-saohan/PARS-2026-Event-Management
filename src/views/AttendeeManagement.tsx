@@ -22,6 +22,13 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'unpaid' | 'pending_verification'>('all');
   const [checkInFilter, setCheckInFilter] = useState<'all' | 'checked' | 'not_checked'>('all');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
+
+  // Extract unique sources list
+  const uniqueSources = React.useMemo(() => {
+    const list = attendees.map(a => a.source || 'website');
+    return Array.from(new Set(list));
+  }, [attendees]);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,7 +37,7 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
   // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, statusFilter, checkInFilter]);
+  }, [searchQuery, statusFilter, checkInFilter, sourceFilter]);
 
   // Monitor network status to allow online/offline actions dynamically
   React.useEffect(() => {
@@ -1058,7 +1065,11 @@ Ban Thư ký Hội nghị PARS 2026`
         (checkInFilter === 'checked' && a.isCheckedIn) ||
         (checkInFilter === 'not_checked' && !a.isCheckedIn);
 
-      return matchQuery && matchStatus && matchCheckIn;
+      const matchSource = 
+        sourceFilter === 'all' || 
+        (a.source || 'website') === sourceFilter;
+
+      return matchQuery && matchStatus && matchCheckIn && matchSource;
     });
   };
 
@@ -1297,11 +1308,22 @@ Ban Thư ký Hội nghị PARS 2026`
           <select
             value={checkInFilter}
             onChange={(e: any) => setCheckInFilter(e.target.value)}
-            className="px-3 py-2 bg-slate-5-0 hover:bg-slate-100/50 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none"
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none"
           >
             <option value="all">Tất cả Điểm danh (Check-In)</option>
             <option value="checked">Đã điểm danh</option>
             <option value="not_checked">Chưa điểm danh</option>
+          </select>
+
+          <select
+            value={sourceFilter}
+            onChange={(e: any) => setSourceFilter(e.target.value)}
+            className="px-3 py-2 bg-slate-50 hover:bg-slate-100/50 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none"
+          >
+            <option value="all">Tất cả Nguồn</option>
+            {uniqueSources.map(src => (
+              <option key={src} value={src}>{src}</option>
+            ))}
           </select>
         </div>
 
@@ -1423,6 +1445,7 @@ Ban Thư ký Hội nghị PARS 2026`
                 <th className="px-6 py-3.5">Mã ID</th>
                 <th className="px-6 py-3.5">Họ và Tên Đại Biểu</th>
                 <th className="px-6 py-3.5">Đơn Vị Công Tác</th>
+                <th className="px-6 py-3.5">Nguồn</th>
                 <th className="px-6 py-3.5">Gói Đăng Ký</th>
                 <th className="px-6 py-3.5 text-center">Đóng Phí (VNĐ)</th>
                 <th className="px-6 py-3.5 text-center">Check-In</th>
@@ -1432,7 +1455,7 @@ Ban Thư ký Hội nghị PARS 2026`
             <tbody className="divide-y divide-slate-100 font-medium text-slate-750">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="text-center py-12 text-slate-400 font-semibold italic text-xs">
+                  <td colSpan={9} className="text-center py-12 text-slate-400 font-semibold italic text-xs">
                     Không tìm thấy đại biểu nào khớp với bộ lọc dữ liệu hiện thời.
                   </td>
                 </tr>
@@ -1475,6 +1498,17 @@ Ban Thư ký Hội nghị PARS 2026`
                     </td>
                     <td className="px-6 py-4 truncate max-w-[150px]">
                       {att.organization}
+                    </td>
+                    <td className="px-6 py-4">
+                      {att.source === 'website' || !att.source ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
+                          website
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100 truncate max-w-[120px] inline-block" title={att.source}>
+                          {att.source}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
@@ -2435,6 +2469,13 @@ Ban Thư ký Hội nghị PARS 2026`
                           </div>
                         </div>
 
+                        <div>
+                          <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Nguồn đăng ký:</span>
+                          <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-850 font-bold truncate">
+                            ℹ️ {viewDetailAttendee.source || 'website'}
+                          </div>
+                        </div>
+
                         <div className="sm:col-span-2">
                           <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Địa chỉ liên hệ:</span>
                           <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-semibold leading-relaxed">
@@ -2637,6 +2678,17 @@ Ban Thư ký Hội nghị PARS 2026`
                             value={detailEditForm.organization}
                             onChange={(e) => setDetailEditForm({ ...detailEditForm, organization: e.target.value })}
                             className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:border-indigo-505"
+                          />
+                        </div>
+
+                        {/* Source (Read-only) */}
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Nguồn đăng ký</label>
+                          <input
+                            type="text"
+                            disabled
+                            value={detailEditForm.source || 'website'}
+                            className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-550 font-semibold focus:outline-none cursor-not-allowed text-xs"
                           />
                         </div>
 

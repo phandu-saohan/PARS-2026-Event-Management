@@ -155,6 +155,7 @@ export interface Attendee {
   province?: string;
   avatarUrl?: string;
   doctorProofUrl?: string;
+  source?: string;
 }
 
 export interface SpeakerRegistration {
@@ -746,3 +747,51 @@ export interface SendingCampaign {
   logs: string[];
   createdAt: string;
 }
+
+export interface CustomFormConfig {
+  id: string;
+  title: string;
+  headerTitle?: string;
+  headerSubtitle?: string;
+  headerLogoUrl?: string;
+  headerBannerUrl?: string;
+  footerText?: string;
+  fields: {
+    title: boolean;
+    fullName: boolean;
+    organization: boolean;
+    department: boolean;
+    phone: boolean;
+    email: boolean;
+    address: boolean;
+    yearOfBirth: boolean;
+    gender: boolean;
+    cmeRequired: boolean;
+    cmeIdentityNo: boolean;
+    galaRequired: boolean;
+    masterclassRequired: boolean;
+    tourRequired: boolean;
+    province: boolean;
+    avatarUrl: boolean;
+    doctorProofUrl: boolean;
+  };
+  requiredFields: {
+    fullName: boolean;
+    phone: boolean;
+    email: boolean;
+    organization: boolean;
+  };
+  packages: {
+    id: string;
+    name: string;
+    fee: number;
+    isActive: boolean;
+  }[];
+  paymentQrEnabled: boolean;
+  bankCode?: string;
+  bankAccountNo?: string;
+  bankAccountName?: string;
+  createdAt: string;
+  isActive: boolean;
+}
+

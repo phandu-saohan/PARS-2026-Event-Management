@@ -29,8 +29,10 @@ const NotificationSystem = lazy(() => import('./views/NotificationSystem'));
 const SettingsPanel = lazy(() => import('./views/SettingsPanel'));
 const UserGuide = lazy(() => import('./views/UserGuide'));
 const EventMarketing = lazy(() => import('./views/EventMarketing'));
+const CustomFormManager = lazy(() => import('./views/CustomFormManager'));
 
 // Public views
+const PublicCustomRegister = lazy(() => import('./views/PublicCustomRegister'));
 const PublicEventDetails = lazy(() => import('./views/PublicEventDetails'));
 const PublicDelegateRegister = lazy(() => import('./views/PublicDelegateRegister'));
 const PublicSpeakerRegister = lazy(() => import('./views/PublicSpeakerRegister'));
@@ -50,6 +52,7 @@ const VIEW_REQUIRED_PERMISSIONS: Record<string, string> = {
   'bulk-send': 'notifications.send',
   settings: 'settings.view',
   marketing: 'marketing.view',
+  'custom-forms': 'settings.view',
 };
 
 function AppContent() {
@@ -59,8 +62,8 @@ function AppContent() {
       const params = new URLSearchParams(window.location.search);
       const viewParam = params.get('view');
       const validViews = [
-        'overview', 'attendees', 'speakers', 'schedule', 'tasks', 'finances', 'sponsors', 'notifications', 'bulk-send', 'settings', 'marketing',
-        'event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration'
+        'overview', 'attendees', 'speakers', 'schedule', 'tasks', 'finances', 'sponsors', 'notifications', 'bulk-send', 'settings', 'marketing', 'custom-forms',
+        'event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration', 'register-custom'
       ];
       if (viewParam && validViews.includes(viewParam)) {
         return viewParam;
@@ -319,6 +322,8 @@ function AppContent() {
         );
       case 'marketing':
         return <EventMarketing role={role} />;
+      case 'custom-forms':
+        return <CustomFormManager role={role} />;
       case 'user-guide':
         return <UserGuide />;
 
@@ -333,6 +338,8 @@ function AppContent() {
         return <PublicSponsorRegister onNavigate={handleNavigate} />;
       case 'check-registration':
         return <PublicCheckRegistration onNavigate={handleNavigate} />;
+      case 'register-custom':
+        return <PublicCustomRegister onNavigate={handleNavigate} />;
       
       default:
         return <DashboardOverview role={role} />;

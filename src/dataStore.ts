@@ -32,6 +32,7 @@ import {
   MarketingPost,
   MarketingChannelsConfig,
   SendingCampaign,
+  CustomFormConfig,
 } from './types';
 import { supabase, isSupabaseConfigured, uploadToSupabaseStorage } from './lib/supabase';
 import {
@@ -52,6 +53,7 @@ import {
   mapContactToDb, mapDbToContact,
   mapMarketingPostToDb, mapDbToMarketingPost,
   mapCampaignToDb, mapDbToCampaign,
+  mapCustomFormToDb, mapDbToCustomForm,
 } from './lib/mappers';
 
 // Empty fallbacks to remove mock data from source code
@@ -1108,6 +1110,7 @@ export class DataStore {
   private static KEY_MARKETING_CHANNELS_CONFIG = 'pars_marketing_channels_config';
   private static KEY_ROLES = 'pars_roles';
   private static KEY_CAMPAIGNS = 'pars_sending_campaigns';
+  private static KEY_CUSTOM_FORMS = 'pars_custom_forms';
 
   // In-memory cache
   private attendees: Attendee[] = [];
@@ -1140,6 +1143,7 @@ export class DataStore {
   private marketingChannelsConfig: MarketingChannelsConfig = DEFAULT_MARKETING_CHANNELS_CONFIG;
   private roles: UserRole[] = [];
   private sendingCampaigns: SendingCampaign[] = [];
+  private customForms: CustomFormConfig[] = [];
 
   constructor() {
     this.loadLocalStorage();
@@ -1264,6 +1268,7 @@ export class DataStore {
       }
     ]);
     this.sendingCampaigns = this.getLocalStorage(DataStore.KEY_CAMPAIGNS, []);
+    this.customForms = this.getLocalStorage(DataStore.KEY_CUSTOM_FORMS, []);
   }
 
   /**
@@ -1295,6 +1300,7 @@ export class DataStore {
         { data: dbDates },
         { data: dbShifts },
         { data: dbSections },
+        { data: dbCustomForms },
       ] = await Promise.all([
         supabase.from('packages').select('*'),
         supabase.from('specialty_tracks').select('*'),
@@ -1305,6 +1311,7 @@ export class DataStore {
         Promise.resolve(supabase.from('schedule_dates').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('shifts').select('*')).catch(() => ({ data: null })),
         Promise.resolve(supabase.from('virtual_sections').select('*')).catch(() => ({ data: null })),
+        Promise.resolve(supabase.from('custom_registration_forms').select('*')).catch(() => ({ data: null })),
       ]);
 
       if (pkgs) {
@@ -1359,6 +1366,10 @@ export class DataStore {
       if (dbSections && dbSections.length > 0) {
         this.virtualSections = dbSections.map(mapDbToVirtualSection);
         this.saveToLocalStorage(DataStore.KEY_SECTIONS, this.virtualSections);
+      }
+      if (dbCustomForms && dbCustomForms.length > 0) {
+        this.customForms = dbCustomForms.map(mapDbToCustomForm);
+        this.saveToLocalStorage(DataStore.KEY_CUSTOM_FORMS, this.customForms);
       }
 
       console.log('⚡ Public caches loaded. Dispatching event for instant UI update...');
@@ -2339,6 +2350,46 @@ export class DataStore {
     if (isSupabaseConfigured()) {
       supabase.from('sessions').delete().eq('id', id).then(({ error }) => {
         if (error) console.error('Error deleting session from Supabase:', error);
+      });
+    }
+  }
+
+
+  // Custom Forms
+  getCustomForms() { return this.customForms; }
+  saveCustomForm(form: CustomFormConfig) {
+    const idx = this.customForms.findIndex(f => f.id === form.id);
+    const isNew = idx < 0;
+    if (!isNew) {
+      this.customForms[idx] = form;
+    } else {
+      this.customForms.push(form);
+    }
+    this.saveToLocalStorage(DataStore.KEY_CUSTOM_FORMS, this.customForms);
+
+    if (isSupabaseConfigured()) {
+      (async () => {
+        try {
+          const dbRecord = mapCustomFormToDb(form);
+          const query = isNew
+            ? supabase.from('custom_registration_forms').insert(dbRecord)
+            : supabase.from('custom_registration_forms').upsert(dbRecord);
+          const { error } = await query;
+          if (error) console.error(`Error ${isNew ? 'inserting' : 'upserting'} custom form to Supabase:`, error);
+        } catch (err) {
+          console.error('Error during sync of custom form:', err);
+        }
+      })();
+    }
+  }
+
+  deleteCustomForm(id: string) {
+    this.customForms = this.customForms.filter(f => f.id !== id);
+    this.saveToLocalStorage(DataStore.KEY_CUSTOM_FORMS, this.customForms);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('custom_registration_forms').delete().eq('id', id).then(({ error }) => {
+        if (error) console.error('Error deleting custom form from Supabase:', error);
       });
     }
   }
@@ -3873,9 +3924,9 @@ export class DataStore {
     localStorage.removeItem(DataStore.KEY_SPECIALTY_TRACKS);
     localStorage.removeItem(DataStore.KEY_BUSINESS_CONFIG);
     localStorage.removeItem(DataStore.KEY_EMBED_SCRIPTS);
-    localStorage.removeItem(DataStore.KEY_MARKETING_POSTS);
     localStorage.removeItem(DataStore.KEY_MARKETING_CHANNELS_CONFIG);
     localStorage.removeItem(DataStore.KEY_CAMPAIGNS);
+    localStorage.removeItem(DataStore.KEY_CUSTOM_FORMS);
     localStorage.removeItem(DataStore.KEY_ROOMS);
     localStorage.removeItem(DataStore.KEY_DATES);
     localStorage.removeItem(DataStore.KEY_SHIFTS);
@@ -3894,6 +3945,7 @@ export class DataStore {
         supabase.from('notification_logs').delete().neq('id', ''),
         supabase.from('marketing_posts').delete().neq('id', ''),
         supabase.from('sending_campaigns').delete().neq('id', ''),
+        Promise.resolve(supabase.from('custom_registration_forms').delete().neq('id', '')).catch(() => null),
         supabase.from('system_config').delete().eq('key', 'marketing_channels_config'),
       ]).then(() => {
         console.log('Cleared Supabase tables on reset.');

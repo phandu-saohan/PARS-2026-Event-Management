@@ -7,7 +7,7 @@ import type {
   InternalTask, FinanceTransaction, RegistrationPackage, UserAccount,
   NotificationTemplate, SentNotificationLog, SpecialtyTrack,
   BusinessConfig, EmbedScript, ZaloConfig, EmailConfig, Contact,
-  MarketingPost, UserRole, SendingCampaign
+  MarketingPost, UserRole, SendingCampaign, CustomFormConfig
 } from '../types';
 
 // ============================================================
@@ -45,6 +45,7 @@ export function mapAttendeeToDb(a: Attendee): Record<string, any> {
     registration_period: a.registrationPeriod || null,
     province: a.province || null,
     avatar_url: a.avatarUrl || null,
+    source: a.source || 'website',
   };
 }
 
@@ -80,6 +81,7 @@ export function mapDbToAttendee(row: any): Attendee {
     registrationPeriod: row.registration_period || undefined,
     province: row.province || undefined,
     avatarUrl: row.avatar_url || undefined,
+    source: row.source || 'website',
   };
 }
 
@@ -664,6 +666,71 @@ export function mapDbToCampaign(row: any): SendingCampaign {
     failedCount: Number(row.failed_count) || 0,
     recipients: row.recipients || [],
     logs: row.logs || [],
+    createdAt: row.created_at || new Date().toISOString()
+  };
+}
+
+export function mapCustomFormToDb(f: CustomFormConfig): Record<string, any> {
+  return {
+    id: f.id,
+    title: f.title,
+    header_title: f.headerTitle || null,
+    header_subtitle: f.headerSubtitle || null,
+    header_logo_url: f.headerLogoUrl || null,
+    header_banner_url: f.headerBannerUrl || null,
+    footer_text: f.footerText || null,
+    fields: f.fields,
+    required_fields: f.requiredFields,
+    packages: f.packages,
+    payment_qr_enabled: f.paymentQrEnabled,
+    bank_code: f.bankCode || null,
+    bank_account_no: f.bankAccountNo || null,
+    bank_account_name: f.bankAccountName || null,
+    is_active: f.isActive,
+    created_at: f.createdAt
+  };
+}
+
+export function mapDbToCustomForm(row: any): CustomFormConfig {
+  return {
+    id: row.id,
+    title: row.title || '',
+    headerTitle: row.header_title || undefined,
+    headerSubtitle: row.header_subtitle || undefined,
+    headerLogoUrl: row.header_logo_url || undefined,
+    headerBannerUrl: row.header_banner_url || undefined,
+    footerText: row.footer_text || undefined,
+    fields: row.fields || {
+      title: true,
+      fullName: true,
+      organization: true,
+      department: false,
+      phone: true,
+      email: true,
+      address: false,
+      yearOfBirth: false,
+      gender: false,
+      cmeRequired: false,
+      cmeIdentityNo: false,
+      galaRequired: false,
+      masterclassRequired: false,
+      tourRequired: false,
+      province: false,
+      avatarUrl: false,
+      doctorProofUrl: false,
+    },
+    requiredFields: row.required_fields || {
+      fullName: true,
+      phone: true,
+      email: true,
+      organization: false,
+    },
+    packages: row.packages || [],
+    paymentQrEnabled: Boolean(row.payment_qr_enabled),
+    bankCode: row.bank_code || undefined,
+    bankAccountNo: row.bank_account_no || undefined,
+    bankAccountName: row.bank_account_name || undefined,
+    isActive: Boolean(row.is_active),
     createdAt: row.created_at || new Date().toISOString()
   };
 }
