@@ -208,6 +208,7 @@ export interface VirtualSection {
 export interface ConferenceSession {
   id: string;
   title: string;
+  titleEn?: string;
   speakerName: string;
   speakerTitle: string;
   roomName: string;

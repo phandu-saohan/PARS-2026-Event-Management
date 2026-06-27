@@ -470,7 +470,9 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const heroThemeEn = sections.hero?.themeEn || "PLASTIC & AESTHETIC REGENERATIVE SURGERY";
   const heroThemeVi = sections.hero?.themeVi || "Phẫu thuật Tạo hình Thẩm mỹ & Y học Tái sinh";
   const heroDate = sections.hero?.date || "12 - 13 THÁNG 09, 2026";
-  const heroLocation = sections.hero?.location || "MELIÀ HANOI, HÀ NỘI, VIỆT NAM";
+  const heroDateEn = sections.hero?.dateEn || "SEPTEMBER 12 - 13, 2026";
+  const heroLocation = sections.hero?.location || "MELI\u00c0 HANOI, H\u00c0 N\u1ed8I, VI\u1ec6T NAM";
+  const heroLocationEn = sections.hero?.locationEn || "MELI\u00c0 HANOI HOTEL, HANOI, VIETNAM";
   const heroBtnRegisterText = sections.hero?.btnRegisterText || "Đăng ký ngay";
   const heroBtnProgramText = sections.hero?.btnProgramText || "Chương trình hội nghị";
 
@@ -1131,11 +1133,11 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto px-4">
             <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
               <Calendar className="w-4.5 h-4.5 text-amber-400 shrink-0" />
-              <span>{heroDate}</span>
+              <span>{t(heroDate, heroDateEn)}</span>
             </div>
             <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
               <MapPin className="w-4.5 h-4.5 text-rose-400 shrink-0" />
-              <span>{heroLocation}</span>
+              <span>{t(heroLocation, heroLocationEn)}</span>
             </div>
           </div>
 
@@ -1570,7 +1572,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                             <div className="w-1.5 h-1.5 rounded-full bg-teal-600 shrink-0" />
                             <div className="min-w-0">
                               <span className="bg-slate-200 text-slate-600 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mr-2">{rep.roomName}</span>
-                              <span className="font-bold text-slate-800 text-xs leading-tight hover:text-teal-700 transition-colors">{rep.title}</span>
+                              <span className="font-bold text-slate-800 text-xs leading-tight hover:text-teal-700 transition-colors">{rep.titleEn && lang === 'en' ? rep.titleEn : rep.title}</span>
                               {rep.speakerName && (
                                 <span className="ml-2 text-[10px] text-slate-400 font-semibold">— {rep.speakerName}</span>
                               )}
@@ -1592,7 +1594,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                                   }`}
                                 >
                                   <p className="font-bold text-slate-800 text-xs leading-snug line-clamp-2 group-hover:text-teal-700 transition-colors">
-                                    {s.title}
+                                    {s.titleEn && lang === 'en' ? s.titleEn : s.title}
                                   </p>
                                   <p className="text-[10px] text-slate-400 font-semibold mt-1 truncate">{s.speakerName}</p>
                                 </div>
@@ -1628,7 +1630,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                           {matchingRoom && (
                             <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${matchingRoom.tagBg}`}>{t(matchingRoom.vietnameseName, matchingRoom.id === 'Hội trường 1' ? 'Hall A' : 'Hall B')}</span>
                           )}
-                          <p className="font-bold text-slate-800 text-xs leading-snug mt-0.5 line-clamp-2">{session.title}</p>
+                          <p className="font-bold text-slate-800 text-xs leading-snug mt-0.5 line-clamp-2">{session.titleEn && lang === 'en' ? session.titleEn : session.title}</p>
                           {session.speakerName && (
                             <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5">{session.speakerName}</p>
                           )}
@@ -2014,7 +2016,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                 </div>
 
                 <h3 className="text-lg md:text-xl font-black text-slate-100 leading-snug tracking-tight">
-                  {selectedSessionDetail.title}
+                  {selectedSessionDetail.titleEn && lang === 'en' ? selectedSessionDetail.titleEn : selectedSessionDetail.title}
                 </h3>
               </div>
 

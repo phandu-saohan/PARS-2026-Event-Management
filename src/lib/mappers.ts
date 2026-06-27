@@ -192,6 +192,7 @@ export function mapSessionToDb(s: ConferenceSession): Record<string, any> {
   return {
     id: s.id,
     title: s.title,
+    title_en: s.titleEn || '',
     speaker_name: s.speakerName,
     speaker_title: s.speakerTitle,
     room_name: s.roomName,
@@ -207,6 +208,7 @@ export function mapDbToSession(row: any): ConferenceSession {
   return {
     id: row.id,
     title: row.title || '',
+    titleEn: row.title_en || '',
     speakerName: row.speaker_name || '',
     speakerTitle: row.speaker_title || '',
     roomName: row.room_name || '',

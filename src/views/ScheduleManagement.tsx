@@ -223,6 +223,7 @@ export default function ScheduleManagement({ role }: ScheduleManagementProps) {
   const [editingPresentationId, setEditingPresentationId] = useState<string | null>(null);
   const [activeSectionForAdd, setActiveSectionForAdd] = useState<VirtualSection | null>(null);
   const [presTitle, setPresTitle] = useState('');
+  const [presTitleEn, setPresTitleEn] = useState('');
   const [presSpeaker, setPresSpeaker] = useState('');
   const [presSpeakerTitle, setPresSpeakerTitle] = useState('');
   const [presStartTime, setPresStartTime] = useState('08:00');
@@ -819,6 +820,7 @@ export default function ScheduleManagement({ role }: ScheduleManagementProps) {
     setActiveSectionForAdd(sec);
     setEditingPresentationId(session.id);
     setPresTitle(session.title);
+    setPresTitleEn(session.titleEn || '');
     setPresSpeaker(session.speakerName);
     setPresSpeakerTitle(session.speakerTitle);
     setPresStartTime(session.startTime);
@@ -858,6 +860,7 @@ export default function ScheduleManagement({ role }: ScheduleManagementProps) {
     const sessionData: ConferenceSession = {
       id: editingPresentationId ? editingPresentationId : `SES-${Math.floor(Math.random() * 900000 + 100000)}`,
       title: presTitle.trim(),
+      titleEn: presTitleEn.trim() || undefined,
       speakerName: presSpeaker.trim(),
       speakerTitle: presSpeakerTitle.trim(),
       roomName: selectedRoomName,
@@ -2183,6 +2186,16 @@ export default function ScheduleManagement({ role }: ScheduleManagementProps) {
                   value={presTitle}
                   onChange={(e) => setPresTitle(e.target.value)}
                   placeholder="ví dụ: Nghiên cứu cải tiến kỹ thuật mí mắt Hàn Quốc..."
+                  className="w-full px-3 py-2 border border-slate-205 rounded-xl"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-slate-400 block mb-1">Tiêu đề bài báo cáo tiếng Anh (English Title)</label>
+                <input
+                  type="text"
+                  value={presTitleEn}
+                  onChange={(e) => setPresTitleEn(e.target.value)}
+                  placeholder="e.g.: Advances in Upper Blepharoplasty Techniques..."
                   className="w-full px-3 py-2 border border-slate-205 rounded-xl"
                 />
               </div>
