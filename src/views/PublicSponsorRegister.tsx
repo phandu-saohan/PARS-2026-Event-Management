@@ -218,27 +218,23 @@ const SPONSOR_TIERS = [
 
 /* ── Benefits comparison table data ─────────────────────────────── */
 const BENEFITS_TABLE = [
-  { labelVi: 'Phí tài trợ', labelEn: 'Sponsorship Fee', valuesVi: ['600 triệu', '400 triệu', '300 triệu', '200 triệu', '100 triệu', '50 triệu'], valuesEn: ['600M VND', '400M VND', '300M VND', '200M VND', '100M VND', '50M VND'], isBold: true },
-  { labelVi: 'Tặng vé tham dự Gala', labelEn: 'Complimentary Gala Tickets', valuesVi: ['50', '40', '30', '20', '10', '-'], valuesEn: ['50', '40', '30', '20', '10', '-'] },
-  { labelVi: 'Tặng vé tham dự tiệc Chào mừng', labelEn: 'Complimentary Welcome Dinner Tickets', valuesVi: ['3', '2', '1', '-', '-', '-'], valuesEn: ['3', '2', '1', '-', '-', '-'] },
-  { labelVi: 'Giá sử dụng phòng Hand-on training (2h): $3,000', labelEn: 'Hands-on Training Room Use (2h): $3,000', valuesVi: ['2 suất', '1 suất', '1 suất', 'Ưu đãi 50%', 'Ưu đãi 40%', 'Ưu đãi 30%'], valuesEn: ['2 slots', '1 slot', '1 slot', '50% Discount', '40% Discount', '30% Discount'] },
-  { labelVi: 'Đại biểu đăng ký qua nhà tài trợ', labelEn: 'Delegate Registration Discount', valuesVi: ['Giảm 25%', 'Giảm 20%', 'Giảm 15%', 'Giảm 10%', 'Giảm 5%', '-'], valuesEn: ['25% Off', '20% Off', '15% Off', '10% Off', '5% Off', '-'] },
-  { labelVi: 'Gian hàng theo tiêu chuẩn', labelEn: 'Standard Exhibition Booth', valuesVi: ['Độc quyền', 'Đặc biệt 1', 'Đặc biệt 2', 'Ưu tiên 1', 'Ưu tiên 2', 'Cơ bản'], valuesEn: ['Exclusive', 'Special 1', 'Special 2', 'Priority 1', 'Priority 2', 'Basic'] },
-  { labelVi: 'Logo trên backdrop và các ấn phẩm', labelEn: 'Logo on Backdrop & Printings', valuesVi: ['Cỡ size 6', 'Cỡ size 5', 'Cỡ size 4', 'Cỡ size 3', 'Cỡ size 2', 'Cỡ size 1'], valuesEn: ['Size 6', 'Size 5', 'Size 4', 'Size 3', 'Size 2', 'Size 1'] },
-  { labelVi: 'Nêu tên cảm ơn trong suốt chương trình', labelEn: 'Verbal Thank-you Announcement', valuesVi: ['Có', 'Có', 'Có', 'Có', 'Có', 'Có'], valuesEn: ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'] },
-  { labelVi: 'Banner trên web hội', labelEn: 'Banner on Society Website', valuesVi: ['3 tháng', '2 tháng', '1 tháng', 'Không', 'Không', 'Không'], valuesEn: ['3 Months', '2 Months', '1 Month', 'No', 'No', 'No'] },
-  { labelVi: 'Standee trước cửa hội trường', labelEn: 'Standee at Hall Entrance', valuesVi: ['2 cái', '1 cái', 'Không', 'Không', 'Không', 'Không'], valuesEn: ['2 pcs', '1 pc', 'No', 'No', 'No', 'No'] },
-  { labelVi: 'Đăng bài viết về sản phẩm trên Web, page hội', labelEn: 'Product Promotion Post on Web/Page', valuesVi: ['5 bài', '3 bài', '2 bài', '1 bài', '1 bài', 'Không'], valuesEn: ['5 Posts', '3 Posts', '2 Posts', '1 Post', '1 Post', 'No'] },
-  { labelVi: 'Giấy cảm ơn và quà lưu niệm', labelEn: 'Appreciation Certificate & Souvenir', valuesVi: ['Có', 'Có', 'Có', 'Có', 'Có', 'Có'], valuesEn: ['Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes'] },
+  { labelVi: 'PHÍ TÀI TRỢ', labelEn: 'Sponsorship Fee', valuesVi: ['300.000.000 VNĐ', '200.000.000 VNĐ', '100.000.000 VNĐ', '50.000.000 VNĐ'], valuesEn: ['300M VND', '200M VND', '100M VND', '50M VND'], isBold: true },
+  { labelVi: 'Tặng vé tham dự Đêm tiệc Gala Dinner', labelEn: 'Complimentary Gala Dinner Tickets', valuesVi: ['10 vé', '8 vé', '6 vé', '4 vé'], valuesEn: ['10 tickets', '8 tickets', '6 tickets', '4 tickets'] },
+  { labelVi: 'Tặng vé tham dự Tiệc chào mừng (Welcome Dinner)', labelEn: 'Complimentary Welcome Dinner Tickets', valuesVi: ['3 vé', '1 vé', '-', '-'], valuesEn: ['3 tickets', '1 ticket', '-', '-'] },
+  { labelVi: 'Ưu đãi cho Đại biểu đăng ký qua Nhà tài trợ', labelEn: 'Delegate Registration Discount', valuesVi: ['Giảm 25%', 'Giảm 15%', 'Giảm 10%', 'Giảm 5%'], valuesEn: ['25% Off', '15% Off', '10% Off', '5% Off'] },
+  { labelVi: 'Quy mô và vị trí Gian hàng triển lãm tại Meliá', labelEn: 'Exhibition Booth Size & Location', valuesVi: ['Độc quyền (Vị trí VIP nhất)', 'Đặc biệt 2', 'Ưu tiên 1', 'Ưu tiên 2'], valuesEn: ['Exclusive (VIP Location)', 'Special 2', 'Priority 1', 'Priority 2'] },
+  { labelVi: 'Kích thước Logo trên Backdrop và các ấn phẩm', labelEn: 'Logo Size on Backdrop & Materials', valuesVi: ['Cỡ size 6 (Lớn nhất)', 'Cỡ size 4', 'Cỡ size 3', 'Cỡ size 2'], valuesEn: ['Size 6 (Largest)', 'Size 4', 'Size 3', 'Size 2'] },
+  { labelVi: 'Logo thương hiệu trong suốt chương trình hội nghị', labelEn: 'Brand Logo During Conference', valuesVi: ['Có', 'Có', 'Có', 'Có'], valuesEn: ['Yes', 'Yes', 'Yes', 'Yes'] },
+  { labelVi: 'Logo quảng cáo trên Website chính thức của hội nghị', labelEn: 'Logo Advertisement on Website', valuesVi: ['3 tháng', '1 tháng', '-', '-'], valuesEn: ['3 Months', '1 Month', '-', '-'] },
+  { labelVi: 'Đặt Standee giới thiệu trước cửa hội trường chính', labelEn: 'Standee at Main Hall Entrance', valuesVi: ['2 cái', '-', '-', '-'], valuesEn: ['2 pcs', '-', '-', '-'] },
+  { labelVi: 'Giấy cảm ơn và Quà lưu niệm từ Ban tổ chức', labelEn: 'Appreciation Certificate & Souvenir', valuesVi: ['Có', 'Có', 'Có', 'Có'], valuesEn: ['Yes', 'Yes', 'Yes', 'Yes'] },
 ];
 
 const TIER_HEADERS = [
   { name: 'Kim cương', nameEn: 'Diamond', color: '#6366f1' },
-  { name: 'Bạch kim', nameEn: 'Platinum', color: '#8b5cf6' },
   { name: 'Vàng', nameEn: 'Gold', color: '#f59e0b' },
   { name: 'Bạc', nameEn: 'Silver', color: '#94a3b8' },
   { name: 'Đồng', nameEn: 'Bronze', color: '#d97706' },
-  { name: 'Tiêu chuẩn', nameEn: 'Standard', color: '#64748b' },
 ];
 
 export default function PublicSponsorRegister({ onNavigate }: PublicSponsorRegisterProps) {
@@ -654,6 +650,30 @@ export default function PublicSponsorRegister({ onNavigate }: PublicSponsorRegis
           <p className="text-[9px] text-slate-350 mt-0.5">
             Website: pars.vn &nbsp;—&nbsp; Email: parsevents@gmail.com &nbsp;—&nbsp; Hotline: +84964551151
           </p>
+        </div>
+      </div>
+
+      {/* SƠ ĐỒ GIAN HÀNG TRIỂN LÃM */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-8">
+        <div className="bg-gradient-to-r from-[#2c3e6b] to-[#3b5998] px-6 py-4 text-center">
+          <h2 className="text-white font-extrabold text-lg md:text-xl tracking-wide uppercase" style={{ fontStyle: 'italic' }}>
+            {L.t('Sơ đồ vị trí gian hàng triển lãm', 'Exhibition Booth Floor Plan Layout')}
+          </h2>
+        </div>
+        <div className="p-4 bg-slate-50 flex justify-center border-t border-slate-100">
+          <div className="max-w-4xl w-full border border-slate-200 rounded-xl overflow-hidden bg-white p-2">
+            <img 
+              src="/pars-layout-map.png" 
+              alt="PARS 2026 Layout Floor Plan" 
+              className="w-full h-auto object-contain rounded-lg shadow-sm"
+            />
+          </div>
+        </div>
+        <div className="px-6 py-3.5 bg-slate-50 text-center border-t border-slate-100 text-xs font-semibold text-slate-500">
+          {L.t(
+            'Lưu ý: Các đơn vị vui lòng liên hệ Ban Thư ký để được tư vấn chính xác vị trí gian hàng còn trống trước khi đăng ký.',
+            'Note: Please contact the Secretariat to verify available booths before submitting registration.'
+          )}
         </div>
       </div>
 
