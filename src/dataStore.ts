@@ -2281,7 +2281,7 @@ export class DataStore {
     if (isSupabaseConfigured()) {
       const dbRow = mapCampaignToDb(campaign);
       const { error } = await supabase.from('sending_campaigns').upsert(dbRow);
-      if (error) throw error;
+      if (error) console.error('Error saving campaign to Supabase:', error);
     }
   }
   async deleteCampaign(id: string): Promise<void> {
@@ -2291,7 +2291,7 @@ export class DataStore {
 
     if (isSupabaseConfigured()) {
       const { error } = await supabase.from('sending_campaigns').delete().eq('id', id);
-      if (error) throw error;
+      if (error) console.error('Error deleting campaign from Supabase:', error);
     }
   }
 
