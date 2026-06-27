@@ -295,7 +295,21 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
     <div ref={containerRef} className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 md:py-12 md:px-6">
       <div className="max-w-2xl w-full bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden">
         {/* Banner Logo Section */}
-        {formConfig.headerBannerUrl ? (
+        {formConfig.bgType === 'color' ? (
+          <div className="text-white px-6 py-8 text-center relative border-b border-slate-200" style={{ backgroundColor: formConfig.bgColor || '#4f46e5' }}>
+            {formConfig.headerLogoUrl && (
+              <div className="w-12 h-12 bg-white rounded-xl p-1 mx-auto mb-3 flex items-center justify-center shadow-md">
+                <img src={formConfig.headerLogoUrl} alt="Logo" className="max-w-full max-h-full object-contain" />
+              </div>
+            )}
+            <h1 className="text-lg md:text-xl font-black uppercase tracking-wide text-white drop-shadow-sm">
+              {formConfig.headerTitle || formConfig.title}
+            </h1>
+            <p className="text-xs text-white/80 mt-1.5 font-medium leading-relaxed max-w-lg mx-auto">
+              {formConfig.headerSubtitle || 'Đăng ký thông tin đại biểu tham dự sự kiện chính thức.'}
+            </p>
+          </div>
+        ) : formConfig.headerBannerUrl ? (
           <div className="w-full h-44 md:h-56 relative overflow-hidden bg-slate-100 border-b border-slate-200">
             <img src={formConfig.headerBannerUrl} alt="Banner" className="w-full h-full object-cover" />
             {formConfig.headerLogoUrl && (
@@ -321,7 +335,7 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
         )}
 
         {/* Dynamic Header details when banner is used */}
-        {formConfig.headerBannerUrl && (
+        {formConfig.bgType !== 'color' && formConfig.headerBannerUrl && (
           <div className="p-6 pb-2 text-center border-b border-slate-100 bg-slate-50/50">
             <h1 className="text-lg md:text-xl font-black uppercase tracking-wide text-slate-900">
               {formConfig.headerTitle || formConfig.title}

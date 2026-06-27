@@ -791,6 +791,8 @@ export interface CustomFormConfig {
   bankCode?: string;
   bankAccountNo?: string;
   bankAccountName?: string;
+  bgType?: 'color' | 'image';
+  bgColor?: string;
   createdAt: string;
   isActive: boolean;
 }

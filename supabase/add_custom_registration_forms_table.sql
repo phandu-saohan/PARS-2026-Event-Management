@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS public.custom_registration_forms (
     bank_account_no TEXT,
     bank_account_name TEXT,
     is_active BOOLEAN DEFAULT TRUE,
+    bg_type TEXT DEFAULT 'image',
+    bg_color TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

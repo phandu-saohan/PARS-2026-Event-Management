@@ -687,6 +687,8 @@ export function mapCustomFormToDb(f: CustomFormConfig): Record<string, any> {
     bank_account_no: f.bankAccountNo || null,
     bank_account_name: f.bankAccountName || null,
     is_active: f.isActive,
+    bg_type: f.bgType || 'image',
+    bg_color: f.bgColor || null,
     created_at: f.createdAt
   };
 }
@@ -731,6 +733,8 @@ export function mapDbToCustomForm(row: any): CustomFormConfig {
     bankAccountNo: row.bank_account_no || undefined,
     bankAccountName: row.bank_account_name || undefined,
     isActive: Boolean(row.is_active),
+    bgType: row.bg_type || 'image',
+    bgColor: row.bg_color || undefined,
     createdAt: row.created_at || new Date().toISOString()
   };
 }
