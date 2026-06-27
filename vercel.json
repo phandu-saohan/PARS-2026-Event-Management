@@ -15,6 +15,12 @@
     { "source": "/OneSignalSDKWorker.js", "destination": "/OneSignalSDKWorker.js" },
     { "source": "/check-registration.html", "destination": "/check-registration.html" },
     { "source": "/check-registration", "destination": "/check-registration.html" },
+    { "source": "/privacy.html", "destination": "/privacy.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms.html", "destination": "/terms.html" },
+    { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/delete-data.html", "destination": "/delete-data.html" },
+    { "source": "/delete-data", "destination": "/delete-data.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
