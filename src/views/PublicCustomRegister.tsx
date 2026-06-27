@@ -292,23 +292,8 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
     : '';
 
   return (
-    <div 
-      ref={containerRef} 
-      className="min-h-screen flex flex-col items-center py-6 px-4 md:py-12 md:px-6 transition-all duration-500"
-      style={formConfig.bgType === 'color'
-        ? { backgroundColor: formConfig.bgColor || '#f8fafc' }
-        : formConfig.bgType === 'image' && formConfig.headerBannerUrl
-          ? { 
-              backgroundImage: `url(${formConfig.headerBannerUrl})`, 
-              backgroundSize: 'cover', 
-              backgroundPosition: 'center', 
-              backgroundAttachment: 'fixed',
-              minHeight: '100vh'
-            }
-          : { backgroundColor: '#f8fafc' }
-      }
-    >
-      <div className="max-w-2xl w-full bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden backdrop-blur-xs">
+    <div ref={containerRef} className="min-h-screen bg-slate-50 flex flex-col items-center py-6 px-4 md:py-12 md:px-6">
+      <div className="max-w-2xl w-full bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden">
         {/* Banner Logo Section */}
         {formConfig.bgType === 'color' ? (
           <div className="text-white px-6 py-8 text-center relative border-b border-slate-200" style={{ backgroundColor: formConfig.bgColor || '#4f46e5' }}>
