@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit, Trash, Copy, ExternalLink, ClipboardList, CheckCircle, 
-  Settings, Check, X, Shield, Users, Coins, Image, HelpCircle, AlertCircle, FileText, QrCode, Upload
+  Settings, Check, X, Shield, Users, Coins, Image, HelpCircle, AlertCircle, FileText, QrCode, Upload, Code
 } from 'lucide-react';
 import { store } from '../dataStore';
 import { CustomFormConfig, Role } from '../types';
@@ -87,6 +87,9 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
   const [editorTab, setEditorTab] = useState<'info' | 'fields' | 'packages' | 'payment'>('info');
   const [activeQrUrl, setActiveQrUrl] = useState<string | null>(null);
   const [activeQrTitle, setActiveQrTitle] = useState<string>('');
+  const [activeEmbedUrl, setActiveEmbedUrl] = useState<string | null>(null);
+  const [activeEmbedTitle, setActiveEmbedTitle] = useState<string>('');
+  const [copiedEmbed, setCopiedEmbed] = useState(false);
 
   // Packages state in editor
   const [pkgName, setPkgName] = useState('');
@@ -115,6 +118,12 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}`;
     setActiveQrUrl(qrUrl);
     setActiveQrTitle(title);
+  };
+
+  const handleShowEmbedModal = (formId: string, title: string) => {
+    setActiveEmbedUrl(getPublicLink(formId));
+    setActiveEmbedTitle(title);
+    setCopiedEmbed(false);
   };
 
   const handleCopyLink = (formId: string) => {
@@ -334,6 +343,13 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
                       title="Mã QR đăng ký riêng"
                     >
                       <QrCode className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleShowEmbedModal(form.id, form.title)}
+                      className="p-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-600 cursor-pointer"
+                      title="Lấy mã nhúng website (Iframe)"
+                    >
+                      <Code className="w-3.5 h-3.5" />
                     </button>
                     <a
                       href={getPublicLink(form.id)}
@@ -920,6 +936,74 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
                 className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs border-none"
               >
                 Sao chép Link QR
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeEmbedUrl && (
+        <div className="fixed inset-0 bg-slate-950/45 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden border border-slate-200 shadow-2xl animate-fade-in p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 className="text-sm font-black text-slate-900 uppercase">Mã Nhúng Website (Iframe)</h4>
+              <button
+                onClick={() => setActiveEmbedUrl(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-full cursor-pointer hover:bg-slate-100 border-none bg-transparent"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-slate-450 font-black uppercase">Tên biểu mẫu:</span>
+              <h5 className="text-sm font-bold text-slate-900">{activeEmbedTitle}</h5>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] font-black text-slate-500 uppercase block">Đoạn mã HTML Iframe</label>
+              <textarea
+                readOnly
+                rows={4}
+                value={`<iframe src="${activeEmbedUrl}" width="100%" height="800" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="${activeEmbedTitle}"></iframe>`}
+                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 focus:outline-none select-all"
+              />
+            </div>
+
+            <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+              * Mẹo: Bạn có thể thay đổi thuộc tính `height="800"` (chiều cao) thành kích thước phù hợp để tránh cuộn trang (ví dụ: `height="1200"` nếu form dài).
+            </p>
+
+            <div className="flex gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setActiveEmbedUrl(null)}
+                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer"
+              >
+                Đóng
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const code = `<iframe src="${activeEmbedUrl}" width="100%" height="800" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="${activeEmbedTitle}"></iframe>`;
+                  navigator.clipboard.writeText(code).then(() => {
+                    setCopiedEmbed(true);
+                    setTimeout(() => setCopiedEmbed(false), 2000);
+                  });
+                }}
+                className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs border-none flex items-center justify-center gap-1.5"
+              >
+                {copiedEmbed ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Đã sao chép!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    <span>Sao chép mã nhúng</span>
+                  </>
+                )}
               </button>
             </div>
           </div>
