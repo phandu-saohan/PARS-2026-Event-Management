@@ -258,7 +258,7 @@ function AppContent() {
   };
 
   // Check if current view is public or admin-side
-  const isPublicView = ['event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration'].includes(currentView);
+  const isPublicView = ['event-details', 'register-delegate', 'register-speaker', 'register-sponsor', 'check-registration', 'register-custom'].includes(currentView);
 
   // Middleware effect: watch role and view changes, block and redirect unauthorized access
   useEffect(() => {

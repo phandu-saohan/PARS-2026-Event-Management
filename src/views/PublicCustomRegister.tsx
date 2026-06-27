@@ -279,7 +279,8 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
   };
 
   // Generate VietQR dynamic code transfer parameters
-  const transferMessage = `DK ${createdAttendee ? createdAttendee.id : 'ATT'}`;
+  const cleanName = fullName.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/Đ/g, 'D').trim();
+  const transferMessage = `${cleanName} ${phone.trim()}`;
   const bankCode = formConfig.bankCode || businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB';
   const bankAccountNo = formConfig.bankAccountNo || businessConfig.paymentConfig?.vietqr?.accountNo || '';
   const bankAccountName = formConfig.bankAccountName || businessConfig.paymentConfig?.vietqr?.accountName || '';
