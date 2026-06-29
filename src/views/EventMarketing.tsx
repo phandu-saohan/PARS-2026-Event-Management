@@ -59,6 +59,48 @@ export default function EventMarketing({ role }: EventMarketingProps) {
   const [bulkSocialPostingProgress, setBulkSocialPostingProgress] = useState(0);
   const [bulkSocialPostingIndex, setBulkSocialPostingIndex] = useState(-1);
   const [bulkSocialLogs, setBulkSocialLogs] = useState<string[]>([]);
+
+  const [allSocialGroups, setAllSocialGroups] = useState<any[]>(() => {
+    const saved = localStorage.getItem('pars_social_groups');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return [
+      // Joined groups
+      { id: 'fb_group_1', name: 'Cộng đồng Thẩm Mỹ & Spa Việt Nam', type: 'group', platform: 'facebook', members: 45200, joined: true },
+      { id: 'fb_group_2', name: 'Hội Chủ Spa & Thẩm Mỹ Viện Toàn Quốc', type: 'group', platform: 'facebook', members: 28400, joined: true },
+      { id: 'fb_page_2', name: 'Thiết Bị Thẩm Mỹ Chính Hãng VSAPS', type: 'page', platform: 'facebook', members: 12300, joined: true },
+      { id: 'zl_group_1', name: '[Zalo] Hội Thảo Thẩm Mỹ Nội Khoa 2026', type: 'group', platform: 'zalo', members: 850, joined: true },
+      { id: 'fb_group_4', name: 'Hội Bác Sĩ Da Liễu & Thẩm Mỹ Việt Nam', type: 'group', platform: 'facebook', members: 16700, joined: true },
+      { id: 'zl_group_2', name: '[Zalo] Group Báo Cáo Viên VSAPS & PARS', type: 'group', platform: 'zalo', members: 180, joined: true },
+      { id: 'fb_page_1', name: 'Tin tức Y học & Da liễu Lâm sàng', type: 'page', platform: 'facebook', members: 8900, joined: true },
+      { id: 'zl_group_3', name: '[Zalo] Cộng đồng Học viên Masterclass', type: 'group', platform: 'zalo', members: 420, joined: true },
+
+      // Not Joined groups containing "thẩm mỹ" / "spa" / "da liễu"
+      { id: 'fb_group_3', name: 'Góc Review Làm Đẹp & Skincare Thẩm Mỹ', type: 'group', platform: 'facebook', members: 120500, joined: false },
+      { id: 'fb_group_5', name: 'Chia sẻ kinh nghiệm Setup & Marketing Spa', type: 'group', platform: 'facebook', members: 21900, joined: false },
+      { id: 'fb_group_6', name: 'Cộng Đồng Thẩm Mỹ Trị Mụn & Nám Da', type: 'group', platform: 'facebook', members: 34500, joined: false },
+      { id: 'fb_group_7', name: 'Hội Bác Sĩ Thẩm Mỹ Nội Khoa & Laser', type: 'group', platform: 'facebook', members: 9200, joined: false },
+      { id: 'fb_page_3', name: 'Học Viện Thẩm Mỹ Quốc Tế SeoulSpa', type: 'page', platform: 'facebook', members: 56000, joined: false },
+      { id: 'zl_group_4', name: '[Zalo] Nguồn Hàng Mỹ Phẩm Spa Da Liễu', type: 'group', platform: 'zalo', members: 1250, joined: false },
+      { id: 'fb_group_8', name: 'Review Trải Nghiệm Thẩm Mỹ Viện & Spa', type: 'group', platform: 'facebook', members: 78900, joined: false },
+      { id: 'fb_page_4', name: 'Bác Sĩ Da Liễu Thẩm Mỹ Online', type: 'page', platform: 'facebook', members: 15400, joined: false },
+      { id: 'zl_group_5', name: '[Zalo] Group Mua Bán Thiết Bị Spa Cũ', type: 'group', platform: 'zalo', members: 630, joined: false },
+      { id: 'fb_group_9', name: 'Hội Kỹ Thuật Viên Spa & Chăm Sóc Da', type: 'group', platform: 'facebook', members: 43100, joined: false },
+      { id: 'fb_group_10', name: 'Cộng Đồng Phẫu Thuật Thẩm Mỹ An Toàn', type: 'group', platform: 'facebook', members: 67200, joined: false },
+      { id: 'zl_group_6', name: '[Zalo] Hội Thảo Da Liễu Miền Nam 2026', type: 'group', platform: 'zalo', members: 390, joined: false }
+    ];
+  });
+
+  useEffect(() => {
+    if (allSocialGroups.length > 0) {
+      localStorage.setItem('pars_social_groups', JSON.stringify(allSocialGroups));
+    }
+  }, [allSocialGroups]);
   
   // Editorial Calendar states
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -1057,33 +1099,7 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     // Simulate API network latency
     setTimeout(() => {
       const kw = keyword.toLowerCase();
-      const allMockGroups = [
-        // Joined groups
-        { id: 'fb_group_1', name: 'Cộng đồng Thẩm Mỹ & Spa Việt Nam', type: 'group', platform: 'facebook', members: 45200, joined: true },
-        { id: 'fb_group_2', name: 'Hội Chủ Spa & Thẩm Mỹ Viện Toàn Quốc', type: 'group', platform: 'facebook', members: 28400, joined: true },
-        { id: 'fb_page_2', name: 'Thiết Bị Thẩm Mỹ Chính Hãng VSAPS', type: 'page', platform: 'facebook', members: 12300, joined: true },
-        { id: 'zl_group_1', name: '[Zalo] Hội Thảo Thẩm Mỹ Nội Khoa 2026', type: 'group', platform: 'zalo', members: 850, joined: true },
-        { id: 'fb_group_4', name: 'Hội Bác Sĩ Da Liễu & Thẩm Mỹ Việt Nam', type: 'group', platform: 'facebook', members: 16700, joined: true },
-        { id: 'zl_group_2', name: '[Zalo] Group Báo Cáo Viên VSAPS & PARS', type: 'group', platform: 'zalo', members: 180, joined: true },
-        { id: 'fb_page_1', name: 'Tin tức Y học & Da liễu Lâm sàng', type: 'page', platform: 'facebook', members: 8900, joined: true },
-        { id: 'zl_group_3', name: '[Zalo] Cộng đồng Học viên Masterclass', type: 'group', platform: 'zalo', members: 420, joined: true },
-
-        // Not Joined groups containing "thẩm mỹ" / "spa" / "da liễu"
-        { id: 'fb_group_3', name: 'Góc Review Làm Đẹp & Skincare Thẩm Mỹ', type: 'group', platform: 'facebook', members: 120500, joined: false },
-        { id: 'fb_group_5', name: 'Chia sẻ kinh nghiệm Setup & Marketing Spa', type: 'group', platform: 'facebook', members: 21900, joined: false },
-        { id: 'fb_group_6', name: 'Cộng Đồng Thẩm Mỹ Trị Mụn & Nám Da', type: 'group', platform: 'facebook', members: 34500, joined: false },
-        { id: 'fb_group_7', name: 'Hội Bác Sĩ Thẩm Mỹ Nội Khoa & Laser', type: 'group', platform: 'facebook', members: 9200, joined: false },
-        { id: 'fb_page_3', name: 'Học Viện Thẩm Mỹ Quốc Tế SeoulSpa', type: 'page', platform: 'facebook', members: 56000, joined: false },
-        { id: 'zl_group_4', name: '[Zalo] Nguồn Hàng Mỹ Phẩm Spa Da Liễu', type: 'group', platform: 'zalo', members: 1250, joined: false },
-        { id: 'fb_group_8', name: 'Review Trải Nghiệm Thẩm Mỹ Viện & Spa', type: 'group', platform: 'facebook', members: 78900, joined: false },
-        { id: 'fb_page_4', name: 'Bác Sĩ Da Liễu Thẩm Mỹ Online', type: 'page', platform: 'facebook', members: 15400, joined: false },
-        { id: 'zl_group_5', name: '[Zalo] Group Mua Bán Thiết Bị Spa Cũ', type: 'group', platform: 'zalo', members: 630, joined: false },
-        { id: 'fb_group_9', name: 'Hội Kỹ Thuật Viên Spa & Chăm Sóc Da', type: 'group', platform: 'facebook', members: 43100, joined: false },
-        { id: 'fb_group_10', name: 'Cộng Đồng Phẫu Thuật Thẩm Mỹ An Toàn', type: 'group', platform: 'facebook', members: 67200, joined: false },
-        { id: 'zl_group_6', name: '[Zalo] Hội Thảo Da Liễu Miền Nam 2026', type: 'group', platform: 'zalo', members: 390, joined: false }
-      ];
-      
-      const filtered = allMockGroups.filter(g => 
+      const filtered = allSocialGroups.filter(g => 
         g.name.toLowerCase().includes(kw) || 
         g.platform.toLowerCase().includes(kw) ||
         g.type.toLowerCase().includes(kw)
