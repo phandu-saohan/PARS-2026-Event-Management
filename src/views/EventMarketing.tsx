@@ -45,7 +45,20 @@ const TOPICS = [
 
 export default function EventMarketing({ role }: EventMarketingProps) {
   const [posts, setPosts] = useState<MarketingPost[]>([]);
-  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'news_feed' | 'video' | 'channels' | 'guide'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'calendar' | 'news_feed' | 'video' | 'channels' | 'guide' | 'social_group_bulk'>('all');
+  
+  // Bulk Social Group Posting states
+  const [socialSearchText, setSocialSearchText] = useState('');
+  const [isSearchingGroups, setIsSearchingGroups] = useState(false);
+  const [foundGroups, setFoundGroups] = useState<any[]>([]);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [socialPostText, setSocialPostText] = useState('');
+  const [socialPostImageUrl, setSocialPostImageUrl] = useState('');
+  const [isGeneratingCanvasImage, setIsGeneratingCanvasImage] = useState(false);
+  const [bulkSocialPostingStatus, setBulkSocialPostingStatus] = useState<'idle' | 'posting' | 'completed' | 'failed'>('idle');
+  const [bulkSocialPostingProgress, setBulkSocialPostingProgress] = useState(0);
+  const [bulkSocialPostingIndex, setBulkSocialPostingIndex] = useState(-1);
+  const [bulkSocialLogs, setBulkSocialLogs] = useState<string[]>([]);
   
   // Editorial Calendar states
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
@@ -1031,6 +1044,229 @@ export default function EventMarketing({ role }: EventMarketingProps) {
     return false;
   });
 
+  // 1. Mock search groups/pages
+  const handleSearchGroups = (keyword: string) => {
+    if (!keyword.trim()) {
+      alert('Vui lòng nhập từ khóa tìm kiếm.');
+      return;
+    }
+    setIsSearchingGroups(true);
+    setFoundGroups([]);
+    setSelectedGroupIds([]);
+    
+    // Simulate API network latency
+    setTimeout(() => {
+      const kw = keyword.toLowerCase();
+      const allMockGroups = [
+        { id: 'fb_group_1', name: 'Cộng đồng Thẩm Mỹ & Spa Việt Nam', type: 'group', platform: 'facebook', members: 45200, joined: true },
+        { id: 'fb_group_2', name: 'Hội Chủ Spa & Thẩm Mỹ Viện Toàn Quốc', type: 'group', platform: 'facebook', members: 28400, joined: true },
+        { id: 'fb_group_3', name: 'Góc Review Làm Đẹp & Skincare', type: 'group', platform: 'facebook', members: 120500, joined: false },
+        { id: 'fb_page_1', name: 'Tin tức Y học & Da liễu Lâm sàng', type: 'page', platform: 'facebook', members: 8900, joined: true },
+        { id: 'fb_page_2', name: 'Thiết Bị Thẩm Mỹ Chính Hãng VSAPS', type: 'page', platform: 'facebook', members: 12300, joined: true },
+        { id: 'zl_group_1', name: '[Zalo] Hội Thảo Thẩm Mỹ Nội Khoa 2026', type: 'group', platform: 'zalo', members: 850, joined: true },
+        { id: 'zl_group_2', name: '[Zalo] Group Báo Cáo Viên VSAPS & PARS', type: 'group', platform: 'zalo', members: 180, joined: true },
+        { id: 'fb_group_4', name: 'Hội Bác Sĩ Da Liễu & Thẩm Mỹ Việt Nam', type: 'group', platform: 'facebook', members: 16700, joined: true },
+        { id: 'fb_group_5', name: 'Chia sẻ kinh nghiệm Setup & Marketing Spa', type: 'group', platform: 'facebook', members: 21900, joined: false },
+        { id: 'zl_group_3', name: '[Zalo] Cộng đồng Học viên Masterclass', type: 'group', platform: 'zalo', members: 420, joined: true }
+      ];
+      
+      const filtered = allMockGroups.filter(g => 
+        g.name.toLowerCase().includes(kw) || 
+        g.platform.toLowerCase().includes(kw) ||
+        g.type.toLowerCase().includes(kw)
+      );
+      
+      setFoundGroups(filtered);
+      setIsSearchingGroups(false);
+      if (filtered.length === 0) {
+        alert('Không tìm thấy trang hoặc nhóm nào phù hợp với từ khóa này.');
+      }
+    }, 1200);
+  };
+
+  // 2. Generate Event Banner Image on HTML5 Canvas
+  const generateAICanvasImage = () => {
+    setIsGeneratingCanvasImage(true);
+    
+    // Simulate processing delay
+    setTimeout(() => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setIsGeneratingCanvasImage(false);
+        return;
+      }
+      
+      // Beautiful gradient background
+      const grad = ctx.createLinearGradient(0, 0, 800, 600);
+      grad.addColorStop(0, '#312e81'); // indigo-900
+      grad.addColorStop(0.5, '#4f46e5'); // indigo-600
+      grad.addColorStop(1, '#db2777'); // pink-600
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 800, 600);
+      
+      // Geometric background decorations
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.beginPath();
+      ctx.arc(100, 100, 220, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(720, 480, 280, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Card Container
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.rect(40, 40, 720, 520);
+      ctx.fill();
+      
+      // Header Accent Line
+      ctx.fillStyle = '#4f46e5';
+      ctx.fillRect(40, 40, 720, 16);
+      
+      // Event Title
+      ctx.fillStyle = '#1e1b4b';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText('HỘI NGHỊ KHOA HỌC THẨM MỸ QUỐC TẾ', 80, 100);
+      
+      // Main branding
+      ctx.fillStyle = '#4f46e5';
+      ctx.font = '900 48px sans-serif';
+      ctx.fillText('VSAPS & PARS 2026', 80, 165);
+      
+      // Subtitle
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('ẤN BẢN ĐẶC BIỆT • MASTERCLASS & GALA DINNER', 80, 210);
+      
+      // Divider
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(80, 240);
+      ctx.lineTo(720, 240);
+      ctx.stroke();
+      
+      // Render text content wrapped
+      ctx.fillStyle = '#334155';
+      ctx.font = '20px sans-serif';
+      const textToDraw = socialPostText || 'Kính mời quý đồng nghiệp và đối tác đăng ký tham gia chuỗi sự kiện đặc biệt, cập nhật công nghệ da liễu thẩm mỹ hiện đại nhất tại PARS 2026.';
+      let y = 290;
+      const words = textToDraw.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        let testLine = line + words[n] + ' ';
+        let metrics = ctx.measureText(testLine);
+        if (metrics.width > 600 && n > 0) {
+          ctx.fillText(line, 80, y);
+          line = words[n] + ' ';
+          y += 36;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, 80, y);
+      
+      // Bottom banner box
+      ctx.fillStyle = '#db2777';
+      ctx.beginPath();
+      ctx.rect(80, 470, 260, 50);
+      ctx.fill();
+      
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('ĐĂNG KÝ NGAY HÔM NAY', 105, 501);
+      
+      // QR Code Box Placeholder
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(620, 430, 90, 90);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.strokeRect(620, 430, 90, 90);
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('PARS 2026', 635, 475);
+      ctx.fillText('SCAN TO JOIN', 627, 495);
+      
+      setSocialPostImageUrl(canvas.toDataURL('image/png'));
+      setIsGeneratingCanvasImage(false);
+    }, 1500);
+  };
+
+  // 3. Simulated bulk sending queue
+  const executeBulkPosting = async () => {
+    if (selectedGroupIds.length === 0) {
+      alert('Vui lòng chọn ít nhất một trang hoặc nhóm để đăng bài.');
+      return;
+    }
+    if (!socialPostText.trim()) {
+      alert('Vui lòng soạn nội dung bài đăng.');
+      return;
+    }
+    
+    setBulkSocialPostingStatus('posting');
+    setBulkSocialPostingProgress(0);
+    setBulkSocialPostingIndex(0);
+    
+    const initialLogs = [`[${new Date().toLocaleTimeString()}] 🚀 Bắt đầu chiến dịch đăng bài hàng loạt lên ${selectedGroupIds.length} kênh.`];
+    setBulkSocialLogs(initialLogs);
+    
+    // Process queue with timeout delay
+    for (let i = 0; i < selectedGroupIds.length; i++) {
+      setBulkSocialPostingIndex(i);
+      const groupId = selectedGroupIds[i];
+      const group = foundGroups.find(g => g.id === groupId);
+      if (!group) continue;
+      
+      // Append sending log
+      const logMsgStart = `[${new Date().toLocaleTimeString()}] 📤 Đang đăng bài viết lên ${group.type === 'page' ? 'Trang' : 'Nhóm'} '${group.name}' (${group.platform.toUpperCase()})...`;
+      setBulkSocialLogs(prev => [...prev, logMsgStart]);
+      
+      // Wait 1.5 seconds delay to simulate API post call
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Simulate success/fail (90% success, 10% fail for realism)
+      const isSuccess = Math.random() > 0.1;
+      let logMsgEnd = '';
+      if (isSuccess) {
+        logMsgEnd = `[${new Date().toLocaleTimeString()}] ✅ Đăng bài THÀNH CÔNG! Link bài viết: https://${group.platform}.com/${group.type}s/${group.id}/post/129481`;
+        
+        // Update database with custom post if relevant
+        const newPost: MarketingPost = {
+          id: `social_post_${Date.now()}_${i}`,
+          title: `Đăng bài nhóm: ${group.name}`,
+          content: socialPostText,
+          mediaUrl: socialPostImageUrl || undefined,
+          platforms: [group.platform],
+          type: 'news_feed',
+          status: 'published',
+          scheduledAt: new Date().toISOString(),
+          metrics: {
+            reach: Math.floor(group.members * 0.15),
+            likes: Math.floor(group.members * 0.02),
+            comments: Math.floor(group.members * 0.003),
+            shares: Math.floor(group.members * 0.001)
+          },
+          createdAt: new Date().toISOString()
+        };
+        // Add to global stores
+        store.saveMarketingPost(newPost);
+      } else {
+        logMsgEnd = `[${new Date().toLocaleTimeString()}] ❌ Đăng bài THẤT BẠI. Lỗi: Token hết hạn hoặc không đủ quyền quản trị đăng bài.`;
+      }
+      
+      setBulkSocialLogs(prev => [...prev, logMsgEnd]);
+      const nextProgress = Math.round(((i + 1) / selectedGroupIds.length) * 100);
+      setBulkSocialPostingProgress(nextProgress);
+    }
+    
+    setBulkSocialPostingStatus('completed');
+    setBulkSocialLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] 🏁 Hoàn thành tiến trình đăng bài hàng loạt!`]);
+    // Refresh global marketing posts list
+    setPosts(store.getMarketingPosts());
+  };
+
   return (
     <div className="space-y-6">
       {/* Toast Notification */}
@@ -1179,6 +1415,14 @@ export default function EventMarketing({ role }: EventMarketingProps) {
           }`}
         >
           Kênh liên kết ({(Object.values(channelsConfig) as any[]).filter(c => c.isConfigured).length})
+        </button>
+        <button
+          onClick={() => setActiveTab('social_group_bulk')}
+          className={`pb-3 text-xs font-bold transition-all border-b-2 bg-transparent cursor-pointer flex items-center gap-1.5 ${
+            activeTab === 'social_group_bulk' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-450 hover:text-slate-700'
+          }`}
+        >
+          <Share2 className="w-3.5 h-3.5" /> Đăng nhóm hàng loạt
         </button>
         <button
           onClick={() => setActiveTab('guide')}
@@ -3614,6 +3858,270 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                   <ExternalLink className="w-2.5 h-2.5 ml-auto shrink-0 text-slate-400" />
                 </a>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {activeTab === 'social_group_bulk' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Main Grid: Left is editor/AI image creator, Right is group list & progress logs */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Column 1: Config, Content & AI Canvas */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                  <FileText className="w-5 h-5 text-indigo-600" />
+                  <span className="text-xs font-black text-slate-800 uppercase tracking-wider block font-extrabold">
+                    Nội Dung Bài Đăng
+                  </span>
+                </div>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-450 uppercase block mb-1">Văn bản bài viết</label>
+                    <textarea
+                      rows={6}
+                      value={socialPostText}
+                      onChange={(e) => setSocialPostText(e.target.value)}
+                      placeholder="Nhập nội dung bài đăng chuẩn bị gửi đến các hội nhóm..."
+                      className="w-full p-3 border border-slate-200 rounded-xl text-xs font-medium focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-700 leading-relaxed"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold text-slate-450 uppercase block">Ảnh đính kèm</label>
+                    
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={generateAICanvasImage}
+                        disabled={isGeneratingCanvasImage}
+                        className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-100 font-bold text-xs cursor-pointer transition-all flex items-center justify-center gap-1.5 disabled:opacity-50 animate-all duration-200"
+                      >
+                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        {isGeneratingCanvasImage ? 'Đang thiết kế...' : 'Tạo Ảnh Bằng AI'}
+                      </button>
+                      
+                      <label className="flex-1 py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-bold text-xs cursor-pointer transition-all flex items-center justify-center gap-1.5 text-slate-700 text-center animate-all duration-200">
+                        <Upload className="w-4 h-4 text-slate-500" />
+                        Tải ảnh từ máy
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setSocialPostImageUrl(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    
+                    {socialPostImageUrl ? (
+                      <div className="relative border border-slate-200 rounded-xl overflow-hidden mt-2 group bg-slate-50">
+                        <img 
+                          src={socialPostImageUrl} 
+                          alt="Banner Preview" 
+                          className="w-full h-auto max-h-48 object-contain mx-auto"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setSocialPostImageUrl('')}
+                          className="absolute top-2 right-2 p-1 bg-slate-900/60 hover:bg-slate-900 rounded-full text-white cursor-pointer border-none"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="border border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-400 text-[10.5px] font-medium bg-slate-50/50">
+                        Chưa có ảnh nào được đính kèm. Nhấp nút trên để tự tạo ảnh Marketing.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Column 2: Search, Groups List & Target channels */}
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                
+                {/* Search Bar */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+                  <div>
+                    <h2 className="text-xs font-black text-slate-800 uppercase tracking-wider block font-extrabold">Tìm kiếm trang & nhóm bài đăng</h2>
+                    <p className="text-[10px] text-slate-450 mt-0.5">Tìm kiếm hội nhóm có sẵn trên Facebook & Zalo theo từ khóa</p>
+                  </div>
+                  
+                  <div className="flex gap-2 shrink-0">
+                    <input
+                      type="text"
+                      placeholder="Nhập từ khóa (ví dụ: spa, thẩm mỹ)..."
+                      value={socialSearchText}
+                      onChange={(e) => setSocialSearchText(e.target.value)}
+                      className="px-3 py-1.5 w-60 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-1 focus:ring-indigo-500 focus:outline-none text-slate-700"
+                    />
+                    <button
+                      onClick={() => handleSearchGroups(socialSearchText)}
+                      disabled={isSearchingGroups}
+                      className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer border-none shadow transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    >
+                      {isSearchingGroups ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <TrendingUp className="w-3.5 h-3.5" />}
+                      Tìm kiếm
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Search Results Table */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[11px] text-slate-500 font-bold">
+                    <span>Kết quả tìm được: {foundGroups.length} nhóm/trang</span>
+                    {foundGroups.length > 0 && (
+                      <span>Đã chọn: {selectedGroupIds.length} / {foundGroups.length}</span>
+                    )}
+                  </div>
+                  
+                  {foundGroups.length > 0 ? (
+                    <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                      <table className="w-full border-collapse text-left text-xs">
+                        <thead>
+                          <tr className="bg-slate-50 border-b border-slate-200 font-bold uppercase tracking-wider text-slate-500 text-[9.5px]">
+                            <th className="px-4 py-2.5 text-center w-10">
+                              <input
+                                type="checkbox"
+                                checked={foundGroups.length > 0 && selectedGroupIds.length === foundGroups.length}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedGroupIds(foundGroups.map(g => g.id));
+                                  } else {
+                                    setSelectedGroupIds([]);
+                                  }
+                                }}
+                                className="w-3.5 h-3.5 text-indigo-600 border-slate-300 rounded cursor-pointer"
+                              />
+                            </th>
+                            <th className="px-4 py-2.5">Tên trang/nhóm</th>
+                            <th className="px-4 py-2.5">Phân loại</th>
+                            <th className="px-4 py-2.5">Kênh</th>
+                            <th className="px-4 py-2.5 text-right">Quy mô thành viên</th>
+                            <th className="px-4 py-2.5 text-center">Trạng thái</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                          {foundGroups.map((g, idx) => (
+                            <tr 
+                              key={g.id} 
+                              className={`hover:bg-slate-50/50 ${selectedGroupIds.includes(g.id) ? 'bg-indigo-50/20' : ''}`}
+                            >
+                              <td className="px-4 py-3 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedGroupIds.includes(g.id)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setSelectedGroupIds(prev => [...prev, g.id]);
+                                    } else {
+                                      setSelectedGroupIds(prev => prev.filter(id => id !== g.id));
+                                    }
+                                  }}
+                                  className="w-3.5 h-3.5 text-indigo-600 border-slate-300 rounded cursor-pointer"
+                                />
+                              </td>
+                              <td className="px-4 py-3 font-bold text-slate-800">{g.name}</td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                  g.type === 'page' ? 'bg-indigo-50 text-indigo-700' : 'bg-slate-100 text-slate-600'
+                                }`}>
+                                  {g.type === 'page' ? 'Trang (Page)' : 'Hội nhóm (Group)'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1 font-bold text-[10px] ${
+                                  g.platform === 'facebook' ? 'text-[#1877F2]' : 'text-sky-600'
+                                }`}>
+                                  {g.platform === 'facebook' ? '🔵 Facebook' : '🟦 Zalo OA'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-right font-mono text-slate-600">{g.members.toLocaleString()}</td>
+                              <td className="px-4 py-3 text-center">
+                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[9px] ${
+                                  g.joined ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                                }`}>
+                                  {g.joined ? 'Đã tham gia' : 'Chưa tham gia'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="border border-slate-200 rounded-xl p-10 text-center text-slate-400 text-xs font-semibold bg-slate-50/50">
+                      💡 Nhập từ khóa (ví dụ: "spa", "thẩm mỹ") ở khung trên rồi bấm "Tìm kiếm" để nạp danh sách hội nhóm mục tiêu.
+                    </div>
+                  )}
+                </div>
+                
+                {/* Console actions & Logs */}
+                {foundGroups.length > 0 && (
+                  <div className="border-t border-slate-100 pt-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={executeBulkPosting}
+                          disabled={bulkSocialPostingStatus === 'posting' || selectedGroupIds.length === 0}
+                          className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer border-none shadow transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <Send className="w-4 h-4" />
+                          Đăng Bài Hàng Loạt ({selectedGroupIds.length})
+                        </button>
+                      </div>
+                      
+                      {bulkSocialPostingStatus === 'posting' && (
+                        <span className="text-xs text-slate-500 font-bold">
+                          Tiến trình: {bulkSocialPostingProgress}% ({bulkSocialPostingIndex + 1} / {selectedGroupIds.length})
+                        </span>
+                      )}
+                    </div>
+                    
+                    {/* Progress Bar */}
+                    {bulkSocialPostingStatus !== 'idle' && (
+                      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-200">
+                        <div 
+                          className="h-full bg-indigo-600 transition-all duration-300"
+                          style={{ width: `${bulkSocialPostingProgress}%` }}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Logs console */}
+                    {bulkSocialLogs.length > 0 && (
+                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-900 space-y-2">
+                        <div className="flex items-center justify-between border-b border-slate-900 pb-2">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider block font-bold">
+                            Nhật ký truyền phát bài đăng (Live logs)
+                          </span>
+                          <span className="text-[9px] text-emerald-400 animate-pulse font-bold">LIVE FEED</span>
+                        </div>
+                        <div className="max-h-40 overflow-y-auto font-mono text-[10px] text-emerald-400 space-y-1.5 leading-relaxed">
+                          {bulkSocialLogs.map((log, idx) => (
+                            <div key={idx} className={log.includes('❌') ? 'text-rose-400' : log.includes('✅') ? 'text-emerald-400' : 'text-slate-350'}>
+                              {log}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
