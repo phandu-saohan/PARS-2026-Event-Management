@@ -10,6 +10,33 @@ import * as XLSX from 'xlsx';
 import { store, DEFAULT_CME_TEMPLATE_CONFIG } from '../dataStore';
 import { Attendee, Role } from '../types';
 
+const parseCustomFieldsFromNotes = (notes: string | undefined): { label: string; value: string }[] | null => {
+  if (!notes || !notes.includes('[Trường tùy chỉnh]')) return null;
+  const parts = notes.split('[Trường tùy chỉnh]');
+  if (parts.length < 2) return null;
+  const lines = parts[1].split('\n').map(l => l.trim()).filter(Boolean);
+  const fields: { label: string; value: string }[] = [];
+  lines.forEach(line => {
+    if (line.startsWith('- ')) {
+      const content = line.substring(2);
+      const colonIdx = content.indexOf(':');
+      if (colonIdx >= 0) {
+        const label = content.substring(0, colonIdx).trim();
+        const value = content.substring(colonIdx + 1).trim();
+        fields.push({ label, value });
+      }
+    }
+  });
+  return fields;
+};
+
+const getRemainingNotes = (notes: string | undefined): string => {
+  if (!notes) return '';
+  if (!notes.includes('[Trường tùy chỉnh]')) return notes;
+  const parts = notes.split('[Trường tùy chỉnh]');
+  return parts[0].trim();
+};
+
 interface AttendeeManagementProps {
   role: Role;
 }
@@ -2520,13 +2547,36 @@ Ban Thư ký Hội nghị PARS 2026`
 
                       {/* Additional notes rendering */}
                       {viewDetailAttendee.notes && (
-                        <div className="p-3 bg-amber-50/30 rounded-xl border border-amber-250/20 text-[11px]">
-                          <span className="font-extrabold text-slate-600 block text-[10px] mb-1">📝 GHI CHÚ TỪ BAN TỔ CHỨC:</span>
-                          <div 
-                            className="text-slate-650 leading-relaxed max-h-16 overflow-y-auto"
-                            dangerouslySetInnerHTML={{ __html: viewDetailAttendee.notes }}
-                          />
-                        </div>
+                        (() => {
+                          const customFields = parseCustomFieldsFromNotes(viewDetailAttendee.notes);
+                          const remainingNotes = getRemainingNotes(viewDetailAttendee.notes);
+                          return (
+                            <div className="space-y-3">
+                              {customFields && customFields.length > 0 && (
+                                <div className="p-3 bg-teal-50/30 rounded-xl border border-teal-200/40 text-[11px] space-y-1.5">
+                                  <span className="font-extrabold text-teal-800 block text-[9.5px] uppercase tracking-wider">📋 Thông tin tùy chỉnh bổ sung:</span>
+                                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700">
+                                    {customFields.map((field, idx) => (
+                                      <div key={idx} className="flex justify-between border-b border-slate-100 pb-0.5">
+                                        <span className="text-slate-400 font-semibold">{field.label}:</span>
+                                        <strong className="text-slate-800 font-bold ml-2">{field.value}</strong>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                              {remainingNotes && (
+                                <div className="p-3 bg-amber-50/30 rounded-xl border border-amber-250/20 text-[11px]">
+                                  <span className="font-extrabold text-slate-600 block text-[10px] mb-1">📝 GHI CHÚ TỪ BAN TỔ CHỨC:</span>
+                                  <div 
+                                    className="text-slate-650 leading-relaxed max-h-16 overflow-y-auto"
+                                    dangerouslySetInnerHTML={{ __html: remainingNotes }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()
                       )}
 
                       {/* Proof of transfer image rendering */}

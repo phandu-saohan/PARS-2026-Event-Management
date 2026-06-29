@@ -6,10 +6,30 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit, Trash, Copy, ExternalLink, ClipboardList, CheckCircle, 
-  Settings, Check, X, Shield, Users, Coins, Image, HelpCircle, AlertCircle, FileText, QrCode, Upload, Code
+  Settings, Check, X, Shield, Users, Coins, Image, HelpCircle, AlertCircle, FileText, QrCode, Upload, Code,
+  ArrowUp, ArrowDown, Edit3
 } from 'lucide-react';
 import { store } from '../dataStore';
-import { CustomFormConfig, Role } from '../types';
+import { CustomFormConfig, Role, FormFieldConfig } from '../types';
+
+const DEFAULT_FIELDS_ORDER = [
+  'fullName',
+  'phone',
+  'email',
+  'organization',
+  'title',
+  'department',
+  'address',
+  'yearOfBirth',
+  'gender',
+  'cmeRequired',
+  'galaRequired',
+  'masterclassRequired',
+  'tourRequired',
+  'province',
+  'avatarUrl',
+  'doctorProofUrl',
+];
 
 interface CustomFormManagerProps {
   role: Role;
@@ -63,7 +83,13 @@ const DEFAULT_NEW_FORM = (): Omit<CustomFormConfig, 'id' | 'createdAt'> => ({
   headerLogoUrl: '',
   headerBannerUrl: '',
   footerText: '',
-  fields: { ...INITIAL_FIELDS },
+  fields: { 
+    ...INITIAL_FIELDS,
+    fieldsOrder: [...DEFAULT_FIELDS_ORDER],
+    customFieldsList: [],
+    customLabels: {},
+    customPlaceholders: {}
+  },
   requiredFields: { ...INITIAL_REQUIRED },
   packages: [
     { id: 'pkg-' + Date.now(), name: 'Vé tiêu chuẩn', fee: 0, isActive: true }
@@ -90,6 +116,19 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
   const [activeEmbedUrl, setActiveEmbedUrl] = useState<string | null>(null);
   const [activeEmbedTitle, setActiveEmbedTitle] = useState<string>('');
   const [copiedEmbed, setCopiedEmbed] = useState(false);
+
+  // Field Editor States
+  const [showFieldModal, setShowFieldModal] = useState(false);
+  const [isNewField, setIsNewField] = useState(false);
+  const [fieldForm, setFieldForm] = useState<FormFieldConfig>({
+    key: '',
+    label: '',
+    type: 'text',
+    required: false,
+    isEnabled: true,
+    options: []
+  });
+  const [fieldOptionsText, setFieldOptionsText] = useState('');
 
   // Packages state in editor
   const [pkgName, setPkgName] = useState('');
@@ -144,7 +183,14 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
         headerLogoUrl: form.headerLogoUrl || '',
         headerBannerUrl: form.headerBannerUrl || '',
         footerText: form.footerText || '',
-        fields: { ...INITIAL_FIELDS, ...form.fields },
+        fields: { 
+          ...INITIAL_FIELDS, 
+          ...form.fields,
+          fieldsOrder: form.fields?.fieldsOrder || [...DEFAULT_FIELDS_ORDER],
+          customFieldsList: form.fields?.customFieldsList || [],
+          customLabels: form.fields?.customLabels || {},
+          customPlaceholders: form.fields?.customPlaceholders || {},
+        },
         requiredFields: { ...INITIAL_REQUIRED, ...form.requiredFields },
         packages: form.packages || [],
         paymentQrEnabled: !!form.paymentQrEnabled,
@@ -187,6 +233,215 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
       ...prev,
       packages: prev.packages.filter(p => p.id !== pkgId)
     }));
+  };
+
+  // Field customization handlers
+  const handleMoveFieldUp = (index: number) => {
+    if (index === 0) return;
+    const newOrder = [...(formData.fields.fieldsOrder || [])];
+    const temp = newOrder[index];
+    newOrder[index] = newOrder[index - 1];
+    newOrder[index - 1] = temp;
+    setFormData(prev => ({
+      ...prev,
+      fields: {
+        ...prev.fields,
+        fieldsOrder: newOrder
+      }
+    }));
+  };
+
+  const handleMoveFieldDown = (index: number) => {
+    const order = formData.fields.fieldsOrder || [];
+    if (index === order.length - 1) return;
+    const newOrder = [...order];
+    const temp = newOrder[index];
+    newOrder[index] = newOrder[index + 1];
+    newOrder[index + 1] = temp;
+    setFormData(prev => ({
+      ...prev,
+      fields: {
+        ...prev.fields,
+        fieldsOrder: newOrder
+      }
+    }));
+  };
+
+  const handleAddNewField = () => {
+    setIsNewField(true);
+    setFieldForm({
+      key: 'c_' + Math.random().toString(36).substr(2, 9),
+      label: '',
+      type: 'text',
+      required: false,
+      isEnabled: true,
+      options: []
+    });
+    setFieldOptionsText('');
+    setShowFieldModal(true);
+  };
+
+  const handleEditField = (fieldKey: string) => {
+    const isCustom = !DEFAULT_FIELDS_ORDER.includes(fieldKey);
+    const customFields = formData.fields.customFieldsList || [];
+    const customLabels = formData.fields.customLabels || {};
+    const customPlaceholders = formData.fields.customPlaceholders || {};
+    
+    if (isCustom) {
+      const field = customFields.find(f => f.key === fieldKey);
+      if (field) {
+        setIsNewField(false);
+        setFieldForm({ ...field });
+        setFieldOptionsText((field.options || []).join(', '));
+        setShowFieldModal(true);
+      }
+    } else {
+      setIsNewField(false);
+      const defaultLabels: Record<string, string> = {
+        title: 'Danh xưng (BS, GS, TS...)',
+        fullName: 'Họ và Tên',
+        organization: 'Cơ quan công tác',
+        department: 'Khoa / Phòng ban',
+        phone: 'Số Điện Thoại',
+        email: 'Hòm thư (Email)',
+        address: 'Địa chỉ liên hệ',
+        yearOfBirth: 'Năm sinh',
+        gender: 'Giới tính',
+        cmeRequired: 'Đăng ký CME (Đào tạo liên tục)',
+        cmeIdentityNo: 'Số CCCD (Dành cho CME)',
+        galaRequired: 'Đăng ký vé Gala Dinner',
+        masterclassRequired: 'Đăng ký Masterclass',
+        tourRequired: 'Đăng ký Tour du lịch',
+        province: 'Tỉnh / Thành phố đại diện',
+        avatarUrl: 'Tải lên Ảnh đại biểu (Avatar)',
+        doctorProofUrl: 'Tải lên Bằng chứng Bác sĩ (Bằng cấp)',
+      };
+      
+      const defaultPlaceholders: Record<string, string> = {
+        fullName: 'Nhập họ và tên đầy đủ của bạn',
+        phone: 'Nhập số điện thoại di động chính chủ',
+        email: 'Ví dụ: bacsi@example.com',
+        organization: 'Nhập bệnh viện, đơn vị, phòng khám hoặc cơ quan',
+        department: 'Ví dụ: Khoa Thẩm mỹ Ngoại khoa',
+        address: 'Nhập địa chỉ nhà riêng hoặc cơ quan công tác chi tiết',
+        yearOfBirth: 'Ví dụ: 1985',
+      };
+
+      setFieldForm({
+        key: fieldKey,
+        label: customLabels[fieldKey] || defaultLabels[fieldKey] || fieldKey,
+        type: 'text',
+        required: fieldKey === 'organization' ? !!formData.requiredFields.organization : (['fullName', 'phone', 'email'].includes(fieldKey) ? true : !!(formData.fields as any)[fieldKey]),
+        isEnabled: !!(formData.fields as any)[fieldKey],
+        placeholder: customPlaceholders[fieldKey] || defaultPlaceholders[fieldKey] || '',
+        options: []
+      });
+      setFieldOptionsText('');
+      setShowFieldModal(true);
+    }
+  };
+
+  const handleSaveField = () => {
+    if (!fieldForm.label.trim()) {
+      alert('Vui lòng nhập nhãn hiển thị.');
+      return;
+    }
+    const isCustom = !DEFAULT_FIELDS_ORDER.includes(fieldForm.key);
+    
+    const parsedOptions = fieldOptionsText
+      ? fieldOptionsText.split(',').map(o => o.trim()).filter(Boolean)
+      : [];
+
+    const updatedField = {
+      ...fieldForm,
+      options: parsedOptions
+    };
+
+    if (isCustom) {
+      const customFields = [...(formData.fields.customFieldsList || [])];
+      if (isNewField) {
+        customFields.push(updatedField);
+        const newOrder = [...(formData.fields.fieldsOrder || []), updatedField.key];
+        setFormData(prev => ({
+          ...prev,
+          fields: {
+            ...prev.fields,
+            customFieldsList: customFields,
+            fieldsOrder: newOrder,
+            [updatedField.key]: true
+          }
+        }));
+      } else {
+        const idx = customFields.findIndex(f => f.key === updatedField.key);
+        if (idx >= 0) {
+          customFields[idx] = updatedField;
+        }
+        setFormData(prev => ({
+          ...prev,
+          fields: {
+            ...prev.fields,
+            customFieldsList: customFields
+          }
+        }));
+      }
+    } else {
+      const customLabels = { ...(formData.fields.customLabels || {}) };
+      const customPlaceholders = { ...(formData.fields.customPlaceholders || {}) };
+      
+      customLabels[fieldForm.key] = fieldForm.label;
+      if (fieldForm.placeholder) {
+        customPlaceholders[fieldForm.key] = fieldForm.placeholder;
+      } else {
+        delete customPlaceholders[fieldForm.key];
+      }
+
+      let updatedRequired = { ...formData.requiredFields };
+      if (fieldForm.key === 'organization') {
+        updatedRequired.organization = fieldForm.required;
+      }
+
+      setFormData(prev => ({
+        ...prev,
+        requiredFields: updatedRequired,
+        fields: {
+          ...prev.fields,
+          customLabels,
+          customPlaceholders
+        }
+      }));
+    }
+
+    setShowFieldModal(false);
+  };
+
+  const handleDeleteField = (fieldKey: string) => {
+    const isCustom = !DEFAULT_FIELDS_ORDER.includes(fieldKey);
+    if (isCustom) {
+      if (confirm('Bạn có chắc muốn xóa trường tùy chỉnh này?')) {
+        const customFields = (formData.fields.customFieldsList || []).filter(f => f.key !== fieldKey);
+        const newOrder = (formData.fields.fieldsOrder || []).filter(k => k !== fieldKey);
+        setFormData(prev => ({
+          ...prev,
+          fields: {
+            ...prev.fields,
+            customFieldsList: customFields,
+            fieldsOrder: newOrder
+          }
+        }));
+      }
+    } else {
+      if (['fullName', 'phone', 'email'].includes(fieldKey)) {
+        alert('Trường này là bắt buộc của hệ thống và không thể ẩn.');
+        return;
+      }
+      setFormData(prev => ({
+        ...prev,
+        fields: {
+          ...prev.fields,
+          [fieldKey]: false
+        }
+      }));
+    }
   };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -633,103 +888,153 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
 
               {/* TAB 2: Dynamic fields setup */}
               {editorTab === 'fields' && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-fade-in">
                   <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-850 flex gap-2.5 font-medium">
                     <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                     <div>
-                      <strong>Cấu hình hiển thị trường:</strong> Chọn những thông tin bạn muốn thu thập từ đại biểu của biểu mẫu này. Những trường chính (Họ tên, SĐT, Email) luôn là trường bắt buộc để đăng ký tài khoản đại biểu hội nghị.
+                      <strong>Cấu hình hiển thị trường:</strong> Chọn những thông tin bạn muốn thu thập từ đại biểu của biểu mẫu này. Những trường chính (Họ tên, SĐT, Email) luôn là trường bắt buộc để đăng ký tài khoản đại biểu hội nghị. Bạn có thể thêm các trường tùy chỉnh mới, đổi thứ tự hiển thị bằng các nút mũi tên, hoặc chỉnh sửa nhãn/placeholder/bắt buộc.
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 border border-slate-150 rounded-2xl p-4 bg-slate-50/30">
-                    <h5 className="col-span-full text-xs font-black uppercase text-slate-900 border-b border-slate-100 pb-2 mb-2 flex items-center gap-1">
-                      <Settings className="w-4 h-4 text-teal-655" />
-                      Trường hiển thị & Bắt buộc
-                    </h5>
+                  <div className="flex justify-between items-center pb-2 border-b border-slate-100 pt-2">
+                    <span className="text-xs font-bold text-slate-800">Danh sách trường hiển thị (Xếp theo thứ tự hiển thị):</span>
+                    <button
+                      type="button"
+                      onClick={handleAddNewField}
+                      className="px-3 py-1.5 text-xs bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl flex items-center gap-1 cursor-pointer transition-all"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Thêm trường tùy chọn
+                    </button>
+                  </div>
 
-                    {/* Standard Fields always required */}
-                    <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-800">Họ và Tên</span>
-                        <span className="text-[10px] text-teal-600 font-bold uppercase">Bắt buộc hệ thống</span>
-                      </div>
-                      <Check className="w-5 h-5 text-teal-650" />
-                    </div>
+                  <div className="space-y-2.5 max-h-[50vh] overflow-y-auto pr-1">
+                    {(formData.fields.fieldsOrder || []).map((fieldKey, idx) => {
+                      const isCustom = !DEFAULT_FIELDS_ORDER.includes(fieldKey);
+                      const customFields = formData.fields.customFieldsList || [];
+                      const customLabels = formData.fields.customLabels || {};
+                      
+                      let labelText = '';
+                      let isEnabled = false;
+                      let isRequired = false;
+                      let fieldType = '';
 
-                    <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-800">Số Điện Thoại</span>
-                        <span className="text-[10px] text-teal-600 font-bold uppercase">Bắt buộc hệ thống</span>
-                      </div>
-                      <Check className="w-5 h-5 text-teal-655" />
-                    </div>
+                      if (isCustom) {
+                        const fieldDef = customFields.find(f => f.key === fieldKey);
+                        if (!fieldDef) return null;
+                        labelText = fieldDef.label;
+                        isEnabled = fieldDef.isEnabled;
+                        isRequired = fieldDef.required;
+                        fieldType = `Tùy chọn: ${fieldDef.type}`;
+                      } else {
+                        const defaultLabels: Record<string, string> = {
+                          title: 'Danh xưng (BS, GS, TS...)',
+                          fullName: 'Họ và Tên',
+                          organization: 'Cơ quan công tác',
+                          department: 'Khoa / Phòng ban',
+                          phone: 'Số Điện Thoại',
+                          email: 'Hòm thư (Email)',
+                          address: 'Địa chỉ liên hệ',
+                          yearOfBirth: 'Năm sinh',
+                          gender: 'Giới tính',
+                          cmeRequired: 'Đăng ký CME (Đào tạo liên tục)',
+                          galaRequired: 'Đăng ký vé Gala Dinner',
+                          masterclassRequired: 'Đăng ký Masterclass',
+                          tourRequired: 'Đăng ký Tour du lịch',
+                          province: 'Tỉnh / Thành phố đại diện',
+                          avatarUrl: 'Tải lên Ảnh đại biểu (Avatar)',
+                          doctorProofUrl: 'Tải lên Bằng chứng Bác sĩ (Bằng cấp)',
+                        };
+                        labelText = customLabels[fieldKey] || defaultLabels[fieldKey] || fieldKey;
+                        isEnabled = ['fullName', 'phone', 'email'].includes(fieldKey) ? true : !!(formData.fields as any)[fieldKey];
+                        isRequired = fieldKey === 'organization' ? !!formData.requiredFields.organization : ['fullName', 'phone', 'email'].includes(fieldKey);
+                        fieldType = 'Hệ thống';
+                      }
 
-                    <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-800">Hòm thư (Email)</span>
-                        <span className="text-[10px] text-teal-600 font-bold uppercase">Bắt buộc hệ thống</span>
-                      </div>
-                      <Check className="w-5 h-5 text-teal-655" />
-                    </div>
-
-                    {/* Org (display is always true but required is toggleable) */}
-                    <div className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl">
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-slate-800">Cơ quan công tác</span>
-                        <span className="text-[9px] text-slate-400 font-semibold">Tùy chỉnh bắt buộc</span>
-                      </div>
-                      <label className="inline-flex items-center gap-1 cursor-pointer text-[10px] font-bold">
-                        <input
-                          type="checkbox"
-                          checked={formData.requiredFields.organization}
-                          onChange={(e) => setFormData({
-                            ...formData,
-                            requiredFields: { ...formData.requiredFields, organization: e.target.checked }
-                          })}
-                          className="w-3.5 h-3.5 text-teal-600 rounded cursor-pointer"
-                        />
-                        <span>Bắt buộc</span>
-                      </label>
-                    </div>
-
-                    {/* Dynamic Fields Display Toggles */}
-                    {Object.keys(formData.fields).map((fieldKey) => {
-                      // Skip title, fullName, phone, email, organization as they are customized above
-                      if (['fullName', 'phone', 'email', 'organization'].includes(fieldKey)) return null;
-
-                      const labels: Record<string, string> = {
-                        title: 'Danh xưng (BS, GS, TS...)',
-                        department: 'Khoa / Phòng ban',
-                        address: 'Địa chỉ liên hệ',
-                        yearOfBirth: 'Năm sinh',
-                        gender: 'Giới tính',
-                        cmeRequired: 'Đăng ký CME (Đào tạo liên tục)',
-                        cmeIdentityNo: 'Số CCCD (Dành cho CME)',
-                        galaRequired: 'Đăng ký vé Gala Dinner',
-                        masterclassRequired: 'Đăng ký Masterclass',
-                        tourRequired: 'Đăng ký Tour du lịch',
-                        province: 'Tỉnh / Thành phố đại diện',
-                        avatarUrl: 'Tải lên Ảnh đại biểu (Avatar)',
-                        doctorProofUrl: 'Tải lên Bằng chứng Bác sĩ (Bằng cấp)',
-                      };
-
-                      const labelText = labels[fieldKey] || fieldKey;
-                      const isEnabled = (formData.fields as any)[fieldKey];
+                      const isSystemRequired = ['fullName', 'phone', 'email'].includes(fieldKey);
 
                       return (
-                        <div key={fieldKey} className="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl">
-                          <span className="text-xs font-bold text-slate-800 leading-tight">{labelText}</span>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={isEnabled}
-                              onChange={(e) => setFormData({
-                                ...formData,
-                                fields: { ...formData.fields, [fieldKey]: e.target.checked }
-                              })}
-                              className="w-4 h-4 text-teal-650 rounded cursor-pointer"
-                            />
-                          </label>
+                        <div 
+                          key={fieldKey} 
+                          className={`flex items-center justify-between p-3 rounded-2xl border text-xs transition-all ${
+                            isEnabled ? 'bg-white border-slate-200 shadow-xs' : 'bg-slate-50 border-slate-150 text-slate-400'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            {/* Order Controls */}
+                            <div className="flex flex-col gap-0.5">
+                              <button
+                                type="button"
+                                disabled={idx === 0}
+                                onClick={() => handleMoveFieldUp(idx)}
+                                className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30 cursor-pointer border-none bg-transparent"
+                              >
+                                <ArrowUp className="w-3.5 h-3.5 text-slate-500" />
+                              </button>
+                              <button
+                                type="button"
+                                disabled={idx === (formData.fields.fieldsOrder || []).length - 1}
+                                onClick={() => handleMoveFieldDown(idx)}
+                                className="p-0.5 hover:bg-slate-100 rounded disabled:opacity-30 cursor-pointer border-none bg-transparent"
+                              >
+                                <ArrowDown className="w-3.5 h-3.5 text-slate-500" />
+                              </button>
+                            </div>
+
+                            {/* Field Information */}
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-slate-850">{labelText}</span>
+                                {isRequired && (
+                                  <span className="text-[9px] bg-rose-50 text-rose-600 font-bold px-1.5 py-0.2 rounded border border-rose-100">Bắt buộc</span>
+                                )}
+                              </div>
+                              <span className="text-[9.5px] text-slate-455 font-bold uppercase">{fieldType}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {/* Enable Toggle (Skip system required ones) */}
+                            {!isSystemRequired && !isCustom && (
+                              <label className="inline-flex items-center gap-1 mr-2 cursor-pointer font-bold">
+                                <input
+                                  type="checkbox"
+                                  checked={isEnabled}
+                                  onChange={(e) => setFormData(prev => ({
+                                    ...prev,
+                                    fields: {
+                                      ...prev.fields,
+                                      [fieldKey]: e.target.checked
+                                    }
+                                  }))}
+                                  className="w-4 h-4 text-teal-600 rounded cursor-pointer"
+                                />
+                                <span>Hiển thị</span>
+                              </label>
+                            )}
+
+                            {/* Edit Label/Placeholder Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleEditField(fieldKey)}
+                              className="p-1.5 hover:bg-slate-100 text-slate-500 hover:text-indigo-650 rounded-lg cursor-pointer border-none bg-transparent"
+                              title="Chỉnh sửa nhãn / thuộc tính / gợi ý"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+
+                            {/* Delete/Remove button */}
+                            {!isSystemRequired && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteField(fieldKey)}
+                                className="p-1.5 hover:bg-slate-100 text-slate-550 hover:text-rose-650 rounded-lg cursor-pointer border-none bg-transparent"
+                                title={isCustom ? "Xóa trường tùy chỉnh này" : "Ẩn trường này"}
+                              >
+                                <Trash className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -1004,6 +1309,124 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
                     <span>Sao chép mã nhúng</span>
                   </>
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Field Customization Editor Modal */}
+      {showFieldModal && (
+        <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden border border-slate-200 shadow-2xl animate-fade-in flex flex-col">
+            {/* Modal Header */}
+            <div className="bg-slate-900 p-4 text-white flex items-center justify-between">
+              <h4 className="font-bold text-xs uppercase tracking-wider">
+                {isNewField ? 'Thêm Trường Tùy Chỉnh Mới' : 'Hiệu Chỉnh Thuộc Tính Trường'}
+              </h4>
+              <button
+                type="button"
+                onClick={() => setShowFieldModal(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-full cursor-pointer hover:bg-slate-800 transition-all border-none bg-transparent"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 space-y-4 text-xs font-semibold text-slate-700">
+              {/* Field Label */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 block uppercase">Nhãn hiển thị (Label)*</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ví dụ: Size áo đại biểu, Sở thích..."
+                  value={fieldForm.label}
+                  onChange={(e) => setFieldForm({ ...fieldForm, label: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-teal-500 bg-slate-50/50"
+                />
+              </div>
+
+              {/* Field Placeholder */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 block uppercase">Gợi ý nhập liệu (Placeholder)</label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: Chọn size áo của bạn, Nhập sở thích của bạn..."
+                  value={fieldForm.placeholder || ''}
+                  onChange={(e) => setFieldForm({ ...fieldForm, placeholder: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-teal-500 bg-slate-50/50"
+                />
+              </div>
+
+              {/* Field Type (Only for new custom fields) */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-slate-500 block uppercase">Loại dữ liệu (Field Type)</label>
+                <select
+                  disabled={!isNewField && DEFAULT_FIELDS_ORDER.includes(fieldForm.key)}
+                  value={fieldForm.type}
+                  onChange={(e) => setFieldForm({ ...fieldForm, type: e.target.value as any })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-850 bg-slate-50/50 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="text">Văn bản (Text)</option>
+                  <option value="number">Số (Number)</option>
+                  <option value="textarea">Văn bản dài (Textarea)</option>
+                  <option value="select">Hộp lựa chọn (Dropdown/Select)</option>
+                  <option value="checkbox">Nhiều lựa chọn (Checkbox)</option>
+                  <option value="radio">Chọn một duy nhất (Radio)</option>
+                  <option value="file">Tải tệp tin lên (File)</option>
+                </select>
+              </div>
+
+              {/* Field Options (For select/radio/checkbox) */}
+              {['select', 'checkbox', 'radio'].includes(fieldForm.type) && (
+                <div className="space-y-1 animate-fade-in">
+                  <label className="text-[10px] font-black text-slate-500 block uppercase">Các tùy chọn (Phân cách bằng dấu phẩy)*</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Ví dụ: Lựa chọn 1, Lựa chọn 2, Lựa chọn 3"
+                    value={fieldOptionsText}
+                    onChange={(e) => setFieldOptionsText(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-teal-500 bg-slate-50/50"
+                  />
+                  <p className="text-[9px] text-slate-450 italic leading-none mt-0.5">Nhập các lựa chọn, cách nhau bởi dấu phẩy (,)</p>
+                </div>
+              )}
+
+              {/* Required Toggle */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    disabled={['fullName', 'phone', 'email'].includes(fieldForm.key)}
+                    checked={fieldForm.required}
+                    onChange={(e) => setFieldForm({ ...fieldForm, required: e.target.checked })}
+                    className="w-4 h-4 text-teal-650 rounded cursor-pointer accent-teal-600"
+                  />
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 block">Bắt buộc nhập</span>
+                    <span className="text-[9px] text-slate-400 font-semibold leading-none">Người dùng không thể bỏ trống</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-slate-100 flex justify-end gap-2 bg-slate-50">
+              <button
+                type="button"
+                onClick={() => setShowFieldModal(false)}
+                className="px-4 py-2 border border-slate-200 hover:bg-slate-150 text-slate-650 font-bold rounded-xl text-xs cursor-pointer bg-white"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveField}
+                className="px-4 py-2 bg-teal-650 hover:bg-teal-700 text-white font-bold rounded-xl text-xs cursor-pointer shadow-md"
+              >
+                Lưu cấu hình
               </button>
             </div>
           </div>

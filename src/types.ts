@@ -749,6 +749,17 @@ export interface SendingCampaign {
   createdAt: string;
 }
 
+export interface FormFieldConfig {
+  key: string;
+  label: string;
+  type: 'text' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea' | 'file';
+  placeholder?: string;
+  options?: string[]; // for select, checkbox, radio
+  required: boolean;
+  isEnabled: boolean;
+  isSystem?: boolean;
+}
+
 export interface CustomFormConfig {
   id: string;
   title: string;
@@ -775,6 +786,10 @@ export interface CustomFormConfig {
     province: boolean;
     avatarUrl: boolean;
     doctorProofUrl: boolean;
+    fieldsOrder?: string[];
+    customFieldsList?: FormFieldConfig[];
+    customLabels?: Record<string, string>;
+    customPlaceholders?: Record<string, string>;
   };
   requiredFields: {
     fullName: boolean;
@@ -797,4 +812,5 @@ export interface CustomFormConfig {
   createdAt: string;
   isActive: boolean;
 }
+
 
