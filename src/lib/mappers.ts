@@ -649,6 +649,8 @@ export function mapCampaignToDb(c: SendingCampaign): Record<string, any> {
     total_recipients: c.totalRecipients,
     success_count: c.successCount,
     failed_count: c.failedCount,
+    open_count: c.openCount || 0,
+    click_count: c.clickCount || 0,
     recipients: c.recipients || [],
     logs: c.logs || []
   };
@@ -666,6 +668,8 @@ export function mapDbToCampaign(row: any): SendingCampaign {
     totalRecipients: Number(row.total_recipients) || 0,
     successCount: Number(row.success_count) || 0,
     failedCount: Number(row.failed_count) || 0,
+    openCount: Number(row.open_count) || 0,
+    clickCount: Number(row.click_count) || 0,
     recipients: row.recipients || [],
     logs: row.logs || [],
     createdAt: row.created_at || new Date().toISOString()

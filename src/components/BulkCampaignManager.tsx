@@ -1,9 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Mail, Smartphone, Trash2, Plus, Check, X, Smartphone as PhoneIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Code, Palette, Upload, Play, Pause, Square, Users, CheckSquare, ChevronLeft, Search, History, BarChart3, Info, Sparkles, RefreshCw } from 'lucide-react';
+import { Mail, Smartphone, Trash2, Plus, Check, X, Smartphone as PhoneIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Code, Palette, Upload, Play, Pause, Square, Users, CheckSquare, ChevronLeft, Search, History, BarChart3, Info, Sparkles, RefreshCw, Image, Eye, MousePointerClick } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { store } from '../dataStore';
 import { isSupabaseConfigured } from '../lib/supabase';
 import { NotificationTemplate, SentNotificationLog, Contact, SendingCampaign, CampaignRecipient } from '../types';
+
+const rewriteEmailLinks = (htmlContent: string, campaignId: string, email: string) => {
+  const origin = window.location.origin;
+  const trackClickUrl = `${origin}/api/email/track-click?cId=${campaignId}&email=${encodeURIComponent(email)}&url=`;
+  
+  return htmlContent.replace(/href=(["'])(https?:\/\/[^\s"'<>]+)\1/gi, (match, quote, url) => {
+    if (url.includes('/api/email/track')) {
+      return match;
+    }
+    return `href=${quote}${trackClickUrl}${encodeURIComponent(url)}${quote}`;
+  });
+};
 
 export default function BulkCampaignManager() {
   const [campaigns, setCampaigns] = useState<SendingCampaign[]>(() => store.getCampaigns());
@@ -488,6 +500,13 @@ export default function BulkCampaignManager() {
               }
             });
 
+            // Rewrite links for click tracking
+            compiledBody = rewriteEmailLinks(compiledBody, currentCampaign.id, recipient.email);
+
+            // Add open tracking pixel
+            const openTrackingUrl = `${window.location.origin}/api/email/track-open?cId=${currentCampaign.id}&email=${encodeURIComponent(recipient.email)}`;
+            compiledBody += `<img src="${openTrackingUrl}" width="1" height="1" style="display:none;" />`;
+
             const res = await fetch('/api/email/send-resend', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -777,6 +796,7 @@ export default function BulkCampaignManager() {
                     <th className="px-5 py-3">Kênh</th>
                     <th className="px-5 py-3">Tiến độ</th>
                     <th className="px-5 py-3">Trạng thái</th>
+                    <th className="px-5 py-3">Lượt mở / Click</th>
                     <th className="px-5 py-3">Ngày tạo</th>
                     <th className="px-5 py-3 text-right">Thao tác</th>
                   </tr>
@@ -852,6 +872,22 @@ export default function BulkCampaignManager() {
                                c.status === 'sending' ? 'Đang gửi' :
                                c.status === 'paused' ? 'Tạm dừng' : 'Bản nháp'}
                             </span>
+                          </td>
+                          <td className="px-5 py-4">
+                            {c.channel === 'email' ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="text-teal-650 flex items-center gap-1 font-bold">
+                                  <Eye className="w-3.5 h-3.5 shrink-0" />
+                                  {c.openCount || 0} lượt mở
+                                </span>
+                                <span className="text-indigo-650 flex items-center gap-1 font-bold">
+                                  <MousePointerClick className="w-3.5 h-3.5 shrink-0" />
+                                  {c.clickCount || 0} lượt click
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 font-normal">-</span>
+                            )}
                           </td>
                           <td className="px-5 py-4 text-slate-500 font-bold">
                             {new Date(c.createdAt).toLocaleDateString('vi-VN')}
@@ -1357,6 +1393,54 @@ export default function BulkCampaignManager() {
 
                         <div className="w-px h-4 bg-slate-350 mx-1" />
 
+                        {/* Image insertion */}
+                        <div className="relative group flex items-center">
+                          <button
+                            type="button"
+                            className="p-1.5 hover:bg-slate-200 rounded text-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Chèn hình ảnh"
+                          >
+                            <Image className="w-3.5 h-3.5" />
+                          </button>
+                          <div className="absolute top-full left-0 mt-1 hidden group-hover:flex flex-col bg-white border border-slate-200 p-2 rounded-xl shadow-lg gap-1.5 z-30 min-w-[150px]">
+                            <button
+                              type="button"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                const url = prompt('Nhập địa chỉ hình ảnh (URL):', 'https://');
+                                if (url) handleBulkFormat('insertImage', url);
+                              }}
+                              className="w-full text-left px-2 py-1.5 hover:bg-slate-50 text-[11px] font-bold text-slate-750 border-none bg-transparent cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Link className="w-3.5 h-3.5 text-slate-400" />
+                              Nhập URL ảnh
+                            </button>
+                            <label className="w-full text-left px-2 py-1.5 hover:bg-slate-50 text-[11px] font-bold text-slate-750 cursor-pointer flex items-center gap-1.5">
+                              <Upload className="w-3.5 h-3.5 text-slate-400" />
+                              Tải ảnh từ máy
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    if (file.size > 5 * 1024 * 1024) {
+                                      alert('Dung lượng ảnh tối đa là 5MB.');
+                                      return;
+                                    }
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => {
+                                      handleBulkFormat('insertImage', reader.result as string);
+                                    };
+                                    reader.readAsDataURL(file);
+                                  }
+                                }}
+                              />
+                            </label>
+                          </div>
+                        </div>
+
                         <button
                           type="button"
                           onMouseDown={(e) => {
@@ -1702,6 +1786,7 @@ export default function BulkCampaignManager() {
                         <th className="px-4 py-2.5">Email / Số điện thoại</th>
                         <th className="px-4 py-2.5 text-center">Trạng thái</th>
                         <th className="px-4 py-2.5">Chi tiết/Lỗi</th>
+                        {activeCampaign && activeCampaign.channel === 'email' && <th className="px-4 py-2.5">Tracking</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
@@ -1733,6 +1818,39 @@ export default function BulkCampaignManager() {
                                 </span>
                               </td>
                               <td className="px-4 py-2 font-medium text-slate-500 max-w-xs truncate" title={item.error}>{item.error || '-'}</td>
+                              {activeCampaign && activeCampaign.channel === 'email' && (
+                                <td className="px-4 py-2">
+                                  <div className="flex gap-2">
+                                    {item.openedAt ? (
+                                      <span 
+                                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 font-bold text-[8px]"
+                                        title={`Mở lúc: ${new Date(item.openedAt).toLocaleString()}`}
+                                      >
+                                        <Eye className="w-2.5 h-2.5" />
+                                        Đã mở
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 text-[8px]">
+                                        Chưa mở
+                                      </span>
+                                    )}
+                                    
+                                    {item.clickedAt ? (
+                                      <span 
+                                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold text-[8px]"
+                                        title={`Click lúc: ${new Date(item.clickedAt).toLocaleString()}`}
+                                      >
+                                        <MousePointerClick className="w-2.5 h-2.5" />
+                                        Đã click
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-100 text-slate-400 text-[8px]">
+                                        Chưa click
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                              )}
                             </tr>
                           );
                         })}

@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Megaphone, Mail, Phone, Settings, Send, CheckCircle, Sparkles, AlertCircle, AlertTriangle, Info, FileText, ToggleLeft, ToggleRight, Trash2, Plus, Check, X, Bell, Radio, Wifi, Volume2, BellOff, Smartphone, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Type, Code, Eye, RefreshCw, Palette, Upload, Play, Pause, Square, Users, CheckSquare } from 'lucide-react';
+import { Megaphone, Mail, Phone, Settings, Send, CheckCircle, Sparkles, AlertCircle, AlertTriangle, Info, FileText, ToggleLeft, ToggleRight, Trash2, Plus, Check, X, Bell, Radio, Wifi, Volume2, BellOff, Smartphone, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List, ListOrdered, Link, Type, Code, Eye, RefreshCw, Palette, Upload, Play, Pause, Square, Users, CheckSquare, Image } from 'lucide-react';
 import { store } from '../dataStore';
 import { sendRealtimeNotification } from '../lib/realtime';
 import { NotificationTemplate, SentNotificationLog, Contact } from '../types';
@@ -1040,6 +1040,54 @@ export default function NotificationSystem({ defaultTab = 'templates', hideTabs 
                   </button>
 
                   <div className="w-px h-4 bg-slate-350 mx-1" />
+
+                  {/* Image insertion */}
+                  <div className="relative group flex items-center">
+                    <button
+                      type="button"
+                      className="p-1.5 hover:bg-slate-200 rounded text-slate-700 transition-colors flex items-center gap-1 cursor-pointer"
+                      title="Chèn hình ảnh"
+                    >
+                      <Image className="w-3.5 h-3.5" />
+                    </button>
+                    <div className="absolute top-full left-0 mt-1 hidden group-hover:flex flex-col bg-white border border-slate-200 p-2 rounded-xl shadow-lg gap-1.5 z-30 min-w-[150px]">
+                      <button
+                        type="button"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          const url = prompt('Nhập địa chỉ hình ảnh (URL):', 'https://');
+                          if (url) handleFormat('insertImage', url);
+                        }}
+                        className="w-full text-left px-2 py-1.5 hover:bg-slate-50 text-[11px] font-bold text-slate-750 border-none bg-transparent cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Link className="w-3.5 h-3.5 text-slate-400" />
+                        Nhập URL ảnh
+                      </button>
+                      <label className="w-full text-left px-2 py-1.5 hover:bg-slate-50 text-[11px] font-bold text-slate-750 cursor-pointer flex items-center gap-1.5">
+                        <Upload className="w-3.5 h-3.5 text-slate-400" />
+                        Tải ảnh từ máy
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              if (file.size > 5 * 1024 * 1024) {
+                                alert('Dung lượng ảnh tối đa là 5MB.');
+                                return;
+                              }
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                handleFormat('insertImage', reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                  </div>
 
                   {/* Link insertion */}
                   <button

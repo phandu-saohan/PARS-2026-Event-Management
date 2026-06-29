@@ -730,6 +730,8 @@ export interface CampaignRecipient {
   isPhoneValid: boolean;
   status: 'pending' | 'sending' | 'success' | 'failed';
   error: string;
+  openedAt?: string;
+  clickedAt?: string;
   [key: string]: any;
 }
 
@@ -744,6 +746,8 @@ export interface SendingCampaign {
   totalRecipients: number;
   successCount: number;
   failedCount: number;
+  openCount?: number;
+  clickCount?: number;
   recipients: CampaignRecipient[];
   logs: string[];
   createdAt: string;

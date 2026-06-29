@@ -196,22 +196,141 @@ async function handleTestConnection(req: VercelRequest, res: VercelResponse) {
 }
 
 // ==========================================
+// 4. Action: track-open (Email Open Pixel)
+// ==========================================
+async function handleTrackOpen(req: VercelRequest, res: VercelResponse) {
+  const cId = req.query.cId as string;
+  const email = req.query.email as string;
+
+  if (cId && email) {
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+        
+        // Fetch current campaign
+        const { data: campaign, error } = await supabase
+          .from('sending_campaigns')
+          .select('open_count, recipients')
+          .eq('id', cId)
+          .single();
+
+        if (!error && campaign) {
+          const recipients = campaign.recipients || [];
+          const updatedRecipients = recipients.map((r: any) => {
+            if (r.email && r.email.toLowerCase() === email.toLowerCase()) {
+              if (!r.openedAt) {
+                return { ...r, openedAt: new Date().toISOString() };
+              }
+            }
+            return r;
+          });
+
+          // Increment count and update recipients
+          await supabase
+            .from('sending_campaigns')
+            .update({
+              open_count: (campaign.open_count || 0) + 1,
+              recipients: updatedRecipients
+            })
+            .eq('id', cId);
+        }
+      } catch (dbErr) {
+        console.error('Error tracking email open:', dbErr);
+      }
+    }
+  }
+
+  // Always return a tiny 1x1 transparent GIF
+  const img = Buffer.from('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64');
+  res.writeHead(200, {
+    'Content-Type': 'image/gif',
+    'Content-Length': img.length,
+    'Cache-Control': 'no-store, no-cache, must-revalidate, private'
+  });
+  return res.end(img);
+}
+
+// ==========================================
+// 5. Action: track-click (Link Click Tracking)
+// ==========================================
+async function handleTrackClick(req: VercelRequest, res: VercelResponse) {
+  const cId = req.query.cId as string;
+  const email = req.query.email as string;
+  const url = req.query.url as string;
+
+  if (cId && email) {
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+    if (supabaseUrl && supabaseServiceKey) {
+      try {
+        const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+        // Fetch current campaign
+        const { data: campaign, error } = await supabase
+          .from('sending_campaigns')
+          .select('click_count, recipients')
+          .eq('id', cId)
+          .single();
+
+        if (!error && campaign) {
+          const recipients = campaign.recipients || [];
+          const updatedRecipients = recipients.map((r: any) => {
+            if (r.email && r.email.toLowerCase() === email.toLowerCase()) {
+              if (!r.clickedAt) {
+                return { ...r, clickedAt: new Date().toISOString() };
+              }
+            }
+            return r;
+          });
+
+          // Increment count and update recipients
+          await supabase
+            .from('sending_campaigns')
+            .update({
+              click_count: (campaign.click_count || 0) + 1,
+              recipients: updatedRecipients
+            })
+            .eq('id', cId);
+        }
+      } catch (dbErr) {
+        console.error('Error tracking email click:', dbErr);
+      }
+    }
+  }
+
+  // Redirect to destination URL
+  const destinationUrl = url || '/';
+  res.writeHead(302, { Location: destinationUrl });
+  return res.end();
+}
+
+// ==========================================
 // Main Handler
 // ==========================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
   }
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
   const action = req.query.action;
+
+  if (action === 'track-open' || action === 'track-click') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method not allowed for tracking' });
+    }
+  } else {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+  }
 
   if (action === 'send') {
     return handleSend(req, res);
@@ -219,6 +338,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleSendResend(req, res);
   } else if (action === 'test-connection') {
     return handleTestConnection(req, res);
+  } else if (action === 'track-open') {
+    return handleTrackOpen(req, res);
+  } else if (action === 'track-click') {
+    return handleTrackClick(req, res);
   } else {
     return res.status(400).json({ error: 'Invalid or missing action query parameter' });
   }
