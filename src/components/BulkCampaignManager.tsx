@@ -688,7 +688,7 @@ export default function BulkCampaignManager() {
           {/* Thống kê chiến dịch */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-650 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
                 <History className="w-6 h-6" />
               </div>
               <div>
@@ -779,7 +779,7 @@ export default function BulkCampaignManager() {
                     setSendingIndex(-1);
                     setBulkLogs([]);
                   }}
-                  className="px-4 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                 >
                   <Plus className="w-4 h-4" />
                   Tạo Chiến Dịch Mới
@@ -866,7 +866,7 @@ export default function BulkCampaignManager() {
                               c.status === 'completed' ? 'bg-emerald-50 text-emerald-700' :
                               c.status === 'sending' ? 'bg-indigo-100 text-indigo-800 animate-pulse' :
                               c.status === 'paused' ? 'bg-amber-50 text-amber-700' :
-                              'bg-slate-100 text-slate-655'
+                              'bg-slate-100 text-slate-600'
                             }`}>
                               {c.status === 'completed' ? 'Hoàn thành' :
                                c.status === 'sending' ? 'Đang gửi' :
@@ -876,11 +876,11 @@ export default function BulkCampaignManager() {
                           <td className="px-5 py-4">
                             {c.channel === 'email' ? (
                               <div className="flex flex-col gap-0.5">
-                                <span className="text-teal-650 flex items-center gap-1 font-bold">
+                                <span className="text-teal-600 flex items-center gap-1 font-bold">
                                   <Eye className="w-3.5 h-3.5 shrink-0" />
                                   {c.openCount || 0} lượt mở
                                 </span>
-                                <span className="text-indigo-650 flex items-center gap-1 font-bold">
+                                <span className="text-indigo-600 flex items-center gap-1 font-bold">
                                   <MousePointerClick className="w-3.5 h-3.5 shrink-0" />
                                   {c.clickCount || 0} lượt click
                                 </span>
@@ -1028,7 +1028,7 @@ export default function BulkCampaignManager() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       />
                       <div className="space-y-2">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-650 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                        <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
                           <Upload className="w-5 h-5" />
                         </div>
                         <div className="text-xs font-bold text-slate-700">
@@ -1111,7 +1111,7 @@ export default function BulkCampaignManager() {
 
                       {selectedGroup && excelData.length > 0 && (
                         <div className="bg-indigo-50 text-indigo-800 p-3.5 rounded-xl text-xs font-medium border border-indigo-100 flex items-center gap-2">
-                          <Users className="w-4 h-4 text-indigo-650 shrink-0" />
+                          <Users className="w-4 h-4 text-indigo-600 shrink-0" />
                           <div>
                             Đã nạp <strong>{excelData.length}</strong> liên hệ từ nhóm <strong>{selectedGroup}</strong>.
                           </div>
@@ -1524,19 +1524,19 @@ export default function BulkCampaignManager() {
                     setExcelData([]);
                     setExcelFileName('');
                   }}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer border-none transition-all"
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-indigo-50 hover:text-indigo-600 text-slate-750 font-bold text-xs cursor-pointer border-none transition-all"
                 >
                   Hủy Bỏ
                 </button>
                 <button
                   onClick={saveDraftCampaign}
-                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-indigo-50 hover:text-indigo-650 text-slate-750 font-bold text-xs cursor-pointer border-none transition-all"
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-indigo-50 hover:text-indigo-600 text-slate-750 font-bold text-xs cursor-pointer border-none transition-all"
                 >
                   💾 Lưu Bản Nháp
                 </button>
                 <button
                   onClick={() => startBulkSending(undefined)}
-                  className="px-5 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-xs cursor-pointer border-none shadow transition-all flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer border-none shadow transition-all flex items-center gap-1.5"
                 >
                   <Play className="w-3.5 h-3.5" />
                   Tạo &amp; Bắt Đầu Gửi
@@ -1602,7 +1602,7 @@ export default function BulkCampaignManager() {
           {/* Thanh tiến độ */}
           <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
             <div
-              className={`h-full transition-all duration-300 ${activeCampaign.status === 'completed' ? 'bg-emerald-500' : 'bg-indigo-650 animate-pulse'}`}
+              className={`h-full transition-all duration-300 ${activeCampaign.status === 'completed' ? 'bg-emerald-500' : 'bg-indigo-600 animate-pulse'}`}
               style={{ width: `${activeCampaign.totalRecipients > 0 ? ((activeCampaign.successCount + activeCampaign.failedCount) / activeCampaign.totalRecipients) * 100 : 0}%` }}
             />
           </div>
@@ -1684,7 +1684,7 @@ export default function BulkCampaignManager() {
                         {activeCampaign.status !== 'completed' ? (
                           <button
                             onClick={() => startBulkSending(activeCampaign)}
-                            className="px-4 py-2 rounded-xl bg-indigo-650 hover:bg-indigo-750 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                           >
                             <Play className="w-3.5 h-3.5" />
                             {activeCampaign.status === 'paused' ? 'Tiếp Tục Gửi' : 'Bắt Đầu Gửi'}
@@ -1707,7 +1707,7 @@ export default function BulkCampaignManager() {
                                 startBulkSending(restartedCampaign);
                               }
                             }}
-                            className="px-4 py-2 rounded-xl bg-slate-655 hover:bg-slate-755 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                            className="px-4 py-2 rounded-xl bg-slate-600 hover:bg-slate-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                           >
                             <RefreshCw className="w-3.5 h-3.5" />
                             Gửi Lại Từ Đầu
@@ -1719,7 +1719,7 @@ export default function BulkCampaignManager() {
                         {isBulkPaused ? (
                           <button
                             onClick={resumeBulkSending}
-                            className="px-4 py-2 rounded-xl bg-emerald-650 hover:bg-emerald-750 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                           >
                             <Play className="w-3.5 h-3.5" />
                             Tiếp Tục
@@ -1727,7 +1727,7 @@ export default function BulkCampaignManager() {
                         ) : (
                           <button
                             onClick={pauseBulkSending}
-                            className="px-4 py-2 rounded-xl bg-amber-650 hover:bg-amber-750 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                           >
                             <Pause className="w-3.5 h-3.5" />
                             Tạm Dừng
@@ -1735,7 +1735,7 @@ export default function BulkCampaignManager() {
                         )}
                         <button
                           onClick={stopBulkSending}
-                          className="px-4 py-2 rounded-xl bg-rose-650 hover:bg-rose-750 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
+                          className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow transition-all border-none"
                         >
                           <Square className="w-3.5 h-3.5" />
                           Dừng Hẳn
