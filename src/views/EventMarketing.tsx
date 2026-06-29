@@ -4026,6 +4026,10 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                                   checked={selectedGroupIds.includes(g.id)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
+                                      if (!g.joined) {
+                                        alert('Bạn cần tham gia trang hoặc nhóm này trước khi thực hiện đăng bài.');
+                                        return;
+                                      }
                                       setSelectedGroupIds(prev => [...prev, g.id]);
                                     } else {
                                       setSelectedGroupIds(prev => prev.filter(id => id !== g.id));
@@ -4051,11 +4055,31 @@ export default function EventMarketing({ role }: EventMarketingProps) {
                               </td>
                               <td className="px-4 py-3 text-right font-mono text-slate-600">{g.members.toLocaleString()}</td>
                               <td className="px-4 py-3 text-center">
-                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[9px] ${
-                                  g.joined ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
-                                }`}>
-                                  {g.joined ? 'Đã tham gia' : 'Chưa tham gia'}
-                                </span>
+                                {g.joined ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[9px] bg-emerald-50 text-emerald-700">
+                                    Đã tham gia
+                                  </span>
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[9px] bg-rose-50 text-rose-700">
+                                      Chưa tham gia
+                                    </span>
+                                    <a
+                                      href={g.platform === 'facebook' ? `https://facebook.com/groups/${g.id}` : `https://zalo.me/g/${g.id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-[9px] text-indigo-600 hover:underline flex items-center gap-0.5 font-bold cursor-pointer bg-transparent border-none mt-0.5"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (confirm(`Bạn đang đi tới ${g.type === 'page' ? 'Trang' : 'Nhóm'} "${g.name}" để nhấn tham gia. Xác nhận đã tham gia sau khi mở trang?`)) {
+                                          setFoundGroups(prev => prev.map(item => item.id === g.id ? { ...item, joined: true } : item));
+                                        }
+                                      }}
+                                    >
+                                      Tham gia ngay <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           ))}
