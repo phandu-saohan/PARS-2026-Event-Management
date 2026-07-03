@@ -51,6 +51,7 @@ import {
   ZaloConfig, 
   EmailConfig, 
   ResendConfig,
+  CloudflareEmailConfig,
   WhatsappConfig,
   SupabaseConfig, 
   Role, 
@@ -123,10 +124,11 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [zaloConfig, setZaloConfig] = useState<ZaloConfig>(store.getZaloConfig());
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(store.getEmailConfig());
   const [resendConfig, setResendConfig] = useState<ResendConfig>(store.getResendConfig());
+  const [cloudflareEmailConfig, setCloudflareEmailConfig] = useState<CloudflareEmailConfig>(store.getCloudflareEmailConfig());
   const [whatsappConfig, setWhatsappConfig] = useState<WhatsappConfig>(store.getWhatsappConfig());
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig>(store.getSupabaseConfig());
   const [copiedSchema, setCopiedSchema] = useState(false);
-
+ 
   // Connection & API Testing variables
   const [zaloTesting, setZaloTesting] = useState(false);
   const [zaloTestResult, setZaloTestResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -137,6 +139,9 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [resendSendingTest, setResendSendingTest] = useState(false);
   const [resendSendingResult, setResendSendingResult] = useState<{ success: boolean; message: string } | null>(null);
   const [resendTestEmail, setResendTestEmail] = useState('');
+  const [cloudflareSendingTest, setCloudflareSendingTest] = useState(false);
+  const [cloudflareSendingResult, setCloudflareSendingResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [cloudflareTestEmail, setCloudflareTestEmail] = useState('');
   const [waTesting, setWaTesting] = useState(false);
   const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -916,6 +921,72 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
       });
     } finally {
       setResendSendingTest(false);
+    }
+  };
+
+  const handleSaveCloudflareSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    store.saveCloudflareEmailConfig(cloudflareEmailConfig);
+    alert('Đã lưu cấu hình Cổng Mail Cloudflare Worker!');
+  };
+
+  const handleSendTestCloudflareMail = async () => {
+    if (!cloudflareTestEmail) {
+      alert('Vui lòng điền Email nhận test trước!');
+      return;
+    }
+    if (!cloudflareEmailConfig.workerUrl || !cloudflareEmailConfig.senderEmail) {
+      alert('Vui lòng điền Worker URL và Email gửi đi trước!');
+      return;
+    }
+    setCloudflareSendingTest(true);
+    setCloudflareSendingResult(null);
+    try {
+      const testContentHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+          <h2 style="color: #4f46e5; text-transform: uppercase;">Cổng Truyền Tin Cloudflare Worker Kích Hoạt Thành Công</h2>
+          <p>Kính gửi Quý đại diện quản trị,</p>
+          <p>Thư này xác nhận cổng gửi Email qua Cloudflare Email Routing + Gmail/Worker đã cấu hình thành công.</p>
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #4f46e5; margin: 20px 0;">
+            • Cổng API: Cloudflare Worker Gateway<br/>
+            • Worker URL: ${cloudflareEmailConfig.workerUrl}<br/>
+            • Email nguồn: ${cloudflareEmailConfig.senderEmail}<br/>
+            • Thời gian: ${new Date().toLocaleString()}
+          </div>
+          <p style="font-size: 11px; color: #94a3b8;">Email tự động phục vụ kiểm định cấu hình.</p>
+        </div>
+      `;
+      const response = await fetch('/api/email/send-cloudflare', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          workerUrl: cloudflareEmailConfig.workerUrl,
+          apiToken: cloudflareEmailConfig.apiToken,
+          from: cloudflareEmailConfig.senderEmail,
+          to: cloudflareTestEmail,
+          subject: `[CLOUDFLARE SUCCESS] Email kiểm định kết nối cổng Cloudflare Worker`,
+          html: testContentHtml
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setCloudflareSendingResult({
+          success: true,
+          message: `Thư xác thực đã bắn thành công tới ${cloudflareTestEmail}! Hãy kiểm tra hộp thư của bạn.`
+        });
+      } else {
+        setCloudflareSendingResult({
+          success: false,
+          message: `Lỗi truyền phát Cloudflare: ${data.error || 'Chi tiết gửi lỗi máy chủ.'}`
+        });
+      }
+    } catch (err: any) {
+      setCloudflareSendingResult({
+        success: false,
+        message: `Lỗi kết nối API: ${err.message}`
+      });
+    } finally {
+      setCloudflareSendingTest(false);
     }
   };
 
@@ -3018,6 +3089,80 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       }`}>
                         <span className="font-extrabold block mb-0.5">Resend Transmission:</span>
                         <p>{resendSendingResult.message}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2c. Cloudflare Worker Outcoming Mail settings card */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest block border-b border-slate-200 pb-1.5">
+                    ☁️ CỔNG EMAIL CLOUDFLARE WORKER + GMAIL
+                  </span>
+                  <form onSubmit={handleSaveCloudflareSubmit} className="space-y-3">
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 block mb-1">CLOUDFLARE WORKER URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://email-worker.yourname.workers.dev"
+                        value={cloudflareEmailConfig.workerUrl}
+                        onChange={(e) => setCloudflareEmailConfig({ ...cloudflareEmailConfig, workerUrl: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 block mb-1">API AUTHORIZATION TOKEN (IF CONFIGURED)</label>
+                      <input
+                        type="password"
+                        placeholder="Nhập Token bảo mật của Cloudflare Worker"
+                        value={cloudflareEmailConfig.apiToken}
+                        onChange={(e) => setCloudflareEmailConfig({ ...cloudflareEmailConfig, apiToken: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 block mb-1">EMAIL SENDER (EMAIL ROUTING GỬI ĐI)</label>
+                      <input
+                        type="text"
+                        placeholder="marketing@yourcustomdomain.com"
+                        value={cloudflareEmailConfig.senderEmail}
+                        onChange={(e) => setCloudflareEmailConfig({ ...cloudflareEmailConfig, senderEmail: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                      />
+                    </div>
+                    <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 border-none text-white text-[10px] font-black uppercase tracking-wider rounded-lg cursor-pointer font-bold">
+                      Đồng bộ cấu hình Cloudflare Worker
+                    </button>
+                  </form>
+
+                  <div className="border-t border-slate-250 pt-3 space-y-2.5 mt-4">
+                    <span className="text-[9px] font-black text-indigo-700 block">⚡ KIỂM TRA KẾT NỐI CLOUDFLARE:</span>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          placeholder="Email nhận test..."
+                          value={cloudflareTestEmail}
+                          onChange={(e) => setCloudflareTestEmail(e.target.value)}
+                          className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-mono flex-1 min-w-[120px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendTestCloudflareMail}
+                          disabled={cloudflareSendingTest}
+                          className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap"
+                        >
+                          {cloudflareSendingTest ? 'Đang gửi...' : 'Gửi mail test'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {cloudflareSendingResult && (
+                      <div className={`p-3 rounded-lg border text-[10px] font-mono leading-normal ${
+                        cloudflareSendingResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+                      }`}>
+                        <span className="font-extrabold block mb-0.5">Cloudflare Worker Response:</span>
+                        <p>{cloudflareSendingResult.message}</p>
                       </div>
                     )}
                   </div>

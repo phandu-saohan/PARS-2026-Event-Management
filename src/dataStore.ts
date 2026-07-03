@@ -15,6 +15,7 @@ import {
   ZaloConfig,
   EmailConfig,
   ResendConfig,
+  CloudflareEmailConfig,
   NotificationTemplate,
   SupabaseConfig,
   SentNotificationLog,
@@ -633,6 +634,13 @@ const DEFAULT_RESEND_CONFIG: ResendConfig = {
   isConfigured: false,
 };
 
+const DEFAULT_CLOUDFLARE_EMAIL_CONFIG: CloudflareEmailConfig = {
+  workerUrl: '',
+  apiToken: '',
+  senderEmail: '',
+  isConfigured: false,
+};
+
 const DEFAULT_WHATSAPP_CONFIG: WhatsappConfig = {
   accessToken: '',
   phoneNumberId: '',
@@ -1092,6 +1100,7 @@ export class DataStore {
   private static KEY_ZALO = 'pars_config_zalo';
   private static KEY_EMAIL = 'pars_config_email';
   private static KEY_RESEND = 'pars_config_resend';
+  private static KEY_CLOUDFLARE_EMAIL = 'pars_config_cloudflare_email';
   private static KEY_TEMPLATES = 'pars_templates';
   private static KEY_SUPABASE = 'pars_supabase';
   private static KEY_NOTIFICATION_LOGS = 'pars_notification_logs';
@@ -1124,6 +1133,7 @@ export class DataStore {
   private zaloConfig: ZaloConfig = DEFAULT_ZALO_CONFIG;
   private emailConfig: EmailConfig = DEFAULT_EMAIL_CONFIG;
   private resendConfig: ResendConfig = DEFAULT_RESEND_CONFIG;
+  private cloudflareEmailConfig: CloudflareEmailConfig = DEFAULT_CLOUDFLARE_EMAIL_CONFIG;
   private whatsappConfig: WhatsappConfig = DEFAULT_WHATSAPP_CONFIG;
   private templates: NotificationTemplate[] = [];
   private supabaseConfig: SupabaseConfig = { url: '', anonKey: '', isConnected: false };
@@ -1177,6 +1187,7 @@ export class DataStore {
     this.zaloConfig = this.getLocalStorage(DataStore.KEY_ZALO, DEFAULT_ZALO_CONFIG) || DEFAULT_ZALO_CONFIG;
     this.emailConfig = this.getLocalStorage(DataStore.KEY_EMAIL, DEFAULT_EMAIL_CONFIG) || DEFAULT_EMAIL_CONFIG;
     this.resendConfig = this.getLocalStorage(DataStore.KEY_RESEND, DEFAULT_RESEND_CONFIG) || DEFAULT_RESEND_CONFIG;
+    this.cloudflareEmailConfig = this.getLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, DEFAULT_CLOUDFLARE_EMAIL_CONFIG) || DEFAULT_CLOUDFLARE_EMAIL_CONFIG;
     this.templates = this.getLocalStorage(DataStore.KEY_TEMPLATES, INITIAL_TEMPLATES) || INITIAL_TEMPLATES;
     this.supabaseConfig = this.getLocalStorage(DataStore.KEY_SUPABASE, { url: '', anonKey: '', isConnected: false }) || { url: '', anonKey: '', isConnected: false };
     this.notificationLogs = this.getLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, []) || [];
@@ -1484,11 +1495,18 @@ export class DataStore {
           this.emailConfig = email.value;
           this.saveToLocalStorage(DataStore.KEY_EMAIL, this.emailConfig);
         }
+
         const resend = configs.find(c => c.key === 'resend_config');
         if (resend) {
           this.resendConfig = resend.value;
           this.saveToLocalStorage(DataStore.KEY_RESEND, this.resendConfig);
         }
+        const cloudflare = configs.find(c => c.key === 'cloudflare_email_config');
+        if (cloudflare) {
+          this.cloudflareEmailConfig = cloudflare.value;
+          this.saveToLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, this.cloudflareEmailConfig);
+        }
+
         const whatsapp = configs.find(c => c.key === 'whatsapp_config');
         if (whatsapp) {
           this.whatsappConfig = whatsapp.value;
@@ -2899,6 +2917,20 @@ export class DataStore {
     return config;
   }
 
+  getCloudflareEmailConfig() { return this.cloudflareEmailConfig; }
+  saveCloudflareEmailConfig(config: CloudflareEmailConfig) {
+    this.cloudflareEmailConfig = config;
+    this.saveToLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, config);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('system_config').upsert({ key: 'cloudflare_email_config', value: config }).then(({ error }) => {
+        if (error) console.error('Error saving Cloudflare Email config to Supabase:', error);
+      });
+    }
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'system_config', key: 'cloudflare_email_config' } }));
+    return config;
+  }
+
   getContacts() { return this.contacts; }
 
   async saveContact(contact: Contact): Promise<Contact> {
@@ -4138,6 +4170,7 @@ export class DataStore {
         zaloConfig: this.zaloConfig,
         emailConfig: this.emailConfig,
         resendConfig: this.resendConfig,
+        cloudflareEmailConfig: this.cloudflareEmailConfig,
         whatsappConfig: this.whatsappConfig,
         templates: this.templates,
         notificationLogs: this.notificationLogs,
@@ -4178,6 +4211,7 @@ export class DataStore {
       if (d.zaloConfig) this.zaloConfig = d.zaloConfig;
       if (d.emailConfig) this.emailConfig = d.emailConfig;
       if (d.resendConfig) this.resendConfig = d.resendConfig;
+      if (d.cloudflareEmailConfig) this.cloudflareEmailConfig = d.cloudflareEmailConfig;
       if (d.whatsappConfig) this.whatsappConfig = d.whatsappConfig;
       if (d.templates) this.templates = d.templates;
       if (d.notificationLogs) this.notificationLogs = d.notificationLogs;
@@ -4205,6 +4239,7 @@ export class DataStore {
       this.saveToLocalStorage(DataStore.KEY_ZALO, this.zaloConfig);
       this.saveToLocalStorage(DataStore.KEY_EMAIL, this.emailConfig);
       this.saveToLocalStorage(DataStore.KEY_RESEND, this.resendConfig);
+      this.saveToLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, this.cloudflareEmailConfig);
       this.saveToLocalStorage(DataStore.KEY_WHATSAPP, this.whatsappConfig);
       this.saveToLocalStorage(DataStore.KEY_TEMPLATES, this.templates);
       this.saveToLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, this.notificationLogs);

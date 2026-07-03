@@ -160,6 +160,73 @@ async function handleSendResend(req: VercelRequest, res: VercelResponse) {
 }
 
 // ==========================================
+// 2b. Action: send-cloudflare (Cloudflare Worker Email Send)
+// ==========================================
+async function handleSendCloudflare(req: VercelRequest, res: VercelResponse) {
+  const { workerUrl, apiToken, from, to, subject, html } = req.body;
+
+  if (!workerUrl) {
+    return res.status(400).json({ success: false, error: 'Cloudflare Worker URL is required.' });
+  }
+  if (!from) {
+    return res.status(400).json({ success: false, error: 'Sender email (from) is required.' });
+  }
+  if (!to) {
+    return res.status(400).json({ success: false, error: 'Recipient email (to) is required.' });
+  }
+  if (!html) {
+    return res.status(400).json({ success: false, error: 'Email body (html) is required.' });
+  }
+
+  try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    };
+    if (apiToken) {
+      headers['Authorization'] = `Bearer ${apiToken}`;
+    }
+
+    const response = await fetch(workerUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        from,
+        to,
+        subject: subject || 'Thông báo từ Ban Tổ Chức',
+        html
+      })
+    });
+
+    let data: any = {};
+    const text = await response.text();
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = { message: text };
+    }
+
+    if (response.ok) {
+      return res.status(200).json({
+        success: true,
+        id: data.id || 'cf-worker-id',
+        message: 'Email sent successfully via Cloudflare Worker'
+      });
+    } else {
+      return res.status(response.status).json({
+        success: false,
+        error: data.error || data.message || 'Lỗi từ Cloudflare Worker'
+      });
+    }
+  } catch (error: any) {
+    console.error('[Cloudflare Worker Proxy API Error]:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Internal server error while connecting to Cloudflare Worker'
+    });
+  }
+}
+
+// ==========================================
 // 3. Action: test-connection (SMTP Connection Verification)
 // ==========================================
 async function handleTestConnection(req: VercelRequest, res: VercelResponse) {
@@ -336,6 +403,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleSend(req, res);
   } else if (action === 'send-resend') {
     return handleSendResend(req, res);
+  } else if (action === 'send-cloudflare') {
+    return handleSendCloudflare(req, res);
   } else if (action === 'test-connection') {
     return handleTestConnection(req, res);
   } else if (action === 'track-open') {

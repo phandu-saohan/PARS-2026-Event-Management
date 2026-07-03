@@ -5,6 +5,7 @@
     { "source": "/api/sepay-check", "destination": "/api/sepay-check" },
     { "source": "/api/email/send", "destination": "/api/email?action=send" },
     { "source": "/api/email/send-resend", "destination": "/api/email?action=send-resend" },
+    { "source": "/api/email/send-cloudflare", "destination": "/api/email?action=send-cloudflare" },
     { "source": "/api/email/test-connection", "destination": "/api/email?action=test-connection" },
     { "source": "/api/email/track-open", "destination": "/api/email?action=track-open" },
     { "source": "/api/email/track-click", "destination": "/api/email?action=track-click" },

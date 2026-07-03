@@ -339,6 +339,13 @@ export interface ResendConfig {
   isConfigured: boolean;
 }
 
+export interface CloudflareEmailConfig {
+  workerUrl: string;
+  apiToken: string;
+  senderEmail: string;
+  isConfigured: boolean;
+}
+
 export interface WhatsappConfig {
   accessToken: string;
   phoneNumberId: string;
