@@ -142,6 +142,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [cloudflareSendingTest, setCloudflareSendingTest] = useState(false);
   const [cloudflareSendingResult, setCloudflareSendingResult] = useState<{ success: boolean; message: string } | null>(null);
   const [cloudflareTestEmail, setCloudflareTestEmail] = useState('');
+  const [showCloudflareGuide, setShowCloudflareGuide] = useState(false);
   const [waTesting, setWaTesting] = useState(false);
   const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
@@ -3096,9 +3097,44 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
 
                 {/* 2c. Cloudflare Worker Outcoming Mail settings card */}
                 <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest block border-b border-slate-200 pb-1.5">
-                    ☁️ CỔNG EMAIL CLOUDFLARE WORKER + GMAIL
-                  </span>
+                  <div className="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                    <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest block">
+                      ☁️ CỔNG EMAIL CLOUDFLARE WORKER + GMAIL
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowCloudflareGuide(!showCloudflareGuide)}
+                      className="text-[9px] font-bold text-indigo-600 hover:underline border-none bg-transparent cursor-pointer flex items-center gap-1"
+                    >
+                      {showCloudflareGuide ? '🙈 Ẩn hướng dẫn' : '📋 Xem hướng dẫn tích hợp'}
+                    </button>
+                  </div>
+
+                  {showCloudflareGuide && (
+                    <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-[10.5px] text-slate-700 space-y-3 leading-relaxed max-h-[350px] overflow-y-auto">
+                      <h4 className="font-extrabold text-indigo-900 uppercase text-[9.5px]">CÁC BƯỚC THIẾT LẬP HỆ THỐNG GỬI TIN CLOUDFLARE</h4>
+                      <ol className="list-decimal list-inside space-y-2">
+                        <li>
+                          <strong>Cấu hình Inbound (Email Routing)</strong>: Trên Cloudflare, vào mục <em>Email Routing</em> ➔ Tạo một address forwarding từ tên miền riêng (ví dụ: <code>contact@domain.com</code>) chuyển tiếp về hộp thư Gmail cá nhân của bạn.
+                        </li>
+                        <li>
+                          <strong>Triển khai Cloudflare Worker (Outbound)</strong>: Tạo một Worker trên Cloudflare, dán đè mã nguồn mẫu trong tệp <code>cloudflare-worker-gmail.js</code> (ở thư mục gốc dự án của bạn).
+                        </li>
+                        <li>
+                          <strong>Cài đặt bảo mật</strong>: Ở tab <em>Settings ➔ Variables</em> của Worker, thêm biến môi trường <code>API_TOKEN</code> và nhập khoá bảo mật. Deploy và copy URL của Worker.
+                        </li>
+                        <li>
+                          <strong>Cấu hình SPF (DNS)</strong>: Để tránh email bị rơi vào hòm thư Spam, thêm bản ghi TXT trên Cloudflare DNS:
+                          <div className="bg-slate-800 text-slate-200 p-2 rounded-lg font-mono text-[9px] mt-1 select-all">
+                            Type: TXT | Name: @ | Content: v=spf1 include:relay.mailchannels.net ~all
+                          </div>
+                        </li>
+                        <li>
+                          <strong>Đồng bộ hệ thống</strong>: Điền Worker URL, Token bảo mật, và Email gửi đi của bạn vào các ô nhập bên dưới rồi nhấn Đồng bộ.
+                        </li>
+                      </ol>
+                    </div>
+                  )}
                   <form onSubmit={handleSaveCloudflareSubmit} className="space-y-3">
                     <div>
                       <label className="text-[9px] font-black text-slate-400 block mb-1">CLOUDFLARE WORKER URL</label>
