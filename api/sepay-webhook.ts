@@ -1,8 +1,16 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { timingSafeEqual } from 'crypto';
 
 const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS & Content-Type
@@ -38,28 +46,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // SePay gửi webhook với header Authorization: Apikey API_KEY_CUA_BAN
-    const incomingKey = ((req.headers['authorization'] as string) || (req.headers['apikey'] as string) || '').trim();
+    // Reject if no webhook secret configured — never process unauthenticated requests
+    if (!webhookSecret) {
+      console.error('[SePay Webhook] No webhook secret configured. Rejecting request.');
+      return res.status(401).json({ success: false, message: 'Webhook secret not configured on server' });
+    }
 
-    if (webhookSecret) {
-      let authorized = false;
-      if (incomingKey === webhookSecret) {
-        authorized = true;
-      } else {
-        const parts = incomingKey.split(' ');
-        if (parts.length === 2 && parts[0].toLowerCase() === 'apikey') {
-          if (parts[1] === webhookSecret) {
-            authorized = true;
-          }
-        }
-      }
+    // SePay sends webhook with header: Authorization: Apikey API_KEY
+    const rawHeader = ((req.headers['authorization'] as string) || (req.headers['apikey'] as string) || '').trim();
 
-      if (!authorized) {
-        console.warn('[SePay Webhook] Unauthorized attempt:', incomingKey);
-        return res.status(401).json({ success: false, message: 'Unauthorized' });
-      }
-    } else {
-      console.warn('[SePay Webhook] Warning: webhookSecret is not configured. Request processed without authentication.');
+    // Extract the key from "Apikey xxx" or use the raw value
+    let incomingKey = rawHeader;
+    const parts = rawHeader.split(' ');
+    if (parts.length === 2 && parts[0].toLowerCase() === 'apikey') {
+      incomingKey = parts[1];
+    }
+
+    if (!incomingKey || !safeEqual(incomingKey, webhookSecret)) {
+      console.warn('[SePay Webhook] Unauthorized attempt from:', req.headers['x-forwarded-for'] || 'unknown');
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
     }
 
     const payload = req.body;
