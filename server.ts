@@ -59,6 +59,7 @@ const adaptHandler = (handler: any) => {
 app.post('/api/email/send', adaptHandler(emailHandler));
 app.post('/api/email/send-resend', adaptHandler(emailHandler));
 app.post('/api/email/send-cloudflare', adaptHandler(emailHandler));
+app.post('/api/email/send-ses', adaptHandler(emailHandler));
 app.post('/api/email/test-connection', adaptHandler(emailHandler));
 app.get('/api/email/track-open', adaptHandler(emailHandler));
 app.get('/api/email/track-click', adaptHandler(emailHandler));

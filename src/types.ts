@@ -346,6 +346,14 @@ export interface CloudflareEmailConfig {
   isConfigured: boolean;
 }
 
+export interface AwsSesConfig {
+  accessKeyId: string;
+  secretAccessKey: string;
+  region: string;
+  senderEmail: string;
+  isConfigured: boolean;
+}
+
 export interface WhatsappConfig {
   accessToken: string;
   phoneNumberId: string;

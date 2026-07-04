@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import nodemailer from 'nodemailer';
 import { createClient } from '@supabase/supabase-js';
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 
 // ==========================================
 // 1. Action: send (SMTP Send)
@@ -376,6 +377,71 @@ async function handleTrackClick(req: VercelRequest, res: VercelResponse) {
 }
 
 // ==========================================
+// 2d. Action: send-ses (Amazon SES Send)
+// ==========================================
+async function handleSendAwsSes(req: VercelRequest, res: VercelResponse) {
+  const { accessKeyId, secretAccessKey, region, from, to, subject, html } = req.body;
+
+  if (!accessKeyId || !secretAccessKey) {
+    return res.status(400).json({ success: false, error: 'AWS Credentials (accessKeyId, secretAccessKey) are required.' });
+  }
+  if (!region) {
+    return res.status(400).json({ success: false, error: 'AWS Region is required.' });
+  }
+  if (!from) {
+    return res.status(400).json({ success: false, error: 'Sender email (from) is required.' });
+  }
+  if (!to) {
+    return res.status(400).json({ success: false, error: 'Recipient email (to) is required.' });
+  }
+  if (!html) {
+    return res.status(400).json({ success: false, error: 'Email body (html) is required.' });
+  }
+
+  try {
+    const sesClient = new SESClient({
+      region,
+      credentials: {
+        accessKeyId: accessKeyId.trim(),
+        secretAccessKey: secretAccessKey.trim(),
+      },
+    });
+
+    const command = new SendEmailCommand({
+      Destination: {
+        ToAddresses: [to],
+      },
+      Message: {
+        Body: {
+          Html: {
+            Charset: 'UTF-8',
+            Data: html,
+          },
+        },
+        Subject: {
+          Charset: 'UTF-8',
+          Data: subject || 'Thông báo từ Ban Tổ Chức',
+        },
+      },
+      Source: from,
+    });
+
+    const response = await sesClient.send(command);
+    return res.status(200).json({
+      success: true,
+      messageId: response.MessageId,
+      message: 'Email sent successfully via Amazon SES'
+    });
+  } catch (error: any) {
+    console.error('[AWS SES Send Error]:', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Internal server error while sending email via Amazon SES'
+    });
+  }
+}
+
+// ==========================================
 // Main Handler
 // ==========================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -405,6 +471,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleSendResend(req, res);
   } else if (action === 'send-cloudflare') {
     return handleSendCloudflare(req, res);
+  } else if (action === 'send-ses') {
+    return handleSendAwsSes(req, res);
   } else if (action === 'test-connection') {
     return handleTestConnection(req, res);
   } else if (action === 'track-open') {

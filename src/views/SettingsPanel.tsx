@@ -52,6 +52,7 @@ import {
   EmailConfig, 
   ResendConfig,
   CloudflareEmailConfig,
+  AwsSesConfig,
   WhatsappConfig,
   SupabaseConfig, 
   Role, 
@@ -125,6 +126,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [emailConfig, setEmailConfig] = useState<EmailConfig>(store.getEmailConfig());
   const [resendConfig, setResendConfig] = useState<ResendConfig>(store.getResendConfig());
   const [cloudflareEmailConfig, setCloudflareEmailConfig] = useState<CloudflareEmailConfig>(store.getCloudflareEmailConfig());
+  const [awsSesConfig, setAwsSesConfig] = useState<AwsSesConfig>(store.getAwsSesConfig());
   const [whatsappConfig, setWhatsappConfig] = useState<WhatsappConfig>(store.getWhatsappConfig());
   const [supabaseConfig, setSupabaseConfig] = useState<SupabaseConfig>(store.getSupabaseConfig());
   const [copiedSchema, setCopiedSchema] = useState(false);
@@ -145,6 +147,9 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [showCloudflareGuide, setShowCloudflareGuide] = useState(false);
   const [waTesting, setWaTesting] = useState(false);
   const [waTestResult, setWaTestResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [awsSesSendingTest, setAwsSesSendingTest] = useState(false);
+  const [awsSesSendingResult, setAwsSesSendingResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [awsSesTestEmail, setAwsSesTestEmail] = useState('');
 
   // Operators/Users management states
   const [users, setUsers] = useState<UserAccount[]>(store.getUsers());
@@ -988,6 +993,73 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
       });
     } finally {
       setCloudflareSendingTest(false);
+    }
+  };
+
+  const handleSaveAwsSesSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    store.saveAwsSesConfig(awsSesConfig);
+    alert('Đã lưu cấu hình Cổng Mail Amazon SES!');
+  };
+
+  const handleSendTestAwsSesMail = async () => {
+    if (!awsSesTestEmail) {
+      alert('Vui lòng điền Email nhận test trước!');
+      return;
+    }
+    if (!awsSesConfig.accessKeyId || !awsSesConfig.secretAccessKey || !awsSesConfig.region || !awsSesConfig.senderEmail) {
+      alert('Vui lòng điền đầy đủ Access Key, Secret Key, Region và Email gửi đi!');
+      return;
+    }
+    setAwsSesSendingTest(true);
+    setAwsSesSendingResult(null);
+    try {
+      const testContentHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 600px; margin: 0 auto; padding: 25px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; color: #1e293b;">
+          <h2 style="color: #4f46e5; text-transform: uppercase;">Cổng Gửi Thư Amazon SES Kích Hoạt Thành Công</h2>
+          <p>Kính gửi Quý đại diện quản trị,</p>
+          <p>Thư này xác nhận kết nối và gửi thư qua API AWS SES (Simple Email Service) đã hoạt động tốt.</p>
+          <div style="background-color: #f8fafc; padding: 15px; border-radius: 10px; font-family: monospace; font-size: 13px; border-left: 4px solid #4f46e5; margin: 20px 0;">
+            • Cổng API: Amazon SES (Simple Email Service)<br/>
+            • Vùng AWS: ${awsSesConfig.region}<br/>
+            • Email nguồn (Verified): ${awsSesConfig.senderEmail}<br/>
+            • Thời gian: ${new Date().toLocaleString()}
+          </div>
+          <p style="font-size: 11px; color: #94a3b8;">Email tự động phục vụ kiểm định cấu hình.</p>
+        </div>
+      `;
+      const response = await fetch('/api/email/send-ses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          accessKeyId: awsSesConfig.accessKeyId,
+          secretAccessKey: awsSesConfig.secretAccessKey,
+          region: awsSesConfig.region,
+          from: awsSesConfig.senderEmail,
+          to: awsSesTestEmail,
+          subject: `[AWS SES SUCCESS] Email kiểm định kết nối cổng Amazon SES`,
+          html: testContentHtml
+        })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setAwsSesSendingResult({
+          success: true,
+          message: `Thư xác thực đã bắn thành công tới ${awsSesTestEmail}! Hãy kiểm tra hộp thư của bạn.`
+        });
+      } else {
+        setAwsSesSendingResult({
+          success: false,
+          message: `Lỗi truyền phát AWS SES: ${data.error || 'Chi tiết gửi lỗi máy chủ.'}`
+        });
+      }
+    } catch (err: any) {
+      setAwsSesSendingResult({
+        success: false,
+        message: `Lỗi kết nối API: ${err.message}`
+      });
+    } finally {
+      setAwsSesSendingTest(false);
     }
   };
 
@@ -3199,6 +3271,92 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       }`}>
                         <span className="font-extrabold block mb-0.5">Cloudflare Worker Response:</span>
                         <p>{cloudflareSendingResult.message}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* 2d. Amazon SES settings card */}
+                <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest block border-b border-slate-200 pb-1.5">
+                    ✉️ CỔNG EMAIL AMAZON SES (AWS)
+                  </span>
+                  <form onSubmit={handleSaveAwsSesSubmit} className="space-y-3">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-2">
+                        <label className="text-[9px] font-black text-slate-400 block mb-1">AWS ACCESS KEY ID</label>
+                        <input
+                          type="text"
+                          placeholder="AKIAIOSFODNN7EXAMPLE"
+                          value={awsSesConfig.accessKeyId}
+                          onChange={(e) => setAwsSesConfig({ ...awsSesConfig, accessKeyId: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                      <div className="col-span-1">
+                        <label className="text-[9px] font-black text-slate-400 block mb-1">AWS REGION</label>
+                        <input
+                          type="text"
+                          placeholder="us-east-1"
+                          value={awsSesConfig.region}
+                          onChange={(e) => setAwsSesConfig({ ...awsSesConfig, region: e.target.value })}
+                          className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 block mb-1">AWS SECRET ACCESS KEY</label>
+                      <input
+                        type="password"
+                        placeholder="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+                        value={awsSesConfig.secretAccessKey}
+                        onChange={(e) => setAwsSesConfig({ ...awsSesConfig, secretAccessKey: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-black text-slate-400 block mb-1">EMAIL SENDER (SES VERIFIED EMAIL)</label>
+                      <input
+                        type="text"
+                        placeholder="contact@yourcustomdomain.com"
+                        value={awsSesConfig.senderEmail}
+                        onChange={(e) => setAwsSesConfig({ ...awsSesConfig, senderEmail: e.target.value })}
+                        className="w-full px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                      />
+                    </div>
+                    <button type="submit" className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 border-none text-white text-[10px] font-black uppercase tracking-wider rounded-lg cursor-pointer font-bold">
+                      Lưu cấu hình Amazon SES
+                    </button>
+                  </form>
+
+                  <div className="border-t border-slate-250 pt-3 space-y-2.5 mt-4">
+                    <span className="text-[9px] font-black text-indigo-700 block">⚡ KIỂM TRA KẾT NỐI AMAZON SES:</span>
+                    <div className="space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          placeholder="Email nhận test..."
+                          value={awsSesTestEmail}
+                          onChange={(e) => setAwsSesTestEmail(e.target.value)}
+                          className="px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] font-mono flex-1 min-w-[120px]"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleSendTestAwsSesMail}
+                          disabled={awsSesSendingTest}
+                          className="px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 rounded-lg text-[10px] font-bold cursor-pointer whitespace-nowrap"
+                        >
+                          {awsSesSendingTest ? 'Đang gửi...' : 'Gửi mail test'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {awsSesSendingResult && (
+                      <div className={`p-3 rounded-lg border text-[10px] font-mono leading-normal ${
+                        awsSesSendingResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+                      }`}>
+                        <span className="font-extrabold block mb-0.5">Amazon SES Service Response:</span>
+                        <p>{awsSesSendingResult.message}</p>
                       </div>
                     )}
                   </div>

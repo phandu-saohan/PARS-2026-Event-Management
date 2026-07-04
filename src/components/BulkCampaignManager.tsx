@@ -31,7 +31,8 @@ export default function BulkCampaignManager() {
   const [bulkChannel, setBulkChannel] = useState<'email' | 'zalo'>('email');
   const [resendConfig, setResendConfigState] = useState(() => store.getResendConfig());
   const [cloudflareConfig, setCloudflareConfigState] = useState(() => store.getCloudflareEmailConfig());
-  const [emailGateway, setEmailGateway] = useState<'resend' | 'cloudflare'>('resend');
+  const [awsSesConfig, setAwsSesConfigState] = useState(() => store.getAwsSesConfig());
+  const [emailGateway, setEmailGateway] = useState<'resend' | 'cloudflare' | 'ses'>('resend');
   const [excelData, setExcelData] = useState<any[]>([]);
   const [excelFileName, setExcelFileName] = useState('');
   const [bulkSubject, setBulkSubject] = useState('Thư xác nhận tham dự Hội nghị Khoa học Thẩm mỹ PARS 2026');
@@ -363,10 +364,16 @@ export default function BulkCampaignManager() {
           alert('Vui lòng vào mục "Cài đặt hệ thống" để cấu hình Resend API Key và Email gửi đi trước khi bắt đầu.');
           return;
         }
-      } else {
+      } else if (emailGateway === 'cloudflare') {
         const currentCf = store.getCloudflareEmailConfig();
         if (!currentCf.workerUrl || !currentCf.senderEmail) {
           alert('Vui lòng vào mục "Cài đặt hệ thống" để cấu hình Cloudflare Worker URL và Email gửi đi trước khi bắt đầu.');
+          return;
+        }
+      } else {
+        const currentSes = store.getAwsSesConfig();
+        if (!currentSes.accessKeyId || !currentSes.secretAccessKey || !currentSes.region || !currentSes.senderEmail) {
+          alert('Vui lòng vào mục "Cài đặt hệ thống" để cấu hình Amazon SES Credentials và Email gửi đi trước khi bắt đầu.');
           return;
         }
       }
@@ -406,7 +413,9 @@ export default function BulkCampaignManager() {
         id: campaignId,
         name: campaignName.trim() || `Chiến dịch gửi ${bulkChannel === 'email' ? 'Email' : 'Zalo'} - ${new Date().toLocaleString()}`,
         channel: bulkChannel,
-        templateId: bulkChannel === 'email' ? (emailGateway === 'resend' ? 'resend-bulk' : 'cloudflare-bulk') : (selectedZaloTemplate?.id || 'zalo-bulk'),
+        templateId: bulkChannel === 'email' 
+          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : 'aws-ses-bulk') 
+          : (selectedZaloTemplate?.id || 'zalo-bulk'),
         subject: bulkChannel === 'email' ? bulkSubject : undefined,
         body: bulkChannel === 'email' ? bulkBody : undefined,
         status: 'sending',
@@ -518,23 +527,40 @@ export default function BulkCampaignManager() {
             const openTrackingUrl = `${window.location.origin}/api/email/track-open?cId=${currentCampaign.id}&email=${encodeURIComponent(recipient.email)}`;
             compiledBody += `<img src="${openTrackingUrl}" width="1" height="1" style="display:none;" />`;
 
-            const endpoint = emailGateway === 'resend' ? '/api/email/send-resend' : '/api/email/send-cloudflare';
-            const requestBody = emailGateway === 'resend'
-              ? {
-                  apiKey: resendConfig.apiKey,
-                  from: resendConfig.senderEmail,
-                  to: recipient.email,
-                  subject: compiledSubject,
-                  html: compiledBody
-                }
-              : {
-                  workerUrl: cloudflareConfig.workerUrl,
-                  apiToken: cloudflareConfig.apiToken,
-                  from: cloudflareConfig.senderEmail,
-                  to: recipient.email,
-                  subject: compiledSubject,
-                  html: compiledBody
-                };
+            let endpoint = '/api/email/send-resend';
+            let requestBody: any = {};
+
+            if (emailGateway === 'resend') {
+              endpoint = '/api/email/send-resend';
+              requestBody = {
+                apiKey: resendConfig.apiKey,
+                from: resendConfig.senderEmail,
+                to: recipient.email,
+                subject: compiledSubject,
+                html: compiledBody
+              };
+            } else if (emailGateway === 'cloudflare') {
+              endpoint = '/api/email/send-cloudflare';
+              requestBody = {
+                workerUrl: cloudflareConfig.workerUrl,
+                apiToken: cloudflareConfig.apiToken,
+                from: cloudflareConfig.senderEmail,
+                to: recipient.email,
+                subject: compiledSubject,
+                html: compiledBody
+              };
+            } else {
+              endpoint = '/api/email/send-ses';
+              requestBody = {
+                accessKeyId: awsSesConfig.accessKeyId,
+                secretAccessKey: awsSesConfig.secretAccessKey,
+                region: awsSesConfig.region,
+                from: awsSesConfig.senderEmail,
+                to: recipient.email,
+                subject: compiledSubject,
+                html: compiledBody
+              };
+            }
 
             const res = await fetch(endpoint, {
               method: 'POST',
@@ -546,10 +572,18 @@ export default function BulkCampaignManager() {
             if (resData.success) {
               success = true;
             } else {
-              errorMsg = resData.error || (emailGateway === 'resend' ? 'Lỗi gửi email qua Resend' : 'Lỗi gửi email qua Cloudflare Worker');
+              errorMsg = resData.error || (
+                emailGateway === 'resend' ? 'Lỗi gửi email qua Resend' :
+                emailGateway === 'cloudflare' ? 'Lỗi gửi email qua Cloudflare Worker' :
+                'Lỗi gửi email qua Amazon SES'
+              );
             }
           } catch (err: any) {
-            errorMsg = err.message || (emailGateway === 'resend' ? 'Lỗi kết nối API Resend' : 'Lỗi kết nối Cloudflare Worker');
+            errorMsg = err.message || (
+              emailGateway === 'resend' ? 'Lỗi kết nối API Resend' :
+              emailGateway === 'cloudflare' ? 'Lỗi kết nối Cloudflare Worker' :
+              'Lỗi kết nối Amazon SES'
+            );
           }
         }
       } else {
@@ -632,13 +666,13 @@ export default function BulkCampaignManager() {
         recipient: bulkChannel === 'email' ? recipient.email : recipient.phone,
         type: bulkChannel,
         templateId: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? 'resend-bulk' : 'cloudflare-bulk') 
+          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : 'aws-ses-bulk') 
           : (selectedZaloTemplate?.id || 'zalo-bulk'),
         templateName: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? 'Gửi Email Hàng Loạt qua Resend' : 'Gửi Email Hàng Loạt qua Cloudflare') 
+          ? (emailGateway === 'resend' ? 'Gửi Email Hàng Loạt qua Resend' : emailGateway === 'cloudflare' ? 'Gửi Email Hàng Loạt qua Cloudflare' : 'Gửi Email Hàng Loạt qua AWS SES') 
           : (selectedZaloTemplate?.name || 'Gửi Zalo OA Hàng Loạt'),
         sender: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? resendConfig.senderEmail : cloudflareConfig.senderEmail) 
+          ? (emailGateway === 'resend' ? resendConfig.senderEmail : emailGateway === 'cloudflare' ? cloudflareConfig.senderEmail : awsSesConfig.senderEmail) 
           : (store.getZaloConfig().oaId || 'Zalo OA'),
         sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
         status: success ? 'success' : 'failed',
@@ -1231,11 +1265,11 @@ export default function BulkCampaignManager() {
                     {/* Gateway selector */}
                     <div>
                       <label className="text-[10px] font-bold text-slate-500 block mb-1">Cổng gửi Email (Gateway)</label>
-                      <div className="grid grid-cols-2 gap-2 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                      <div className="grid grid-cols-3 gap-2 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
                         <button
                           type="button"
                           onClick={() => setEmailGateway('resend')}
-                          className={`py-1 rounded font-bold text-[11px] cursor-pointer transition-all border-none ${
+                          className={`py-1 rounded font-bold text-[10px] cursor-pointer transition-all border-none ${
                             emailGateway === 'resend' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
                           }`}
                         >
@@ -1244,16 +1278,25 @@ export default function BulkCampaignManager() {
                         <button
                           type="button"
                           onClick={() => setEmailGateway('cloudflare')}
-                          className={`py-1 rounded font-bold text-[11px] cursor-pointer transition-all border-none ${
+                          className={`py-1 rounded font-bold text-[10px] cursor-pointer transition-all border-none ${
                             emailGateway === 'cloudflare' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
                           }`}
                         >
                           Cloudflare Worker
                         </button>
+                        <button
+                          type="button"
+                          onClick={() => setEmailGateway('ses')}
+                          className={`py-1 rounded font-bold text-[10px] cursor-pointer transition-all border-none ${
+                            emailGateway === 'ses' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
+                          }`}
+                        >
+                          Amazon SES
+                        </button>
                       </div>
                     </div>
 
-                    {emailGateway === 'resend' ? (
+                    {emailGateway === 'resend' && (
                       <>
                         <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 leading-relaxed text-[10.5px]">
                           📧 <strong>Cổng gửi Email Resend</strong>: Hệ thống sử dụng cấu hình API Key và Email gửi đi của **Resend** được thiết lập trong mục <strong>Cài đặt hệ thống</strong>.
@@ -1271,7 +1314,9 @@ export default function BulkCampaignManager() {
                           </div>
                         </div>
                       </>
-                    ) : (
+                    )}
+
+                    {emailGateway === 'cloudflare' && (
                       <>
                         <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 leading-relaxed text-[10.5px]">
                           ☁️ <strong>Cổng Cloudflare Worker</strong>: Hệ thống chuyển tiếp email qua Cloudflare Worker API tích hợp Gmail SMTP/API của bạn. Cấu hình trong <strong>Cài đặt hệ thống</strong>.
@@ -1291,6 +1336,32 @@ export default function BulkCampaignManager() {
                             <span className="text-slate-450 font-bold">Trạng thái:</span>
                             <span className="font-bold text-slate-750">
                               {cloudflareConfig.workerUrl && cloudflareConfig.senderEmail ? '🟢 Đã cấu hình' : '🔴 Chưa cấu hình'}
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
+                    {emailGateway === 'ses' && (
+                      <>
+                        <div className="bg-indigo-50 text-indigo-800 p-3 rounded-xl border border-indigo-100 leading-relaxed text-[10.5px]">
+                          ✉️ <strong>Cổng Amazon SES (AWS)</strong>: Hệ thống sử dụng kết nối API Amazon SES chính thức của AWS. Cấu hình trong <strong>Cài đặt hệ thống</strong>.
+                        </div>
+                        <div className="border border-slate-200 rounded-xl p-3 bg-slate-50 space-y-1.5">
+                          <div className="flex justify-between">
+                            <span className="text-slate-450 font-bold">Email gửi:</span>
+                            <span className="font-mono text-slate-700 font-extrabold">{awsSesConfig.senderEmail || '(Chưa cấu hình)'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-450 font-bold">Vùng AWS:</span>
+                            <span className="font-mono text-slate-700 font-semibold">
+                              {awsSesConfig.region || '(Chưa cấu hình)'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-450 font-bold">Trạng thái:</span>
+                            <span className="font-bold text-slate-750">
+                              {awsSesConfig.accessKeyId && awsSesConfig.senderEmail ? '🟢 Đã cấu hình' : '🔴 Chưa cấu hình'}
                             </span>
                           </div>
                         </div>
@@ -1700,7 +1771,9 @@ export default function BulkCampaignManager() {
                   <div className="flex justify-between py-1 border-b border-slate-100">
                     <span className="text-slate-450 font-bold">Kênh gửi:</span>
                     <span className="font-extrabold text-slate-700 uppercase">
-                      {activeCampaign.channel === 'email' ? (activeCampaign.templateId === 'cloudflare-bulk' ? '☁️ Email Cloudflare' : '📧 Email Resend') : '📢 Zalo ZNS'}
+                      {activeCampaign.channel === 'email' 
+                        ? (activeCampaign.templateId === 'cloudflare-bulk' ? '☁️ Email Cloudflare' : activeCampaign.templateId === 'aws-ses-bulk' ? '✉️ Email Amazon SES' : '📧 Email Resend') 
+                        : '📢 Zalo ZNS'}
                     </span>
                   </div>
                   <div className="flex justify-between py-1 border-b border-slate-100">

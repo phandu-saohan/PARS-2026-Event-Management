@@ -16,6 +16,7 @@ import {
   EmailConfig,
   ResendConfig,
   CloudflareEmailConfig,
+  AwsSesConfig,
   NotificationTemplate,
   SupabaseConfig,
   SentNotificationLog,
@@ -641,6 +642,14 @@ const DEFAULT_CLOUDFLARE_EMAIL_CONFIG: CloudflareEmailConfig = {
   isConfigured: false,
 };
 
+const DEFAULT_AWS_SES_CONFIG: AwsSesConfig = {
+  accessKeyId: '',
+  secretAccessKey: '',
+  region: 'us-east-1',
+  senderEmail: '',
+  isConfigured: false,
+};
+
 const DEFAULT_WHATSAPP_CONFIG: WhatsappConfig = {
   accessToken: '',
   phoneNumberId: '',
@@ -1101,6 +1110,7 @@ export class DataStore {
   private static KEY_EMAIL = 'pars_config_email';
   private static KEY_RESEND = 'pars_config_resend';
   private static KEY_CLOUDFLARE_EMAIL = 'pars_config_cloudflare_email';
+  private static KEY_AWS_SES = 'pars_config_aws_ses';
   private static KEY_TEMPLATES = 'pars_templates';
   private static KEY_SUPABASE = 'pars_supabase';
   private static KEY_NOTIFICATION_LOGS = 'pars_notification_logs';
@@ -1134,6 +1144,7 @@ export class DataStore {
   private emailConfig: EmailConfig = DEFAULT_EMAIL_CONFIG;
   private resendConfig: ResendConfig = DEFAULT_RESEND_CONFIG;
   private cloudflareEmailConfig: CloudflareEmailConfig = DEFAULT_CLOUDFLARE_EMAIL_CONFIG;
+  private awsSesConfig: AwsSesConfig = DEFAULT_AWS_SES_CONFIG;
   private whatsappConfig: WhatsappConfig = DEFAULT_WHATSAPP_CONFIG;
   private templates: NotificationTemplate[] = [];
   private supabaseConfig: SupabaseConfig = { url: '', anonKey: '', isConnected: false };
@@ -1188,6 +1199,7 @@ export class DataStore {
     this.emailConfig = this.getLocalStorage(DataStore.KEY_EMAIL, DEFAULT_EMAIL_CONFIG) || DEFAULT_EMAIL_CONFIG;
     this.resendConfig = this.getLocalStorage(DataStore.KEY_RESEND, DEFAULT_RESEND_CONFIG) || DEFAULT_RESEND_CONFIG;
     this.cloudflareEmailConfig = this.getLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, DEFAULT_CLOUDFLARE_EMAIL_CONFIG) || DEFAULT_CLOUDFLARE_EMAIL_CONFIG;
+    this.awsSesConfig = this.getLocalStorage(DataStore.KEY_AWS_SES, DEFAULT_AWS_SES_CONFIG) || DEFAULT_AWS_SES_CONFIG;
     this.templates = this.getLocalStorage(DataStore.KEY_TEMPLATES, INITIAL_TEMPLATES) || INITIAL_TEMPLATES;
     this.supabaseConfig = this.getLocalStorage(DataStore.KEY_SUPABASE, { url: '', anonKey: '', isConnected: false }) || { url: '', anonKey: '', isConnected: false };
     this.notificationLogs = this.getLocalStorage(DataStore.KEY_NOTIFICATION_LOGS, []) || [];
@@ -1505,6 +1517,11 @@ export class DataStore {
         if (cloudflare) {
           this.cloudflareEmailConfig = cloudflare.value;
           this.saveToLocalStorage(DataStore.KEY_CLOUDFLARE_EMAIL, this.cloudflareEmailConfig);
+        }
+        const awsSes = configs.find(c => c.key === 'aws_ses_config');
+        if (awsSes) {
+          this.awsSesConfig = awsSes.value;
+          this.saveToLocalStorage(DataStore.KEY_AWS_SES, this.awsSesConfig);
         }
 
         const whatsapp = configs.find(c => c.key === 'whatsapp_config');
@@ -2931,6 +2948,20 @@ export class DataStore {
     return config;
   }
 
+  getAwsSesConfig() { return this.awsSesConfig; }
+  saveAwsSesConfig(config: AwsSesConfig) {
+    this.awsSesConfig = config;
+    this.saveToLocalStorage(DataStore.KEY_AWS_SES, config);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('system_config').upsert({ key: 'aws_ses_config', value: config }).then(({ error }) => {
+        if (error) console.error('Error saving AWS SES config to Supabase:', error);
+      });
+    }
+    window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'system_config', key: 'aws_ses_config' } }));
+    return config;
+  }
+
   getContacts() { return this.contacts; }
 
   async saveContact(contact: Contact): Promise<Contact> {
@@ -4292,6 +4323,8 @@ export class DataStore {
           { key: 'zalo_config', value: this.zaloConfig },
           { key: 'email_config', value: this.emailConfig },
           { key: 'resend_config', value: this.resendConfig },
+          { key: 'cloudflare_email_config', value: this.cloudflareEmailConfig },
+          { key: 'aws_ses_config', value: this.awsSesConfig },
           { key: 'whatsapp_config', value: this.whatsappConfig },
           { key: 'sepay_config', value: this.sepayConfig },
           { key: 'onesignal_config', value: this.oneSignalConfig },
