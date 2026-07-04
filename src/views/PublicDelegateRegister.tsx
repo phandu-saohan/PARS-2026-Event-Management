@@ -1071,7 +1071,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                         </h3>
                       </div>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4">
                         {packages
                           .filter((pkg) => {
                             if (nationality === 'vietname') {
@@ -1145,11 +1145,6 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                       </div>
                     </div>
 
-                  </div>
-
-                  {/* RIGHT COLUMN: other add-ons, note fields, cumulative fee panel, submit button */}
-                  <div className="lg:col-span-5 space-y-8">
-
                     {/* CME & Gala Dinner selections */}
                     {(() => {
                       const leftAddOns = addOnServices.filter(svc => svc.isEnabled && (svc.id.toLowerCase().includes('cme') || svc.id.toLowerCase().includes('gala')));
@@ -1212,6 +1207,11 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                         </div>
                       );
                     })()}
+
+                  </div>
+
+                  {/* RIGHT COLUMN: other add-ons, note fields, cumulative fee panel, submit button */}
+                  <div className="lg:col-span-5 space-y-8">
 
                     {/* Other services */}
                     {(() => {
