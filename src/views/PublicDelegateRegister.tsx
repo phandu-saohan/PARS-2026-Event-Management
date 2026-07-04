@@ -1093,16 +1093,17 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                   }`}
                               >
                                 <div className="space-y-2 flex-1 min-w-0">
-                                  <div className="flex items-center">
-                                    <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${pkg.id === 'pkg-member' ? 'bg-indigo-100 text-indigo-850 border border-indigo-200' :
-                                      pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
-                                      }`}>
-                                      {pkg.id === 'pkg-member' ? L.t('Hội Viên', 'Member') :
-                                        pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
+                                  {pkg.id !== 'pkg-member' && (
+                                    <div className="flex items-center">
+                                      <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
+                                        pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
+                                        }`}>
+                                        {pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
                                           pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
                                             pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
-                                    </span>
-                                  </div>
+                                      </span>
+                                    </div>
+                                  )}
 
                                   <div>
                                     <span className="font-black text-xs md:text-sm text-slate-950 block leading-tight">{pkg.name}</span>
