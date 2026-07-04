@@ -1519,12 +1519,29 @@ Ban Thư ký Hội nghị PARS 2026`
                           <span className="font-bold text-slate-950 text-sm">
                             {att.title} {att.fullName}
                           </span>
-                          <span className="text-[10px] text-slate-450 mt-0.5">{att.email} | {att.phone}</span>
+                          <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-450 font-semibold">
+                            <span>{att.gender || 'N/A'}</span>
+                            <span>•</span>
+                            <span>NS: {att.yearOfBirth || 'N/A'}</span>
+                            <span>•</span>
+                            <span>{att.nationality === 'vietname' ? '🇻🇳 Việt Nam' : '🌐 Nước ngoài'}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-450 mt-0.5 font-mono">{att.email} | {att.phone}</span>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 truncate max-w-[150px]">
-                      {att.organization}
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-800">{att.organization || 'Tự do'}</span>
+                        {att.department && (
+                          <span className="text-[10px] text-slate-500 font-medium mt-0.5">{att.department}</span>
+                        )}
+                        {att.province && (
+                          <span className="text-[9.5px] text-slate-400 font-medium mt-0.5 flex items-center gap-0.5">
+                            📍 {att.province}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       {att.source === 'website' || !att.source ? (
@@ -1538,12 +1555,38 @@ Ban Thư ký Hội nghị PARS 2026`
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
-                        att.packageId === 'pkg-vip' ? 'bg-amber-50 text-amber-700' :
-                        att.packageId === 'pkg-standard' ? 'bg-teal-50/50 text-teal-700' : 'bg-slate-100 text-slate-700'
-                      }`}>
-                        {att.packageName}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`px-2 py-0.5 rounded text-[10px] uppercase font-bold ${
+                          att.packageId === 'pkg-vip' ? 'bg-amber-50 text-amber-700' :
+                          att.packageId === 'pkg-standard' ? 'bg-teal-50/50 text-teal-700' : 'bg-slate-100 text-slate-700'
+                        }`}>
+                          {att.packageName}
+                        </span>
+                        
+                        {/* Render addon badges */}
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {att.cmeRequired && (
+                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-100" title="Yêu cầu CME">
+                              CME
+                            </span>
+                          )}
+                          {att.galaRequired && (
+                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-amber-50 text-amber-700 border border-amber-100" title="Yêu cầu Gala">
+                              GALA
+                            </span>
+                          )}
+                          {att.masterclassRequired && (
+                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-indigo-50 text-indigo-750 border border-indigo-100" title="Yêu cầu Masterclass">
+                              M-CLASS
+                            </span>
+                          )}
+                          {att.tourRequired && (
+                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-teal-50 text-teal-750 border border-teal-100" title="Yêu cầu Tour">
+                              TOUR
+                            </span>
+                          )}
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <div className="flex flex-col items-center">
@@ -1715,22 +1758,36 @@ Ban Thư ký Hội nghị PARS 2026`
                       <span className="font-bold text-slate-950 text-xs">
                         {att.title} {att.fullName}
                       </span>
+                      <span className="text-[8.5px] text-slate-450 mt-0.5 font-medium">
+                        {att.gender || 'N/A'} • NS: {att.yearOfBirth || 'N/A'} • {att.nationality === 'vietname' ? 'Việt Nam' : 'Nước ngoài'}
+                      </span>
                       <span className="text-[9px] text-slate-400 mt-0.5 font-mono">{att.id} | {att.phone}</span>
                       <span className="text-[9px] text-slate-400 max-w-[150px] truncate">{att.email}</span>
                     </div>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[8px] uppercase font-black shrink-0 ${
-                    att.packageId === 'pkg-vip' ? 'bg-amber-50 text-amber-700' :
-                    att.packageId === 'pkg-standard' ? 'bg-teal-50/50 text-teal-700' : 'bg-slate-100 text-slate-700'
-                  }`}>
-                    {att.packageName}
-                  </span>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <span className={`px-2 py-0.5 rounded text-[8px] uppercase font-black ${
+                      att.packageId === 'pkg-vip' ? 'bg-amber-50 text-amber-700' :
+                      att.packageId === 'pkg-standard' ? 'bg-teal-50/50 text-teal-700' : 'bg-slate-100 text-slate-700'
+                    }`}>
+                      {att.packageName}
+                    </span>
+                    {/* Addon badges */}
+                    <div className="flex gap-0.5 flex-wrap justify-end">
+                      {att.cmeRequired && <span className="px-1 py-0.2 bg-emerald-50 text-emerald-750 border border-emerald-100 rounded text-[7px] font-black">CME</span>}
+                      {att.galaRequired && <span className="px-1 py-0.2 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[7px] font-black">GALA</span>}
+                      {att.masterclassRequired && <span className="px-1 py-0.2 bg-indigo-50 text-indigo-755 border border-indigo-100 rounded text-[7px] font-black">MC</span>}
+                      {att.tourRequired && <span className="px-1 py-0.2 bg-teal-50 text-teal-755 border border-teal-100 rounded text-[7px] font-black">TOUR</span>}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-1.5 pt-2 border-t border-slate-100 text-[10px] text-slate-600">
                   <div className="flex justify-between">
                     <span>Đơn vị:</span>
-                    <span className="font-semibold text-slate-800 text-right max-w-[160px] truncate">{att.organization || 'N/A'}</span>
+                    <span className="font-semibold text-slate-800 text-right max-w-[160px] truncate" title={`${att.organization || 'Tự do'} ${att.department ? `(${att.department})` : ''} ${att.province ? `📍 ${att.province}` : ''}`}>
+                      {att.organization || 'Tự do'} {att.department ? `(${att.department})` : ''} {att.province ? `📍 ${att.province}` : ''}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span>Đóng Phí:</span>
