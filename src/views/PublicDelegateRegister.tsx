@@ -1108,7 +1108,18 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                   <div>
                                     <span className="font-black text-xs md:text-sm text-slate-950 block leading-tight">{pkg.name}</span>
 
-                                    <div className="flex flex-wrap gap-1 mt-1">
+                                    {pkg.benefits && pkg.benefits.length > 0 && (
+                                      <div className="mt-2 space-y-1 text-slate-500 font-medium text-[10.5px] leading-relaxed border-t border-slate-100/60 pt-2">
+                                        {pkg.benefits.map((benefit, idx) => (
+                                          <div key={idx} className="flex items-start gap-1.5">
+                                            <span className="text-teal-650 font-black shrink-0 select-none">✓</span>
+                                            <span>{benefit}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+
+                                    <div className="flex flex-wrap gap-1 mt-2">
                                       {pkg.id === 'pkg-free' ? (
                                         <span className="px-1 py-0.2 bg-teal-50 text-teal-800 border border-teal-100 rounded text-[7.5px] font-black">{L.t('✓ MIỄN PHÍ', '✓ FREE')}</span>
                                       ) : (
