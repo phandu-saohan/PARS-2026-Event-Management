@@ -397,6 +397,11 @@ export interface SepayConfig {
   webhookSecret?: string;
 }
 
+export interface RegisterWebhookConfig {
+  isEnabled: boolean;
+  apiKey: string;
+}
+
 export interface OneSignalConfig {
   appId: string;
   restApiKey: string;

@@ -181,10 +181,12 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [formEmbedId, setFormEmbedId] = useState('');
   const [formEmbedName, setFormEmbedName] = useState('');
 
-  // SePay config states
   const [sepayConfig, setSepayConfig] = useState(store.getSepayConfig());
   const [isSepayTesting, setIsSepayTesting] = useState(false);
   const [sepayTestResult, setSepayTestResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Register Webhook states
+  const [registerWebhookConfig, setRegisterWebhookConfig] = useState(store.getRegisterWebhookConfig());
 
   // OneSignal config states
   const [onesignalConfig, setOnesignalConfig] = useState(store.getOneSignalConfig());
@@ -3542,6 +3544,145 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                 </div>
 
               </div>
+
+              {/* 4. Incoming registration Webhook configurations card */}
+              <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4 mt-6">
+                <div className="flex justify-between items-center border-b border-slate-200 pb-2">
+                  <span className="text-[10px] font-black text-slate-800 uppercase tracking-widest block">
+                    📥 Webhook Nhận Đăng Ký Đại Biểu (Incoming Webhook)
+                  </span>
+                  <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-wider ${
+                    registerWebhookConfig.isEnabled
+                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-300'
+                      : 'bg-slate-100 text-slate-500 border border-slate-200'
+                  }`}>
+                    {registerWebhookConfig.isEnabled ? 'Đã bật' : 'Chưa bật'}
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-xl p-4 text-[10.5px] leading-relaxed space-y-1.5 shadow-sm">
+                  <p className="font-bold text-indigo-300 text-[11px]">🔗 Hướng dẫn tích hợp Webhook:</p>
+                  <p>Hệ thống cung cấp một API Endpoint công khai để nhận thông tin đăng ký đại biểu từ các nguồn bên ngoài (như Ladipage, Google Forms, Zapier, Make.com).</p>
+                  <p>Khi có lượt đăng ký mới gửi đến, hệ thống sẽ tự động tạo đại biểu, sinh mã ID (vd: <code>{businessConfig.attendeeIdPrefix || 'PARS2026'}-XXXXXX</code>) và mã QR bảo mật tương ứng.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-4">
+                    {/* Enable toggle */}
+                    <div className="flex items-center justify-between bg-white p-3 rounded-xl border border-slate-200">
+                      <div>
+                        <span className="text-xs font-bold text-slate-800 block">Kích hoạt Webhook</span>
+                        <span className="text-[9.5px] text-slate-450 block mt-0.5">Bật/tắt khả năng nhận dữ liệu từ các form bên ngoài</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...registerWebhookConfig, isEnabled: !registerWebhookConfig.isEnabled };
+                          setRegisterWebhookConfig(updated);
+                          store.saveRegisterWebhookConfig(updated);
+                        }}
+                        className={`w-11 h-6 rounded-full p-0.5 border-none cursor-pointer transition-colors duration-200 ${
+                          registerWebhookConfig.isEnabled ? 'bg-emerald-500' : 'bg-slate-350'
+                        }`}
+                      >
+                        <div
+                          className={`bg-white w-5 h-5 rounded-full shadow-md transform transition-transform duration-200 ${
+                            registerWebhookConfig.isEnabled ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    {/* API Key configuration */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-black text-slate-500 uppercase block">Webhook API Key (Authorization token)</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={registerWebhookConfig.apiKey}
+                          onChange={(e) => {
+                            const updated = { ...registerWebhookConfig, apiKey: e.target.value };
+                            setRegisterWebhookConfig(updated);
+                            store.saveRegisterWebhookConfig(updated);
+                          }}
+                          placeholder="Tạo Token bảo mật bảo vệ webhook..."
+                          className="flex-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-mono"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // Generate a random high-entropy token
+                            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                            let generated = '';
+                            for (let i = 0; i < 24; i++) {
+                              generated += chars.charAt(Math.floor(Math.random() * chars.length));
+                            }
+                            const updated = { ...registerWebhookConfig, apiKey: generated };
+                            setRegisterWebhookConfig(updated);
+                            store.saveRegisterWebhookConfig(updated);
+                          }}
+                          className="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold rounded-lg cursor-pointer transition-all"
+                        >
+                          Tạo khóa
+                        </button>
+                      </div>
+                      <span className="text-[9px] text-slate-400 block mt-1">
+                        Sử dụng khóa này trong Header <code>Authorization: Bearer [API_KEY]</code> hoặc <code>X-Api-Key</code> hoặc tham số query <code>?apiKey=...</code>
+                      </span>
+                    </div>
+
+                    {/* Webhook URL copy display */}
+                    <div className="space-y-1.5 bg-slate-105 p-3 rounded-xl border border-slate-200">
+                      <span className="text-[9px] font-black text-slate-500 uppercase block tracking-wider">📡 Webhook URL nhận đăng ký</span>
+                      <div className="bg-white px-3 py-2 rounded-lg border border-slate-200 flex items-center justify-between gap-3 overflow-x-auto">
+                        <code className="text-[10.5px] font-mono font-bold text-slate-800 break-all select-all">
+                          {`${businessConfig.appUrl?.replace(/\/$/, '')}/api/register-webhook${registerWebhookConfig.apiKey ? `?apiKey=${registerWebhookConfig.apiKey}` : ''}`}
+                        </code>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const url = `${businessConfig.appUrl?.replace(/\/$/, '')}/api/register-webhook${registerWebhookConfig.apiKey ? `?apiKey=${registerWebhookConfig.apiKey}` : ''}`;
+                            navigator.clipboard.writeText(url);
+                            alert('Đã sao chép Webhook URL vào Clipboard!');
+                          }}
+                          className="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded text-[9.5px] font-black tracking-wider cursor-pointer border-none shrink-0"
+                        >
+                          COPY
+                        </button>
+                      </div>
+                      <span className="text-[9px] text-slate-450 block leading-normal">
+                        ⚠️ Dán URL này vào mục Webhook của LadiPage hoặc cấu hình gửi POST trong Make.com / Zapier.
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Schema / Example Payload */}
+                  <div className="space-y-2 bg-slate-900 text-slate-300 p-4 rounded-xl border border-slate-850 flex flex-col justify-between font-mono">
+                    <div>
+                      <span className="text-[9px] font-black text-indigo-400 tracking-wider uppercase block border-b border-slate-800 pb-1 mb-2">
+                        📄 MẪU JSON PAYLOAD GỬI ĐẾN (HTTP POST)
+                      </span>
+                      <pre className="text-[8.5px] text-slate-400 leading-normal max-h-48 overflow-y-auto whitespace-pre-wrap select-all">
+{JSON.stringify({
+  "fullName": "NGUYỄN VĂN A",
+  "phone": "0987654321",
+  "email": "nguyenvana@gmail.com",
+  "organization": "Bệnh viện Da liễu",
+  "packageName": "Gói Tiêu chuẩn",
+  "packageId": "pkg-standard",
+  "cmeRequired": true,
+  "cmeIdentityNo": "123456789",
+  "notes": "Đăng ký qua LadiPage"
+}, null, 2)}
+                      </pre>
+                    </div>
+                    <div className="text-[9px] text-slate-500 border-t border-slate-800 pt-2 mt-2 leading-relaxed">
+                      * Các trường <strong>fullName</strong> và <strong>phone</strong> là bắt buộc. Hệ thống hỗ trợ cả cú pháp CamelCase hoặc SnakeCase (vd: <code className="text-slate-400">full_name</code>).
+                    </div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           )}
 

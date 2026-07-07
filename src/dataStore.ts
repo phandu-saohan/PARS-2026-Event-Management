@@ -35,6 +35,7 @@ import {
   MarketingChannelsConfig,
   SendingCampaign,
   CustomFormConfig,
+  RegisterWebhookConfig,
 } from './types';
 import { supabase, isSupabaseConfigured, uploadToSupabaseStorage } from './lib/supabase';
 import {
@@ -1089,6 +1090,11 @@ const DEFAULT_ONESIGNAL_CONFIG: OneSignalConfig = {
   isEnabled: false,
 };
 
+const DEFAULT_REGISTER_WEBHOOK_CONFIG: RegisterWebhookConfig = {
+  isEnabled: false,
+  apiKey: '',
+};
+
 const DEFAULT_MARKETING_CHANNELS_CONFIG: MarketingChannelsConfig = {
   facebook: { appId: '', pageId: '', pageAccessToken: '', pageName: '', isConfigured: false },
   zalo: { appId: '', secretKey: '', oaId: '', accessToken: '', refreshToken: '', oaName: '', isConfigured: false },
@@ -1118,6 +1124,7 @@ export class DataStore {
   private static KEY_BUSINESS_CONFIG = 'pars_business_config';
   private static KEY_EMBED_SCRIPTS = 'pars_embed_scripts';
   private static KEY_SEPAY = 'pars_config_sepay';
+  private static KEY_REGISTER_WEBHOOK = 'pars_config_register_webhook';
   private static KEY_WHATSAPP = 'pars_config_whatsapp';
   private static KEY_ROOMS = 'pars_schedule_rooms';
   private static KEY_DATES = 'pars_schedule_dates';
@@ -1153,6 +1160,7 @@ export class DataStore {
   private businessConfig: BusinessConfig = DEFAULT_BUSINESS_CONFIG;
   private embedScripts: EmbedScript[] = [];
   private sepayConfig: SepayConfig = DEFAULT_SEPAY_CONFIG;
+  private registerWebhookConfig: RegisterWebhookConfig = DEFAULT_REGISTER_WEBHOOK_CONFIG;
   private oneSignalConfig: OneSignalConfig = DEFAULT_ONESIGNAL_CONFIG;
   private pendingSyncAttendeeIds: string[] = [];
   private rooms: string[] = [];
@@ -1231,6 +1239,7 @@ export class DataStore {
     this.virtualSections = this.getLocalStorage(DataStore.KEY_SECTIONS, []);
     this.embedScripts = this.getLocalStorage(DataStore.KEY_EMBED_SCRIPTS, INITIAL_EMBED_SCRIPTS);
     this.sepayConfig = this.getLocalStorage(DataStore.KEY_SEPAY, DEFAULT_SEPAY_CONFIG);
+    this.registerWebhookConfig = this.getLocalStorage(DataStore.KEY_REGISTER_WEBHOOK, DEFAULT_REGISTER_WEBHOOK_CONFIG);
     this.whatsappConfig = this.getLocalStorage(DataStore.KEY_WHATSAPP, DEFAULT_WHATSAPP_CONFIG);
     this.oneSignalConfig = this.getLocalStorage(DataStore.KEY_ONESIGNAL, DEFAULT_ONESIGNAL_CONFIG);
     this.contacts = this.getLocalStorage(DataStore.KEY_CONTACTS, []);
@@ -1533,6 +1542,11 @@ export class DataStore {
         if (sepay) {
           this.sepayConfig = sepay.value;
           this.saveToLocalStorage(DataStore.KEY_SEPAY, this.sepayConfig);
+        }
+        const registerWebhook = configs.find(c => c.key === 'register_webhook_config');
+        if (registerWebhook) {
+          this.registerWebhookConfig = registerWebhook.value;
+          this.saveToLocalStorage(DataStore.KEY_REGISTER_WEBHOOK, this.registerWebhookConfig);
         }
         const onesignal = configs.find(c => c.key === 'onesignal_config');
         if (onesignal) {
@@ -3949,6 +3963,23 @@ export class DataStore {
     if (isSupabaseConfigured()) {
       supabase.from('system_config').upsert({ key: 'sepay_config', value: config }).then(({ error }) => {
         if (error) console.error('Error saving SePay config to Supabase:', error);
+      });
+    }
+  }
+
+  // ==================== REGISTER WEBHOOK CONFIG ====================
+
+  getRegisterWebhookConfig(): RegisterWebhookConfig {
+    return { ...this.registerWebhookConfig };
+  }
+
+  saveRegisterWebhookConfig(config: RegisterWebhookConfig): void {
+    this.registerWebhookConfig = { ...config };
+    this.saveToLocalStorage(DataStore.KEY_REGISTER_WEBHOOK, this.registerWebhookConfig);
+
+    if (isSupabaseConfigured()) {
+      supabase.from('system_config').upsert({ key: 'register_webhook_config', value: config }).then(({ error }) => {
+        if (error) console.error('Error saving Register Webhook config to Supabase:', error);
       });
     }
   }
