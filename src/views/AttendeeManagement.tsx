@@ -37,6 +37,16 @@ const getRemainingNotes = (notes: string | undefined): string => {
   return parts[0].trim();
 };
 
+const formatName = (title: string | undefined, fullName: string | undefined): string => {
+  const fName = fullName || '';
+  if (!title) return fName;
+  const cleanTitle = title.trim();
+  if (cleanTitle.toUpperCase() === 'BS' || cleanTitle.toUpperCase() === 'BS.') {
+    return fName;
+  }
+  return `${cleanTitle} ${fName}`;
+};
+
 interface AttendeeManagementProps {
   role: Role;
 }
@@ -208,14 +218,14 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
           ? await store.sendZaloZNS(att, bulkZnsTemplateId)
           : await store.sendWhatsapp(att, bulkZnsTemplateId);
         results.push({
-          name: `${att.title} ${att.fullName}`,
+          name: formatName(att.title, att.fullName),
           phone: att.phone,
           status: log.status === 'success' ? 'success' : 'failed',
           detail: log.response?.message || 'Thành công'
         });
       } catch (err: any) {
         results.push({
-          name: `${att.title} ${att.fullName}`,
+          name: formatName(att.title, att.fullName),
           phone: att.phone,
           status: 'failed',
           detail: err.message || 'Lỗi gửi tin'
@@ -235,7 +245,7 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
     setNotifyTemplateId(tempId);
     setNotificationFeedback(null);
     
-    const title = att.title || 'BS.';
+    const title = att.title && att.title !== 'BS' && att.title !== 'BS.' ? att.title : 'Quý đại biểu';
     const fullname = att.fullName || '';
     const code = att.id || '';
     const pkg = att.packageName || 'Gói Đại Biểu Tiêu Chuẩn';
@@ -1198,7 +1208,7 @@ Ban Thư ký Hội nghị PARS 2026`
             <div>
               <p className="text-[11px] font-bold text-orange-300 uppercase tracking-widest">Đang kết xuất in nhãn sticker sảnh (8cm x 5cm)...</p>
               <h5 className="text-xs font-extrabold text-white mt-0.5 animate-pulse">
-                Bản ghi: {autoPrintedAttendee.title} {autoPrintedAttendee.fullName} - {autoPrintedAttendee.organization}
+                Bản ghi: {formatName(autoPrintedAttendee.title, autoPrintedAttendee.fullName)} - {autoPrintedAttendee.organization}
               </h5>
             </div>
           </div>
@@ -1517,7 +1527,7 @@ Ban Thư ký Hội nghị PARS 2026`
                         </div>
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-950 text-sm">
-                            {att.title} {att.fullName}
+                            {formatName(att.title, att.fullName)}
                           </span>
                           <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-slate-450 font-semibold">
                             <span>{att.gender || 'N/A'}</span>
@@ -1756,7 +1766,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     </div>
                     <div className="flex flex-col">
                       <span className="font-bold text-slate-950 text-xs">
-                        {att.title} {att.fullName}
+                        {formatName(att.title, att.fullName)}
                       </span>
                       <span className="text-[8.5px] text-slate-450 mt-0.5 font-medium">
                         {att.gender || 'N/A'} • NS: {att.yearOfBirth || 'N/A'} • {att.nationality === 'vietname' ? 'Việt Nam' : 'Nước ngoài'}
@@ -2499,7 +2509,7 @@ Ban Thư ký Hội nghị PARS 2026`
                           <span className="text-[10px] text-slate-400 absolute top-2 right-3 font-mono tracking-wide uppercase">Cấu hình Danh xưng</span>
                           <p className="text-[11px] text-slate-500 font-bold font-mono">DANH XƯNG & HỌ TÊN:</p>
                           <p className="text-sm font-black text-slate-900 uppercase mt-0.5">
-                            {viewDetailAttendee.title} {viewDetailAttendee.fullName}
+                            {formatName(viewDetailAttendee.title, viewDetailAttendee.fullName)}
                           </p>
                         </div>
 
@@ -3122,7 +3132,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     </div>
                     <div>
                       <p className="text-xs font-black text-slate-900 uppercase">
-                        {unpaidAttendeeForQR.title} {unpaidAttendeeForQR.fullName}
+                        {formatName(unpaidAttendeeForQR.title, unpaidAttendeeForQR.fullName)}
                       </p>
                       <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
                         {unpaidAttendeeForQR.packageName} | Mã số: <span className="font-mono text-indigo-650 font-bold">{unpaidAttendeeForQR.id}</span>
@@ -3478,7 +3488,7 @@ Ban Thư ký Hội nghị PARS 2026`
                       className="font-black text-slate-950 uppercase leading-none tracking-tight"
                       style={{ fontSize: nameFontSize }}
                     >
-                      {selectedBadgeAttendee.title} {selectedBadgeAttendee.fullName}
+                      {formatName(selectedBadgeAttendee.title, selectedBadgeAttendee.fullName)}
                     </h2>
                     <p 
                       className="font-bold text-teal-750 truncate mt-1.5"
@@ -3584,7 +3594,7 @@ Ban Thư ký Hội nghị PARS 2026`
                 <div className="space-y-1">
                   <span className="text-[10px] text-indigo-600 font-mono font-bold uppercase tracking-wider block">Người nhận thông báo / Delegate</span>
                   <h3 className="text-sm font-black text-slate-900">
-                    {notifyAttendee.title} {notifyAttendee.fullName}
+                    {formatName(notifyAttendee.title, notifyAttendee.fullName)}
                   </h3>
                   <p className="text-[11px] text-slate-500 font-medium">
                     📧 {notifyAttendee.email} | 📞 {notifyAttendee.phone}
@@ -3842,7 +3852,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     className="text-xl font-black uppercase tracking-tight my-2"
                     style={{ color: cmeConfig.borderColor || '#b45309' }}
                   >
-                    {selectedCmeAttendee.title} {selectedCmeAttendee.fullName}
+                    {formatName(selectedCmeAttendee.title, selectedCmeAttendee.fullName)}
                   </h2>
                   
                   <div className="grid grid-cols-2 text-left max-w-md mx-auto text-[11px] text-slate-700 font-sans bg-amber-50/40 p-2.5 rounded border border-amber-100/50">
@@ -4106,7 +4116,7 @@ Ban Thư ký Hội nghị PARS 2026`
                           <tr key={a.id} className="hover:bg-slate-50 font-serif">
                             <td className="border border-slate-950 p-2 text-center font-sans">{index + 1}</td>
                             <td className="border border-slate-950 p-2 text-center font-mono text-[9px] font-bold text-slate-650">{a.id}</td>
-                            <td className="border border-slate-950 p-2 font-bold uppercase">{a.title} {a.fullName}</td>
+                            <td className="border border-slate-950 p-2 font-bold uppercase">{formatName(a.title, a.fullName)}</td>
                             <td className="border border-slate-950 p-2 text-center font-sans">{a.yearOfBirth || '1982'}</td>
                             <td className="border border-slate-950 p-2 text-center font-sans font-semibold text-xs">{a.nationality === 'vietname' ? 'Việt Nam' : 'Nước ngoài'}</td>
                             <td className="border border-slate-950 p-2 text-slate-700">{a.organization}</td>
@@ -4380,7 +4390,7 @@ Ban Thư ký Hội nghị PARS 2026`
                               {idx + 1}
                             </span>
                             <div>
-                              <p className="font-bold text-slate-800">{a.title} {a.fullName}</p>
+                              <p className="font-bold text-slate-800">{formatName(a.title, a.fullName)}</p>
                               <p className="text-[10px] text-slate-400 font-mono font-bold mt-0.5">{a.id} • {a.phone}</p>
                             </div>
                           </div>
@@ -4537,7 +4547,7 @@ Ban Thư ký Hội nghị PARS 2026`
                   </div>
                   
                   <h3 className="text-base font-black text-slate-900 leading-tight uppercase truncate">
-                    {kioskCheckInAttendee.title} {kioskCheckInAttendee.fullName}
+                    {formatName(kioskCheckInAttendee.title, kioskCheckInAttendee.fullName)}
                   </h3>
                   
                   <p className="text-xs text-slate-500 font-medium truncate">
@@ -4808,7 +4818,7 @@ Ban Thư ký Hội nghị PARS 2026`
                                 <tr key={att.id} className="hover:bg-slate-50/50 transition-colors">
                                   <td className="p-3 pl-4 font-mono font-bold text-slate-900 select-all">{att.id}</td>
                                   <td className="p-3">
-                                    <div className="font-extrabold text-slate-800 uppercase">{att.title} {att.fullName}</div>
+                                    <div className="font-extrabold text-slate-800 uppercase">{formatName(att.title, att.fullName)}</div>
                                     {att.cmeRequired && (
                                       <span className="text-[8px] bg-red-50 text-red-600 border border-red-100 px-1 py-0.2 rounded font-black mt-1 inline-block uppercase">Cấp CME</span>
                                     )}

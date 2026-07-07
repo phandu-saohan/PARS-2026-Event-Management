@@ -49,6 +49,16 @@ export function maskEmail(email: string): string {
   return first2 + mask + last1 + '@' + domain;
 }
 
+export function formatName(title: string | undefined, fullName: string | undefined): string {
+  const fName = fullName || '';
+  if (!title) return fName;
+  const cleanTitle = title.trim();
+  if (cleanTitle.toUpperCase() === 'BS' || cleanTitle.toUpperCase() === 'BS.') {
+    return fName;
+  }
+  return `${cleanTitle} ${fName}`;
+}
+
 interface PublicCheckRegistrationProps {
   onNavigate: (view: string) => void;
 }
@@ -233,7 +243,7 @@ export default function PublicCheckRegistration({ onNavigate }: PublicCheckRegis
                         ID: {att.id}
                       </span>
                       <h3 className="text-sm font-black text-slate-900 uppercase">
-                        {att.title} {att.fullName}
+                        {formatName(att.title, att.fullName)}
                       </h3>
                     </div>
 
@@ -402,7 +412,7 @@ export default function PublicCheckRegistration({ onNavigate }: PublicCheckRegis
                     className="text-xl font-black uppercase tracking-tight my-2"
                     style={{ color: cmeConfig.borderColor || '#b45309' }}
                   >
-                    {selectedAttendee.title} {selectedAttendee.fullName}
+                    {formatName(selectedAttendee.title, selectedAttendee.fullName)}
                   </h2>
                   
                   <div className="grid grid-cols-2 text-left max-w-md mx-auto text-[11px] text-slate-700 font-sans bg-amber-50/40 p-2.5 rounded border border-amber-100/50">
@@ -524,7 +534,7 @@ export default function PublicCheckRegistration({ onNavigate }: PublicCheckRegis
 
               {/* Attendee details */}
               <div className="space-y-1">
-                <h2 className="text-sm font-extrabold text-slate-800 uppercase leading-snug">{selectedAttendee.title} {selectedAttendee.fullName}</h2>
+                <h2 className="text-sm font-extrabold text-slate-800 uppercase leading-snug">{formatName(selectedAttendee.title, selectedAttendee.fullName)}</h2>
                 <p className="text-xs text-slate-500 font-medium">{selectedAttendee.organization}</p>
                 <p className="text-[10px] text-slate-400 italic">Mã số CCHN: {selectedAttendee.cmeIdentityNo || 'Không đăng ký CME'}</p>
               </div>
