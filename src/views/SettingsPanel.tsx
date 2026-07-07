@@ -281,6 +281,7 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   const [iframeHeight, setIframeHeight] = useState('950');
   const [copiedCodeSection, setCopiedCodeSection] = useState<string | null>(null);
   const [selectedEmbedForm, setSelectedEmbedForm] = useState<'delegate' | 'speaker' | 'sponsor'>('delegate');
+  const [embedFormat, setEmbedFormat] = useState<'js' | 'iframe' | 'shortcode'>('js');
 
   // Reload caches helper
   const reloadData = () => {
@@ -3939,59 +3940,77 @@ ON CONFLICT (code) DO UPDATE SET
                   </div>
                 </div>
 
-                {/* Gutenberg clean frame format block */}
-                <div className="space-y-1.5">
-                  <div className="flex justify-between items-center bg-slate-950/80 p-2.5 px-3.5 rounded-t-lg border-b border-slate-900 text-[10.5px]">
-                    <span className="font-mono font-bold text-slate-300">Iframe Responsive Gutenberg/Elementor Block Code</span>
+                {/* Format selection tabs */}
+                <div className="flex flex-wrap gap-2 border-b border-slate-800 pb-3 text-[10.5px]">
+                  {[
+                    { id: 'js', label: 'JS Chèn Động (An toàn nhất)' },
+                    { id: 'iframe', label: 'Iframe Thô' },
+                    { id: 'shortcode', label: 'Shortcode WP' },
+                  ].map(fmt => (
                     <button
-                      onClick={() => {
-                        const finalCode = `<!-- PARS Embed Form: ${selectedEmbedForm} -->
-<div id="pars-frame-root-${selectedEmbedForm}" style="width:100%;overflow:hidden;position:relative;">
-  <iframe
-    id="pars-embed-frame-${selectedEmbedForm}"
-    src="${getEmbedFormUrl(selectedEmbedForm)}"
-    width="100%"
-    height="${iframeHeight}px"
-    style="border:none;width:100%;display:block;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.06);"
-    loading="lazy"
-    allow="clipboard-write"
-    sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"
-  ></iframe>
-  <script>
-    (function(){
-      var frame=document.getElementById('pars-embed-frame-${selectedEmbedForm}');
-      window.addEventListener('message',function(e){
-        if(e.data&&e.data.type==='pars-height'&&typeof e.data.height==='number'){
-          frame.style.height=e.data.height+'px';
-        }
-      });
-    })();
-  <\/script>
-</div>`;
-                        navigator.clipboard.writeText(finalCode);
-                        setCopiedCodeSection('quickger');
-                        setTimeout(() => setCopiedCodeSection(null), 2000);
-                      }}
-                      className="text-amber-400 font-bold border-none bg-transparent cursor-pointer hover:underline text-[10px]"
+                      key={fmt.id}
+                      type="button"
+                      onClick={() => setEmbedFormat(fmt.id as any)}
+                      className={`px-3 py-1 font-bold rounded-lg cursor-pointer transition-all border ${
+                        embedFormat === fmt.id
+                          ? 'bg-amber-400 text-slate-950 border-amber-400'
+                          : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                      }`}
                     >
-                      {copiedCodeSection === 'quickger' ? 'Đã sao chép!' : 'COPY CODE'}
+                      {fmt.label}
                     </button>
-                  </div>
-                  <pre className="bg-slate-950/40 p-4 border border-slate-900 rounded-b-lg font-mono text-[8.5px] text-emerald-400 h-36 overflow-y-auto leading-relaxed select-all">
-{`<!-- PARS Embed Form: ${selectedEmbedForm} -->
-<div id="pars-frame-root-${selectedEmbedForm}" style="width:100%;overflow:hidden;position:relative;">
-  <iframe
-    id="pars-embed-frame-${selectedEmbedForm}"
-    src="${getEmbedFormUrl(selectedEmbedForm)}"
-    width="100%" height="${iframeHeight}px"
-    style="border:none;width:100%;display:block;border-radius:12px;"
-    loading="lazy" allow="clipboard-write"
-    sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"
-  ></iframe>
-  <script>(function(){var f=document.getElementById('pars-embed-frame-${selectedEmbedForm}');window.addEventListener('message',function(e){if(e.data&&e.data.type==='pars-height')f.style.height=e.data.height+'px';});})()</script>
-</div>`}
-                  </pre>
+                  ))}
                 </div>
+
+                {/* Gutenberg clean frame format block */}
+                {(() => {
+                  let codeText = '';
+                  let guideText = '';
+                  const viewName = selectedEmbedForm === 'speaker' ? 'register-speaker' : selectedEmbedForm === 'sponsor' ? 'register-sponsor' : 'register-delegate';
+                  const shortcodeId = selectedEmbedForm === 'speaker' ? 'speaker' : selectedEmbedForm === 'sponsor' ? 'sponsor' : 'delegate';
+
+                  if (embedFormat === 'js') {
+                    codeText = `<div id="pars-iframe-container-${selectedEmbedForm}"></div>\n<script>\n  (function() {\n    var container = document.getElementById("pars-iframe-container-${selectedEmbedForm}");\n    if (container) {\n      var iframe = document.createElement("iframe");\n      iframe.src = "${getEmbedFormUrl(selectedEmbedForm)}";\n      iframe.width = "100%";\n      iframe.height = "${iframeHeight}";\n      iframe.style.border = "none";\n      iframe.style.width = "100%";\n      iframe.style.display = "block";\n      iframe.style.borderRadius = "16px";\n      iframe.style.boxShadow = "0 4px 30px rgba(0,0,0,0.05)";\n      iframe.title = "PARS ${selectedEmbedForm} Form";\n      iframe.setAttribute("allow", "clipboard-write");\n      iframe.setAttribute("sandbox", "allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals");\n      container.appendChild(iframe);\n    }\n  })();\n</script>`;
+                    guideText = '💡 Khuyên dùng: Dán đoạn Script này vào khối Custom HTML của WordPress. Giúp tránh 100% việc bị WordPress chặn hoặc tự lọc thẻ iframe thô khi lưu bài viết.';
+                  } else if (embedFormat === 'iframe') {
+                    codeText = `<iframe src="${getEmbedFormUrl(selectedEmbedForm)}" width="100%" height="${iframeHeight}px" style="border:none;width:100%;display:block;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.06);" loading="lazy" allow="clipboard-write" sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"></iframe>`;
+                    guideText = '💡 Sử dụng: Dán trực tiếp vào Khối HTML Tùy Chỉnh (Custom HTML) trong Gutenberg hoặc Widget HTML của Elementor.';
+                  } else {
+                    codeText = `[pars_form_${shortcodeId} height="${iframeHeight}"]`;
+                    guideText = '💡 Đăng ký Shortcode này trong functions.php của Theme (hoặc qua plugin WPCode):\n\n' +
+                                'function pars_embed_form_shortcode_' + shortcodeId + '($atts) {\n' +
+                                '  $a = shortcode_atts(array("height" => "' + iframeHeight + '"), $atts);\n' +
+                                '  return \'<iframe src="' + getEmbedFormUrl(selectedEmbedForm) + '" width="100%" height="\' . esc_attr($a[\'height\']) . \'" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" allow="clipboard-write" sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"></iframe>\';\n' +
+                                '}\n' +
+                                'add_shortcode("pars_form_' + shortcodeId + '", "pars_embed_form_shortcode_' + shortcodeId + '");';
+                  }
+
+                  return (
+                    <div className="space-y-2 mt-3">
+                      <div className="flex justify-between items-center bg-slate-950/80 p-2.5 px-3.5 rounded-t-lg border-b border-slate-900 text-[10.5px]">
+                        <span className="font-mono font-bold text-slate-300">
+                          {embedFormat === 'js' ? 'Mã Script Chèn Động (Dynamic JS)' : embedFormat === 'iframe' ? 'Khung Iframe Thô (Standard Iframe)' : 'Mã WP Shortcode'}
+                        </span>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(codeText);
+                            setCopiedCodeSection('quickger');
+                            setTimeout(() => setCopiedCodeSection(null), 2000);
+                          }}
+                          className="text-amber-400 font-bold border-none bg-transparent cursor-pointer hover:underline text-[10px]"
+                        >
+                          {copiedCodeSection === 'quickger' ? 'Đã sao chép!' : 'COPY CODE'}
+                        </button>
+                      </div>
+                      <pre className="bg-slate-950/40 p-4 border border-slate-900 rounded-b-lg font-mono text-[8.5px] text-emerald-400 h-44 overflow-y-auto leading-relaxed select-all">
+                        {codeText}
+                      </pre>
+                      <p className="text-[10px] text-slate-405 leading-relaxed whitespace-pre-line bg-slate-900/40 p-3 rounded-lg border border-slate-850 mt-2 font-sans">
+                        {guideText}
+                      </p>
+                    </div>
+                  );
+                })()}
               </div>
 
             </div>

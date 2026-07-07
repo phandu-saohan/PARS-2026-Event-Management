@@ -116,6 +116,7 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
   const [activeEmbedUrl, setActiveEmbedUrl] = useState<string | null>(null);
   const [activeEmbedTitle, setActiveEmbedTitle] = useState<string>('');
   const [copiedEmbed, setCopiedEmbed] = useState(false);
+  const [embedTab, setEmbedTab] = useState<'js' | 'iframe' | 'shortcode'>('js');
 
   // Field Editor States
   const [showFieldModal, setShowFieldModal] = useState(false);
@@ -1265,52 +1266,118 @@ export default function CustomFormManager({ role }: CustomFormManagerProps) {
               <h5 className="text-sm font-bold text-slate-900">{activeEmbedTitle}</h5>
             </div>
 
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase block">Đoạn mã HTML Iframe</label>
-              <textarea
-                readOnly
-                rows={4}
-                value={`<iframe src="${activeEmbedUrl}" width="100%" height="800" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="${activeEmbedTitle}"></iframe>`}
-                className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-600 focus:outline-none select-all"
-              />
-            </div>
-
-            <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
-              * Mẹo: Bạn có thể thay đổi thuộc tính `height="800"` (chiều cao) thành kích thước phù hợp để tránh cuộn trang (ví dụ: `height="1200"` nếu form dài).
-            </p>
-
-            <div className="flex gap-2.5 pt-2">
+             {/* Tab selector for embed code types */}
+            <div className="flex border-b border-slate-100 text-xs">
               <button
                 type="button"
-                onClick={() => setActiveEmbedUrl(null)}
-                className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer"
+                onClick={() => setEmbedTab('js')}
+                className={`flex-1 pb-2 font-bold text-center border-b-2 transition-all ${
+                  embedTab === 'js'
+                    ? 'border-teal-600 text-teal-600 font-extrabold'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
               >
-                Đóng
+                JS Chèn Động (An toàn nhất)
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const code = `<iframe src="${activeEmbedUrl}" width="100%" height="800" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="${activeEmbedTitle}"></iframe>`;
-                  navigator.clipboard.writeText(code).then(() => {
-                    setCopiedEmbed(true);
-                    setTimeout(() => setCopiedEmbed(false), 2000);
-                  });
-                }}
-                className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs border-none flex items-center justify-center gap-1.5"
+                onClick={() => setEmbedTab('iframe')}
+                className={`flex-1 pb-2 font-bold text-center border-b-2 transition-all ${
+                  embedTab === 'iframe'
+                    ? 'border-teal-600 text-teal-600 font-extrabold'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
               >
-                {copiedEmbed ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    <span>Đã sao chép!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    <span>Sao chép mã nhúng</span>
-                  </>
-                )}
+                Iframe Thô (Gutenberg)
+              </button>
+              <button
+                type="button"
+                onClick={() => setEmbedTab('shortcode')}
+                className={`flex-1 pb-2 font-bold text-center border-b-2 transition-all ${
+                  embedTab === 'shortcode'
+                    ? 'border-teal-600 text-teal-600 font-extrabold'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'
+                }`}
+              >
+                WP Shortcode
               </button>
             </div>
+
+            {/* Code Generator & Preview */}
+            {(() => {
+              let codeText = '';
+              let guideText = '';
+              const formIdMatch = activeEmbedUrl ? activeEmbedUrl.match(/formId=([^&]+)/) : null;
+              const extractedFormId = formIdMatch ? formIdMatch[1] : 'form-custom';
+
+              if (embedTab === 'js') {
+                codeText = `<div id="pars-iframe-container-${extractedFormId}"></div>\n<script>\n  (function() {\n    var container = document.getElementById("pars-iframe-container-${extractedFormId}");\n    if (container) {\n      var iframe = document.createElement("iframe");\n      iframe.src = "${activeEmbedUrl}";\n      iframe.width = "100%";\n      iframe.height = "850";\n      iframe.style.border = "none";\n      iframe.style.width = "100%";\n      iframe.style.display = "block";\n      iframe.style.borderRadius = "16px";\n      iframe.style.boxShadow = "0 4px 30px rgba(0,0,0,0.05)";\n      iframe.title = "${activeEmbedTitle}";\n      iframe.setAttribute("allow", "clipboard-write");\n      iframe.setAttribute("sandbox", "allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals");\n      container.appendChild(iframe);\n    }\n  })();\n</script>`;
+                guideText = '💡 Khuyên dùng: Dán đoạn Script này vào khối HTML Tùy Chỉnh (Custom HTML) của WordPress. Vượt qua 100% các bộ lọc bảo mật chặn iframe thô khi lưu trang.';
+              } else if (embedTab === 'iframe') {
+                codeText = `<iframe src="${activeEmbedUrl}" width="100%" height="850" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="${activeEmbedTitle}" allow="clipboard-write" sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"></iframe>`;
+                guideText = '💡 Sử dụng: Dán trực tiếp vào khối "Khối HTML Tùy Chỉnh" (Custom HTML) trong trình Gutenberg/Elementor.';
+              } else {
+                codeText = `[pars_form_thallo form_id="${extractedFormId}" height="850"]`;
+                guideText = '💡 Đăng ký Shortcode này trong functions.php (hoặc WPCode Snippets):\n\n' +
+                            'function pars_embed_thallo_form_shortcode($atts) {\n' +
+                            '  $a = shortcode_atts(array("form_id" => "form-yiy779bd3", "height" => "850"), $atts);\n' +
+                            '  return \'<iframe src="https://pars2026.vercel.app/?view=register-custom&formId=\' . esc_attr($a[\'form_id\']) . \'" width="100%" height="\' . esc_attr($a[\'height\']) . \'" style="border:none; border-radius:16px; box-shadow: 0 4px 30px rgba(0,0,0,0.05);" title="THALLO" allow="clipboard-write" sandbox="allow-top-navigation allow-scripts allow-forms allow-same-origin allow-popups allow-modals"></iframe>\';\n' +
+                            '}\n' +
+                            'add_shortcode("pars_form_thallo", "pars_embed_thallo_form_shortcode");';
+              }
+
+              return (
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase block">
+                      Đoạn mã tích hợp ({embedTab === 'js' ? 'Script Chèn Động' : embedTab === 'iframe' ? 'Iframe Thô' : 'Shortcode WP'})
+                    </label>
+                    <textarea
+                      readOnly
+                      rows={embedTab === 'shortcode' ? 5 : 6}
+                      value={codeText}
+                      className="w-full p-3 bg-slate-900 border border-slate-950 text-emerald-400 rounded-xl text-xs font-mono focus:outline-none select-all leading-normal"
+                    />
+                  </div>
+
+                  <p className="text-[10px] text-slate-500 font-semibold leading-relaxed whitespace-pre-line bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    {guideText}
+                  </p>
+
+                  <div className="flex gap-2.5 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveEmbedUrl(null)}
+                      className="flex-1 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl cursor-pointer"
+                    >
+                      Đóng
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(codeText).then(() => {
+                          setCopiedEmbed(true);
+                          setTimeout(() => setCopiedEmbed(false), 2000);
+                        });
+                      }}
+                      className="flex-1 py-2 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-xl cursor-pointer shadow-xs border-none flex items-center justify-center gap-1.5"
+                    >
+                      {copiedEmbed ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Đã sao chép!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          <span>Sao chép mã nhúng</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
