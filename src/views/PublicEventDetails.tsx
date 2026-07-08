@@ -506,7 +506,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
   // Resolve configured images or fall back to defaults
   const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
-  const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1782198647752.png';
+  const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1783474951858.png';
 
   // Speaker lists: read from DB config, fallback to hardcoded arrays
   const configSpeakers = businessConfig.landingPageSections?.speakers;
@@ -1074,47 +1074,53 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
             {/* 2. WIDESCREEN HERO BANNER */}
       <section 
-        className="relative w-full min-h-[400px] md:min-h-[500px] lg:min-h-[550px] bg-cover bg-center flex items-center border-b border-slate-200"
+        className="relative w-full min-h-[450px] md:min-h-[550px] lg:min-h-[600px] bg-cover bg-bottom flex items-center border-b border-slate-200 overflow-hidden"
         style={{ backgroundImage: `url(${landmarksUrl})` }}
       >
-        {/* Dark overlay for rich contrast and legibility */}
-        <div className="absolute inset-0 bg-slate-950/75 z-10" />
-        
-        {/* Ambient lighting/glow effect */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-amber-500/5 rounded-full blur-3xl pointer-events-none z-10" />
+        {/* Soft light overlay to ensure smooth blending with the background */}
+        <div className="absolute inset-0 bg-white/10 z-10" />
 
         {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-10 md:py-16 w-full text-white flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-12 md:py-20 w-full text-slate-800 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
           
-          {/* Conference name and tag */}
-          <div className="flex flex-col items-center space-y-1">
-            <div className="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-amber-500/20 border-2 border-amber-400/60 text-amber-300 text-sm md:text-base font-black uppercase tracking-[0.25em] mb-3 shadow-lg shadow-amber-500/20 backdrop-blur-sm">
-              <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
-              {heroTag}
-              <Sparkles className="w-4 h-4 animate-pulse text-amber-400" />
-            </div>
-            
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black font-serif tracking-wide leading-none drop-shadow-xl flex flex-wrap items-baseline justify-center">
-              <span className="text-white">{heroTitle}</span>
-              <span className="text-[#C59B27] ml-2 sm:ml-3 font-sans bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-300 bg-clip-text text-transparent">{heroYear}</span>
-            </h1>
+          {/* Brand Logo */}
+          <div className="animate-fade-in-down mb-2">
+            <img 
+              src={logoUrl} 
+              alt="PARS Logo" 
+              className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-sm"
+            />
           </div>
 
-          {/* Theme / Subject - language-aware */}
+          {/* Conference name / Title */}
+          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-serif tracking-wider text-[#FF5B5B] uppercase leading-tight drop-shadow-xs max-w-5xl">
+            {t('INTERNATIONAL SCIENTIFIC CONFERENCE', 'INTERNATIONAL SCIENTIFIC CONFERENCE')}
+          </h2>
+
+          {/* Subtitle / Theme */}
           <div className="max-w-4xl space-y-2 mx-auto px-2">
-            <p className="text-sm md:text-2xl lg:text-3xl font-sans font-bold tracking-wider text-slate-100 uppercase leading-snug drop-shadow-md">
-              {lang === 'vi' ? heroThemeVi : heroThemeEn}
-            </p>
-            <p className="text-[10px] md:text-base lg:text-lg font-sans font-semibold text-slate-200 tracking-wide uppercase opacity-90">
-              {lang === 'vi' ? heroThemeEn : heroThemeVi}
-            </p>
+            <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-sans font-extrabold tracking-wide text-[#1E2A4A] uppercase leading-snug">
+              {lang === 'vi' 
+                ? 'CẬP NHẬT CÁC XU HƯỚNG MỚI TRONG PHẪU THUẬT THẨM MỸ TẠO HÌNH VÀ Y HỌC TÁI SINH' 
+                : 'UPDATING NEW TRENDS IN AESTHETIC PLASTIC SURGERY AND REGENERATIVE SURGERY'}
+            </h3>
+            {lang === 'vi' && (
+              <p className="text-[11px] md:text-sm font-sans font-semibold text-slate-500 tracking-wider uppercase opacity-85">
+                UPDATING NEW TRENDS IN AESTHETIC PLASTIC SURGERY AND REGENERATIVE SURGERY
+              </p>
+            )}
+          </div>
+
+          {/* Date & Location */}
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl font-black tracking-wide text-[#E03C3C]">
+            <span>Hanoi, September 12-13, 2026</span>
           </div>
 
           {/* Actions: 2 Buttons (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-2 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
             <button
               onClick={() => scrollToSection('register')}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-red-600/30 hover:scale-102 transition-all transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer border-none"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#FF5B5B] to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-rose-600/30 hover:scale-102 transition-all transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer border-none"
             >
               <span>{t(heroBtnRegisterText, 'Register Now')}</span>
               <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
@@ -1122,21 +1128,21 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             
             <button
               onClick={() => scrollToSection('program')}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 hover:border-white/40 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer backdrop-blur-md"
+              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white hover:bg-slate-50 border border-slate-250 hover:border-slate-350 text-slate-700 font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer shadow-xs"
             >
-              <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-amber-400" />
+              <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-teal-600" />
               <span>{t(heroBtnProgramText, 'Scientific Program')}</span>
             </button>
           </div>
 
           {/* Date + Location Info Badge - Centered (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-white/10 w-full max-w-2xl mx-auto px-4">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
-              <Calendar className="w-4.5 h-4.5 text-amber-400 shrink-0" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-slate-200/80 w-full max-w-2xl mx-auto px-4">
+            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
+              <Calendar className="w-4.5 h-4.5 text-amber-500 shrink-0" />
               <span>{t(heroDate, heroDateEn)}</span>
             </div>
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 text-white text-xs md:text-sm font-extrabold tracking-wide shadow-md select-none w-full sm:w-auto">
-              <MapPin className="w-4.5 h-4.5 text-rose-400 shrink-0" />
+            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
+              <MapPin className="w-4.5 h-4.5 text-rose-500 shrink-0" />
               <span>{t(heroLocation, heroLocationEn)}</span>
             </div>
           </div>
