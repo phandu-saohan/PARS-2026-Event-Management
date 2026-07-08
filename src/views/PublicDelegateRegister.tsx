@@ -1197,11 +1197,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                     <input
                                       type="checkbox"
                                       checked={isSelected}
-                                      onChange={(e) => {
-                                        e.stopPropagation();
-                                        toggleAddOn(svc.id);
-                                      }}
-                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer`}
+                                      readOnly
+                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer pointer-events-none`}
                                     />
                                     <div>
                                       <span className={`text-xs font-black ${c.text} block uppercase`}>
@@ -1265,11 +1262,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                     <input
                                       type="checkbox"
                                       checked={isSelected}
-                                      onChange={(e) => {
-                                        e.stopPropagation();
-                                        toggleAddOn(svc.id);
-                                      }}
-                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer`}
+                                      readOnly
+                                      className={`w-5 h-5 rounded border-slate-300 ${c.checkbox} focus:ring-current mt-0.5 cursor-pointer pointer-events-none`}
                                     />
                                     <div>
                                       <span className={`text-xs font-black ${c.text} block uppercase`}>
