@@ -6,12 +6,12 @@ on:
       - main
 
 env:
-  AWS_REGION: YOUR_AWS_REGION                   # set this to your preferred AWS region, e.g. us-east-1
-  ECR_REPOSITORY: pars-app-repo                 # set this to your Amazon ECR repository name
-  ECS_SERVICE: pars-app-service                 # set this to your Amazon ECS service name
-  ECS_CLUSTER: pars-app-cluster                 # set this to your Amazon ECS cluster name
-  ECS_TASK_DEFINITION: task-definition.json     # path to your Amazon ECS task definition
-  CONTAINER_NAME: pars-app-container            # name of the container in the task definition
+  AWS_REGION: ${{ secrets.AWS_REGION || vars.AWS_REGION || 'ap-southeast-1' }}
+  ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY || vars.ECR_REPOSITORY || 'pars-app-repo' }}
+  ECS_SERVICE: ${{ secrets.ECS_SERVICE || vars.ECS_SERVICE || 'pars-app-service' }}
+  ECS_CLUSTER: ${{ secrets.ECS_CLUSTER || vars.ECS_CLUSTER || 'pars-app-cluster' }}
+  ECS_TASK_DEFINITION: task-definition.json
+  CONTAINER_NAME: ${{ secrets.CONTAINER_NAME || vars.CONTAINER_NAME || 'pars-app-container' }}
 
 permissions:
   contents: read
@@ -47,6 +47,11 @@ jobs:
         docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    - name: Replace placeholders in task definition
+      run: |
+        sed -i 's/YOUR_AWS_ACCOUNT_ID/${{ secrets.AWS_ACCOUNT_ID || vars.AWS_ACCOUNT_ID }}/g' task-definition.json
+        sed -i 's/YOUR_AWS_REGION/${{ env.AWS_REGION }}/g' task-definition.json
 
     - name: Fill in the new image ID in the Amazon ECS task definition
       id: task-def
