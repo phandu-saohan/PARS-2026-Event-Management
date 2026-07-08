@@ -1068,7 +1068,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
 
       {/* 2. WIDESCREEN HERO BANNER */}
       <section 
-        className="relative w-full min-h-[480px] md:min-h-[550px] lg:min-h-[600px] bg-cover bg-center flex flex-col justify-between border-b border-slate-200 overflow-hidden"
+        className="relative w-full min-h-[480px] md:min-h-[550px] lg:min-h-[600px] lg:max-h-[700px] bg-cover bg-center flex flex-col justify-between border-b border-slate-200 overflow-hidden"
         style={{ backgroundImage: `url(${landmarksUrl})` }}
       >
         {/* Soft light overlay */}
@@ -1087,7 +1087,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </div>
 
           {/* Conference name / Title */}
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-serif tracking-wider text-[#FF5B5B] uppercase leading-tight drop-shadow-xs max-w-5xl">
+          <h2 className="text-sm sm:text-lg md:text-2xl lg:text-4xl font-black font-serif tracking-wider text-[#FF5B5B] uppercase leading-tight sm:whitespace-nowrap drop-shadow-xs max-w-5xl">
             {t('INTERNATIONAL SCIENTIFIC CONFERENCE', 'INTERNATIONAL SCIENTIFIC CONFERENCE')}
           </h2>
 
