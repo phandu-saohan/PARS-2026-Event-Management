@@ -318,6 +318,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
   };
 
   const validateStep1 = () => {
+    if (!avatarImage) {
+      setErrorMsg('Vui lòng tải lên Ảnh Chân Dung / Avatar.');
+      return false;
+    }
     if (!fullName) {
       setErrorMsg('Vui lòng điền họ và tên đại biểu.');
       return false;
@@ -463,6 +467,14 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
     }
     if (!address) {
       setErrorMsg('Vui lòng điền địa chỉ liên hệ.');
+      return;
+    }
+    if (!avatarImage) {
+      setErrorMsg('Vui lòng tải lên Ảnh Chân Dung / Avatar.');
+      return;
+    }
+    if (selectedPaymentMethod === 'bank_transfer' && !proofImage) {
+      setErrorMsg('Vui lòng đính kèm Biên lai chuyển tiền / Ảnh chuyển khoản.');
       return;
     }
 
@@ -1087,29 +1099,57 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                               <label
                                 key={pkg.id}
                                 onClick={() => handleSelectPackage(pkg.id)}
-                                className={`p-4 rounded-2xl border cursor-pointer flex justify-between items-start gap-4 transition-all relative ${isSelected
+                                className={`p-4 rounded-2xl border cursor-pointer flex flex-col gap-3 transition-all relative ${isSelected
                                   ? 'bg-teal-50/40 border-teal-600 ring-2 ring-teal-600/20 shadow-lg'
                                   : 'bg-white border-slate-200 hover:border-slate-350 shadow-sm'
                                   }`}
                               >
-                                <div className="space-y-2 flex-1 min-w-0">
-                                  {pkg.id !== 'pkg-member' && (
-                                    <div className="flex items-center">
-                                      <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
-                                        pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
-                                        }`}>
-                                        {pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
-                                          pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
-                                            pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
-                                      </span>
-                                    </div>
-                                  )}
-
-                                  <div>
+                                {/* Header row: Name, Tags, Price, Checkmark */}
+                                <div className="flex justify-between items-start gap-4 w-full">
+                                  <div className="space-y-1.5 flex-1 min-w-0">
+                                    {pkg.id !== 'pkg-member' && (
+                                      <div className="flex items-center">
+                                        <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded ${
+                                          pkg.id === 'pkg-standard' ? 'bg-teal-100 text-teal-850 border border-teal-100' : 'bg-slate-100 text-slate-700'
+                                          }`}>
+                                          {pkg.id === 'pkg-standard' ? L.t('Tiêu chuẩn', 'Standard') :
+                                            pkg.id === 'pkg-student' ? L.t('Học Viên', 'Student/Resident') :
+                                              pkg.id === 'pkg-free' ? L.t('Báo cáo viên', 'Speaker') : L.t('Quốc tế', 'International')}
+                                        </span>
+                                      </div>
+                                    )}
                                     <span className="font-black text-xs md:text-sm text-slate-950 block leading-tight">{pkg.name}</span>
+                                  </div>
 
+                                  <div className="flex items-center gap-2 shrink-0">
+                                    <div className="font-mono font-black text-slate-950 text-sm md:text-base text-right">
+                                      {pkg.id === 'pkg-foreign' ? (
+                                        <span>
+                                          ${Math.round(pkg.fee / 25000)}{' '}
+                                          <span className="text-[10px] font-normal text-slate-400 font-sans block mt-0.5">
+                                            ({pkg.fee.toLocaleString()} VNĐ)
+                                          </span>
+                                        </span>
+                                      ) : (
+                                        <span>
+                                          {currentPkgPrice.toLocaleString()}{' '}
+                                          <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                    {isSelected && (
+                                      <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                                        ✓
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Body row: Benefits list & Sub-badge */}
+                                {(pkg.benefits && pkg.benefits.length > 0) || pkg.id ? (
+                                  <div className="w-full border-t border-slate-100/60 pt-2 space-y-2">
                                     {pkg.benefits && pkg.benefits.length > 0 && (
-                                      <div className="mt-2 space-y-1 text-slate-500 font-medium text-[10.5px] leading-relaxed border-t border-slate-100/60 pt-2">
+                                      <div className="space-y-1 text-slate-500 font-medium text-[10.5px] leading-relaxed">
                                         {pkg.benefits.map((benefit, idx) => (
                                           <div key={idx} className="flex items-start gap-1.5">
                                             <span className="text-teal-650 font-black shrink-0 select-none">✓</span>
@@ -1119,7 +1159,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                       </div>
                                     )}
 
-                                    <div className="flex flex-wrap gap-1 mt-2">
+                                    <div className="flex flex-wrap gap-1">
                                       {pkg.id === 'pkg-free' ? (
                                         <span className="px-1 py-0.2 bg-teal-50 text-teal-800 border border-teal-100 rounded text-[7.5px] font-black">{L.t('✓ MIỄN PHÍ', '✓ FREE')}</span>
                                       ) : (
@@ -1127,30 +1167,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                                       )}
                                     </div>
                                   </div>
-                                </div>
-
-                                <div className="flex items-center gap-2 shrink-0">
-                                  <div className="font-mono font-black text-slate-950 text-sm md:text-base text-right">
-                                    {pkg.id === 'pkg-foreign' ? (
-                                      <span>
-                                        ${Math.round(pkg.fee / 25000)}{' '}
-                                        <span className="text-[10px] font-normal text-slate-400 font-sans block mt-0.5">
-                                          ({pkg.fee.toLocaleString()} VNĐ)
-                                        </span>
-                                      </span>
-                                    ) : (
-                                      <span>
-                                        {currentPkgPrice.toLocaleString()}{' '}
-                                        <span className="text-[10px] font-normal text-slate-400 font-sans">VNĐ</span>
-                                      </span>
-                                    )}
-                                  </div>
-                                  {isSelected && (
-                                    <span className="w-5 h-5 rounded-full bg-teal-600 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                                      ✓
-                                    </span>
-                                  )}
-                                </div>
+                                ) : null}
                               </label>
                             );
                           })}
