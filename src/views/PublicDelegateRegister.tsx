@@ -1471,7 +1471,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                           <div className="flex items-center gap-2 border-b border-slate-100 pb-2">
                             <Upload className="w-4 h-4 text-teal-600 animate-bounce" />
                             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">
-                              {L.t('Đính Kèm Biên Lai Chuyển Khoản (Để BTC Đối Soát Nhanh)', 'Attach Payment Receipt (For Fast Verification)')}
+                              {L.t('Đính Kèm Biên Lai Chuyển Khoản (Để BTC Đối Soát Nhanh) *', 'Attach Payment Receipt (For Fast Verification) *')}
                             </h4>
                           </div>
                           <p className="text-[10.5px] text-slate-500 leading-normal font-medium">
