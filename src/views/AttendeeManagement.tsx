@@ -2547,11 +2547,26 @@ Ban Thư ký Hội nghị PARS 2026`
                           </div>
                         </div>
 
-                        {/* Organization & Location provincial */}
+                        {/* Organization & Department */}
                         <div>
                           <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Cơ quan công tác liên kết:</span>
-                          <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-semibold truncate">
+                          <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-semibold truncate font-sans">
                             🏢 {viewDetailAttendee.organization || 'Tự do'}
+                          </div>
+                        </div>
+
+                        <div>
+                          <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Khoa / Chuyên khoa công tác:</span>
+                          <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-semibold truncate font-sans">
+                            🩺 {viewDetailAttendee.department || 'Chưa cung cấp'}
+                          </div>
+                        </div>
+
+                        {/* Nationality & Province */}
+                        <div>
+                          <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Quốc tịch / Nationality:</span>
+                          <div className="p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-semibold">
+                            🌐 {viewDetailAttendee.nationality === 'vietname' ? 'Việt Nam' : 'Nước ngoài / International'}
                           </div>
                         </div>
 
@@ -2728,7 +2743,7 @@ Ban Thư ký Hội nghị PARS 2026`
                           />
                         </div>
 
-                        {/* Gender & Province */}
+                        {/* Gender, Nationality & Province */}
                         <div>
                           <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Giới tính</label>
                           <select
@@ -2739,6 +2754,18 @@ Ban Thư ký Hội nghị PARS 2026`
                             <option value="Nam">Nam</option>
                             <option value="Nữ">Nữ</option>
                             <option value="Khác">Khác</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Quốc tịch</label>
+                          <select
+                            value={detailEditForm.nationality || 'vietname'}
+                            onChange={(e) => setDetailEditForm({ ...detailEditForm, nationality: e.target.value as 'vietname' | 'foreign' })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="vietname">Việt Nam</option>
+                            <option value="foreign">Nước ngoài / International</option>
                           </select>
                         </div>
 
@@ -2777,7 +2804,7 @@ Ban Thư ký Hội nghị PARS 2026`
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-black text-slate-505 block mb-1 uppercase">Địa chỉ Email *</label>
+                          <label className="text-[10px] font-black text-slate-550 block mb-1 uppercase">Địa chỉ Email *</label>
                           <input
                             type="email"
                             required
@@ -2787,13 +2814,23 @@ Ban Thư ký Hội nghị PARS 2026`
                           />
                         </div>
 
-                        {/* Organization */}
-                        <div className="sm:col-span-2">
+                        {/* Organization & Department */}
+                        <div>
                           <label className="text-[10px] font-black text-slate-505 block mb-1 uppercase">Cơ quan công tác</label>
                           <input
                             type="text"
                             value={detailEditForm.organization}
                             onChange={(e) => setDetailEditForm({ ...detailEditForm, organization: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:border-indigo-505"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-black text-slate-505 block mb-1 uppercase">Khoa / Phòng ban</label>
+                          <input
+                            type="text"
+                            value={detailEditForm.department || ''}
+                            onChange={(e) => setDetailEditForm({ ...detailEditForm, department: e.target.value })}
                             className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-semibold focus:outline-none focus:border-indigo-505"
                           />
                         </div>
