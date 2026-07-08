@@ -643,9 +643,15 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                     />
                   </div>
                   <div className="text-center space-y-1.5 w-full">
-                    <span className="text-xs font-mono font-bold text-teal-900 bg-teal-50/70 border border-teal-150 px-3 py-0.5 rounded-full inline-block">
-                      MÃ ĐẠI BIỂU: {createdAttendee.id}
-                    </span>
+                    {createdAttendee.paymentStatus === 'paid' ? (
+                      <span className="text-xs font-mono font-bold text-teal-900 bg-teal-50/70 border border-teal-150 px-3 py-0.5 rounded-full inline-block">
+                        MÃ ĐẠI BIỂU: {createdAttendee.id}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-0.5 rounded-full inline-block">
+                        MÃ ĐẠI BIỂU: CHỜ XÁC MINH THANH TOÁN
+                      </span>
+                    )}
                     
                     <div className="flex items-center justify-center gap-3 mt-3 mb-1 px-2">
                       {createdAttendee.avatarUrl ? (
