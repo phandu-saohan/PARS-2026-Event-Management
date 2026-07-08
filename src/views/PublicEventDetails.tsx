@@ -505,8 +505,8 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
   const block4BtnText = sections.intro?.block4BtnText || "Chỉ dẫn đường đi";
 
   // Resolve configured images or fall back to defaults
-  const logoUrl = businessConfig.landingLogoUrl || '/media__1782106316692.png';
-  const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1783474951858.png';
+  const logoUrl = businessConfig.landingLogoUrl || '/media__1783475942159.png';
+  const landmarksUrl = businessConfig.landingLandmarksUrl || '/media__1783475892214.png';
 
   // Speaker lists: read from DB config, fallback to hardcoded arrays
   const configSpeakers = businessConfig.landingPageSections?.speakers;
@@ -1033,12 +1033,6 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
                   >
                     {t('NHÀ TÀI TRỢ', 'SPONSORS')}
                   </button>
-                  <button 
-                    onClick={() => { setIsMobileMenuOpen(false); scrollToSection('footer'); }} 
-                    className="w-full text-left text-sm font-extrabold text-slate-800 py-2 hover:text-teal-600 transition-colors border-none bg-transparent cursor-pointer"
-                  >
-                    {t('LIÊN HỆ', 'CONTACT')}
-                  </button>
                 </div>
               </div>
 
@@ -1072,23 +1066,23 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         )}
       </header>
 
-            {/* 2. WIDESCREEN HERO BANNER */}
+      {/* 2. WIDESCREEN HERO BANNER */}
       <section 
-        className="relative w-full min-h-[450px] md:min-h-[550px] lg:min-h-[600px] bg-cover bg-bottom flex items-center border-b border-slate-200 overflow-hidden"
+        className="relative w-full min-h-[480px] md:min-h-[550px] lg:min-h-[600px] bg-cover bg-center flex flex-col justify-between border-b border-slate-200 overflow-hidden"
         style={{ backgroundImage: `url(${landmarksUrl})` }}
       >
-        {/* Soft light overlay to ensure smooth blending with the background */}
-        <div className="absolute inset-0 bg-white/10 z-10" />
+        {/* Soft light overlay */}
+        <div className="absolute inset-0 bg-white/5 z-10" />
 
         {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-12 md:py-20 w-full text-slate-800 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 pt-12 md:pt-20 pb-4 w-full text-slate-800 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 flex-1">
           
-          {/* Brand Logo */}
-          <div className="animate-fade-in-down mb-2">
+          {/* Brand Logo (Figure 4) */}
+          <div className="animate-fade-in-down">
             <img 
               src={logoUrl} 
               alt="PARS Logo" 
-              className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-sm"
+              className="h-16 sm:h-20 md:h-24 w-auto object-contain"
             />
           </div>
 
@@ -1111,43 +1105,34 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             )}
           </div>
 
-          {/* Date & Location */}
-          <div className="text-sm sm:text-base md:text-lg lg:text-xl font-black tracking-wide text-[#E03C3C]">
-            <span>Hanoi, September 12-13, 2026</span>
-          </div>
-
-          {/* Actions: 2 Buttons (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
+          {/* Actions & Info: 1 Button and 1 Info Box (Stacked on mobile, row on desktop) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 z-30 w-full sm:w-auto px-4 max-w-md sm:max-w-none mx-auto">
+            {/* ĐĂNG KÝ NGAY Button */}
             <button
               onClick={() => scrollToSection('register')}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#FF5B5B] to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-rose-600/30 hover:scale-102 transition-all transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer border-none"
+              className="px-10 py-4 rounded-2xl bg-[#FF5353] hover:bg-[#ff3e3e] text-white font-black text-sm uppercase tracking-wider shadow-sm hover:scale-102 transition-all transform duration-200 cursor-pointer border-none flex items-center justify-center min-w-[200px]"
             >
-              <span>{t(heroBtnRegisterText, 'Register Now')}</span>
-              <ArrowRight className="w-4 h-4 md:w-4.5 md:h-4.5" />
+              {t('ĐĂNG KÝ NGAY', 'REGISTER NOW')}
             </button>
             
-            <button
-              onClick={() => scrollToSection('program')}
-              className="w-full sm:w-auto px-8 py-4 rounded-full bg-white hover:bg-slate-50 border border-slate-250 hover:border-slate-350 text-slate-700 font-extrabold text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-102 transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer shadow-xs"
-            >
-              <Calendar className="w-4 h-4 md:w-4.5 md:h-4.5 text-teal-600" />
-              <span>{t(heroBtnProgramText, 'Scientific Program')}</span>
-            </button>
-          </div>
-
-          {/* Date + Location Info Badge - Centered (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-slate-200/80 w-full max-w-2xl mx-auto px-4">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
-              <Calendar className="w-4.5 h-4.5 text-amber-500 shrink-0" />
-              <span>{t(heroDate, heroDateEn)}</span>
-            </div>
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
-              <MapPin className="w-4.5 h-4.5 text-rose-500 shrink-0" />
-              <span>{t(heroLocation, heroLocationEn)}</span>
+            {/* Melia Hotel, Hanoi Info Box */}
+            <div className="px-6 py-2.5 rounded-2xl bg-white/95 border border-slate-205 text-center select-none shadow-sm flex flex-col justify-center items-center min-w-[220px]">
+              <span className="text-xs md:text-sm font-black text-[#FF5B5B] leading-snug">Melia Hotel, Hanoi,</span>
+              <span className="text-xs md:text-sm font-black text-[#FF5B5B] leading-snug">September 12-13, 2026</span>
             </div>
           </div>
 
         </div>
+
+        {/* Bottom Skyline (Figure 3) */}
+        <div className="relative z-20 w-full mt-auto flex justify-center">
+          <img 
+            src="/media__1783475914057.png" 
+            alt="Skyline Outline" 
+            className="w-full max-w-7xl h-auto object-contain object-bottom pointer-events-none select-none"
+          />
+        </div>
+
       </section>
 
 
