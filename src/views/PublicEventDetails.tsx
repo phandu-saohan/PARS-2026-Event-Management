@@ -1153,9 +1153,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
             <p className="text-slate-650 leading-relaxed text-sm md:text-base">
               {t(introText1, 'The International Scientific Conference PARS 2026, hosted by EMCAS Aesthetic Hospital, is a premier medical event bringing together world-renowned experts from ISAPS, ASPS, and EURAPS alongside leading Vietnamese specialists.')}
             </p>
-            <p className="text-slate-650 leading-relaxed text-sm md:text-base">
-              {t(introText2, 'The conference focuses on cutting-edge clinical advances, technology transfer in aesthetic surgery, body contouring, facial rejuvenation, structural rhinoplasty, and comprehensive management of breast implant safety (BIA-ALCL).')}
-            </p>
+
 
             {/* Bullet Highlights */}
             <div className="space-y-3.5 pt-2">
