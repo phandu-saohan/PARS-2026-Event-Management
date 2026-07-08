@@ -1075,14 +1075,14 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         <div className="absolute inset-0 bg-white/5 z-10" />
 
         {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 pt-12 md:pt-20 pb-4 w-full text-slate-800 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 flex-1">
+        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 pt-8 md:pt-12 pb-4 w-full text-slate-800 flex flex-col items-center justify-center text-center gap-3 md:gap-4 flex-1">
           
           {/* Brand Logo (Figure 4) */}
-          <div className="animate-fade-in-down">
+          <div className="animate-fade-in-up-slow">
             <img 
               src={logoUrl} 
               alt="PARS Logo" 
-              className="h-16 sm:h-20 md:h-24 w-auto object-contain"
+              className="h-16 sm:h-20 md:h-24 w-auto object-contain animate-float-slow"
             />
           </div>
 
@@ -1092,7 +1092,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </h2>
 
           {/* Subtitle / Theme */}
-          <div className="max-w-4xl space-y-2 mx-auto px-2">
+          <div className="max-w-4xl space-y-1 mx-auto px-2">
             <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-sans font-extrabold tracking-wide text-[#1E2A4A] uppercase leading-snug">
               {lang === 'vi' 
                 ? 'CẬP NHẬT CÁC XU HƯỚNG MỚI TRONG PHẪU THUẬT THẨM MỸ TẠO HÌNH VÀ Y HỌC TÁI SINH' 
@@ -1106,7 +1106,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </div>
 
           {/* Actions & Info: 1 Button and 1 Info Box (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 z-30 w-full sm:w-auto px-4 max-w-md sm:max-w-none mx-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-2 z-30 w-full sm:w-auto px-4 max-w-md sm:max-w-none mx-auto">
             {/* ĐĂNG KÝ NGAY Button */}
             <button
               onClick={() => scrollToSection('register')}
@@ -1125,7 +1125,7 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
         </div>
 
         {/* Bottom Skyline (Figure 3) */}
-        <div className="relative z-20 w-full mt-auto flex justify-center">
+        <div className="relative z-20 w-full mt-auto flex justify-center animate-slide-up-skyline">
           <img 
             src="/media__1783475914057.png" 
             alt="Skyline Outline" 
