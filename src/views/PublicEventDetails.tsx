@@ -1073,51 +1073,26 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
       </header>
 
             {/* 2. WIDESCREEN HERO BANNER */}
-      <section 
-        className="relative w-full min-h-[450px] md:min-h-[550px] lg:min-h-[600px] bg-cover bg-bottom flex items-center border-b border-slate-200 overflow-hidden"
-        style={{ backgroundImage: `url(${landmarksUrl})` }}
-      >
-        {/* Soft light overlay to ensure smooth blending with the background */}
-        <div className="absolute inset-0 bg-white/10 z-10" />
-
-        {/* Content Container */}
-        <div className="relative z-20 max-w-7xl mx-auto px-6 md:px-16 py-12 md:py-20 w-full text-slate-800 flex flex-col items-center justify-center text-center space-y-6 md:space-y-8">
+      <section className="relative w-full bg-[#FAF8F5] flex flex-col items-center border-b border-slate-200 py-6 md:py-10">
+        <div className="max-w-6xl w-full px-4 md:px-8 flex flex-col items-center space-y-6 md:space-y-8">
           
-          {/* Brand Logo */}
-          <div className="animate-fade-in-down mb-2">
-            <img 
-              src={logoUrl} 
-              alt="PARS Logo" 
-              className="h-16 sm:h-20 md:h-24 w-auto object-contain drop-shadow-sm"
+          {/* Canva Design Embed */}
+          <div 
+            className="w-full relative shadow-md rounded-2xl overflow-hidden border border-slate-200 bg-white" 
+            style={{ position: 'relative', width: '105%', height: 0, paddingTop: '52.5000%', paddingBottom: 0, marginLeft: '-2.5%', marginRight: '-2.5%', willChange: 'transform' }}
+          >
+            <iframe 
+              loading="lazy" 
+              className="absolute top-0 left-0 w-full h-full border-none p-0 m-0"
+              src="https://www.canva.com/design/DAHOwasdklE/lWHi0lVmHMaWavCmg3UjSw/view?embed" 
+              allowFullScreen
+              allow="fullscreen"
+              title="PARS Trend Banner"
             />
           </div>
 
-          {/* Conference name / Title */}
-          <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black font-serif tracking-wider text-[#FF5B5B] uppercase leading-tight drop-shadow-xs max-w-5xl">
-            {t('INTERNATIONAL SCIENTIFIC CONFERENCE', 'INTERNATIONAL SCIENTIFIC CONFERENCE')}
-          </h2>
-
-          {/* Subtitle / Theme */}
-          <div className="max-w-4xl space-y-2 mx-auto px-2">
-            <h3 className="text-sm sm:text-lg md:text-xl lg:text-2xl font-sans font-extrabold tracking-wide text-[#1E2A4A] uppercase leading-snug">
-              {lang === 'vi' 
-                ? 'CẬP NHẬT CÁC XU HƯỚNG MỚI TRONG PHẪU THUẬT THẨM MỸ TẠO HÌNH VÀ Y HỌC TÁI SINH' 
-                : 'UPDATING NEW TRENDS IN AESTHETIC PLASTIC SURGERY AND REGENERATIVE SURGERY'}
-            </h3>
-            {lang === 'vi' && (
-              <p className="text-[11px] md:text-sm font-sans font-semibold text-slate-500 tracking-wider uppercase opacity-85">
-                UPDATING NEW TRENDS IN AESTHETIC PLASTIC SURGERY AND REGENERATIVE SURGERY
-              </p>
-            )}
-          </div>
-
-          {/* Date & Location */}
-          <div className="text-sm sm:text-base md:text-lg lg:text-xl font-black tracking-wide text-[#E03C3C]">
-            <span>Hanoi, September 12-13, 2026</span>
-          </div>
-
           {/* Actions: 2 Buttons (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-4 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 pt-2 z-30 w-full sm:w-auto px-4 max-w-sm sm:max-w-none mx-auto">
             <button
               onClick={() => scrollToSection('register')}
               className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-[#FF5B5B] to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs md:text-sm uppercase tracking-widest shadow-lg hover:shadow-rose-600/30 hover:scale-102 transition-all transform duration-200 flex items-center justify-center gap-2.5 cursor-pointer border-none"
@@ -1136,12 +1111,12 @@ export default function PublicEventDetails({ onNavigate }: PublicEventDetailsPro
           </div>
 
           {/* Date + Location Info Badge - Centered (Stacked on mobile, row on desktop) */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-slate-200/80 w-full max-w-2xl mx-auto px-4">
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-6 border-t border-slate-200 w-full max-w-2xl mx-auto px-4">
+            <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide select-none w-full sm:w-auto">
               <Calendar className="w-4.5 h-4.5 text-amber-500 shrink-0" />
               <span>{t(heroDate, heroDateEn)}</span>
             </div>
-            <div className="flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100/85 backdrop-blur-md border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide shadow-xs select-none w-full sm:w-auto">
+            <div className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 text-xs md:text-sm font-extrabold tracking-wide select-none w-full sm:w-auto">
               <MapPin className="w-4.5 h-4.5 text-rose-500 shrink-0" />
               <span>{t(heroLocation, heroLocationEn)}</span>
             </div>
