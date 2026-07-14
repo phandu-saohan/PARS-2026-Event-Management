@@ -3,7 +3,7 @@ import { Mail, Smartphone, Trash2, Plus, Check, X, Smartphone as PhoneIcon, Bold
 import * as XLSX from 'xlsx';
 import { store } from '../dataStore';
 import { isSupabaseConfigured } from '../lib/supabase';
-import { NotificationTemplate, SentNotificationLog, Contact, SendingCampaign, CampaignRecipient, CloudflareEmailConfig } from '../types';
+import { NotificationTemplate, SentNotificationLog, Contact, SendingCampaign, CampaignRecipient, CloudflareEmailConfig, EmailConfig } from '../types';
 
 const rewriteEmailLinks = (htmlContent: string, campaignId: string, email: string) => {
   const origin = window.location.origin;
@@ -32,7 +32,8 @@ export default function BulkCampaignManager() {
   const [resendConfig, setResendConfigState] = useState(() => store.getResendConfig());
   const [cloudflareConfig, setCloudflareConfigState] = useState(() => store.getCloudflareEmailConfig());
   const [awsSesConfig, setAwsSesConfigState] = useState(() => store.getAwsSesConfig());
-  const [emailGateway, setEmailGateway] = useState<'resend' | 'cloudflare' | 'ses'>('resend');
+  const [smtpConfig, setSmtpConfigState] = useState<EmailConfig>(() => store.getEmailConfig());
+  const [emailGateway, setEmailGateway] = useState<'resend' | 'cloudflare' | 'ses' | 'smtp'>('resend');
   const [excelData, setExcelData] = useState<any[]>([]);
   const [excelFileName, setExcelFileName] = useState('');
   const [bulkSubject, setBulkSubject] = useState('Thư xác nhận tham dự Hội nghị Khoa học Thẩm mỹ PARS 2026');
@@ -72,6 +73,7 @@ export default function BulkCampaignManager() {
       if (detail && detail.table === 'system_config') {
         setResendConfigState(store.getResendConfig());
         setCloudflareConfigState(store.getCloudflareEmailConfig());
+        setSmtpConfigState(store.getEmailConfig());
       }
       if (detail && detail.table === 'sending_campaigns') {
         setCampaigns(store.getCampaigns());
@@ -370,6 +372,12 @@ export default function BulkCampaignManager() {
           alert('Vui lòng vào mục "Cài đặt hệ thống" để cấu hình Cloudflare Worker URL và Email gửi đi trước khi bắt đầu.');
           return;
         }
+      } else if (emailGateway === 'smtp') {
+        const currentSmtp = store.getEmailConfig();
+        if (!currentSmtp.smtpHost || !currentSmtp.smtpUser || !currentSmtp.smtpPass) {
+          alert('Vui lòng vào mục "Cài đặt hệ thống" → "OUTGOING MAIL SERVER (SMTP)" để cấu hình SMTP Host, User và Password trước khi bắt đầu.');
+          return;
+        }
       } else {
         const currentSes = store.getAwsSesConfig();
         if (!currentSes.accessKeyId || !currentSes.secretAccessKey || !currentSes.region || !currentSes.senderEmail) {
@@ -414,7 +422,7 @@ export default function BulkCampaignManager() {
         name: campaignName.trim() || `Chiến dịch gửi ${bulkChannel === 'email' ? 'Email' : 'Zalo'} - ${new Date().toLocaleString()}`,
         channel: bulkChannel,
         templateId: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : 'aws-ses-bulk') 
+          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : emailGateway === 'smtp' ? 'smtp-bulk' : 'aws-ses-bulk') 
           : (selectedZaloTemplate?.id || 'zalo-bulk'),
         subject: bulkChannel === 'email' ? bulkSubject : undefined,
         body: bulkChannel === 'email' ? bulkBody : undefined,
@@ -549,6 +557,19 @@ export default function BulkCampaignManager() {
                 subject: compiledSubject,
                 html: compiledBody
               };
+            } else if (emailGateway === 'smtp') {
+              endpoint = '/api/email/send-smtp';
+              requestBody = {
+                smtpHost: smtpConfig.smtpHost,
+                smtpPort: smtpConfig.smtpPort || 587,
+                smtpUser: smtpConfig.smtpUser,
+                smtpPass: smtpConfig.smtpPass,
+                from: smtpConfig.senderEmail || smtpConfig.smtpUser,
+                senderName: smtpConfig.senderName || '',
+                to: recipient.email,
+                subject: compiledSubject,
+                html: compiledBody
+              };
             } else {
               endpoint = '/api/email/send-ses';
               requestBody = {
@@ -575,6 +596,7 @@ export default function BulkCampaignManager() {
               errorMsg = resData.error || (
                 emailGateway === 'resend' ? 'Lỗi gửi email qua Resend' :
                 emailGateway === 'cloudflare' ? 'Lỗi gửi email qua Cloudflare Worker' :
+                emailGateway === 'smtp' ? 'Lỗi gửi email qua Gmail SMTP' :
                 'Lỗi gửi email qua Amazon SES'
               );
             }
@@ -582,6 +604,7 @@ export default function BulkCampaignManager() {
             errorMsg = err.message || (
               emailGateway === 'resend' ? 'Lỗi kết nối API Resend' :
               emailGateway === 'cloudflare' ? 'Lỗi kết nối Cloudflare Worker' :
+              emailGateway === 'smtp' ? 'Lỗi kết nối Gmail SMTP' :
               'Lỗi kết nối Amazon SES'
             );
           }
@@ -666,13 +689,13 @@ export default function BulkCampaignManager() {
         recipient: bulkChannel === 'email' ? recipient.email : recipient.phone,
         type: bulkChannel,
         templateId: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : 'aws-ses-bulk') 
+          ? (emailGateway === 'resend' ? 'resend-bulk' : emailGateway === 'cloudflare' ? 'cloudflare-bulk' : emailGateway === 'smtp' ? 'smtp-bulk' : 'aws-ses-bulk') 
           : (selectedZaloTemplate?.id || 'zalo-bulk'),
         templateName: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? 'Gửi Email Hàng Loạt qua Resend' : emailGateway === 'cloudflare' ? 'Gửi Email Hàng Loạt qua Cloudflare' : 'Gửi Email Hàng Loạt qua AWS SES') 
+          ? (emailGateway === 'resend' ? 'Gửi Email Hàng Loạt qua Resend' : emailGateway === 'cloudflare' ? 'Gửi Email Hàng Loạt qua Cloudflare' : emailGateway === 'smtp' ? 'Gửi Email Hàng Loạt qua Gmail SMTP' : 'Gửi Email Hàng Loạt qua AWS SES') 
           : (selectedZaloTemplate?.name || 'Gửi Zalo OA Hàng Loạt'),
         sender: bulkChannel === 'email' 
-          ? (emailGateway === 'resend' ? resendConfig.senderEmail : emailGateway === 'cloudflare' ? cloudflareConfig.senderEmail : awsSesConfig.senderEmail) 
+          ? (emailGateway === 'resend' ? resendConfig.senderEmail : emailGateway === 'cloudflare' ? cloudflareConfig.senderEmail : emailGateway === 'smtp' ? (smtpConfig.senderEmail || smtpConfig.smtpUser) : awsSesConfig.senderEmail) 
           : (store.getZaloConfig().oaId || 'Zalo OA'),
         sentAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
         status: success ? 'success' : 'failed',
@@ -1265,7 +1288,16 @@ export default function BulkCampaignManager() {
                     {/* Gateway selector */}
                     <div>
                       <label className="text-[10px] font-bold text-slate-500 block mb-1">Cổng gửi Email (Gateway)</label>
-                      <div className="grid grid-cols-3 gap-2 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                      <div className="grid grid-cols-4 gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200">
+                        <button
+                          type="button"
+                          onClick={() => setEmailGateway('smtp')}
+                          className={`py-1 rounded font-bold text-[10px] cursor-pointer transition-all border-none ${
+                            emailGateway === 'smtp' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
+                          }`}
+                        >
+                          Gmail SMTP
+                        </button>
                         <button
                           type="button"
                           onClick={() => setEmailGateway('resend')}
@@ -1282,7 +1314,7 @@ export default function BulkCampaignManager() {
                             emailGateway === 'cloudflare' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-800 bg-transparent'
                           }`}
                         >
-                          Cloudflare Worker
+                          Cloudflare
                         </button>
                         <button
                           type="button"
@@ -1295,6 +1327,52 @@ export default function BulkCampaignManager() {
                         </button>
                       </div>
                     </div>
+
+                    {emailGateway === 'smtp' && (
+                      <>
+                        <div className="bg-red-50 text-red-800 p-3 rounded-xl border border-red-100 leading-relaxed text-[10.5px]">
+                          📬 <strong>Gmail SMTP (khuyến nghị cho 8.000 email)</strong>: Gửi trực tiếp qua Gmail SMTP với App Password. Giới hạn ~500 email/ngày (Gmail miễn phí) hoặc ~2.000/ngày (Google Workspace). Cấu hình trong <strong>Cài đặt hệ thống → SMTP</strong>.
+                        </div>
+                        <div className="border border-red-100 rounded-xl p-3 bg-red-50/50 space-y-1.5">
+                          <div className="flex justify-between">
+                            <span className="text-slate-500 font-bold">SMTP Host:</span>
+                            <span className="font-mono text-slate-700 font-extrabold">{smtpConfig.smtpHost || '(Chưa cấu hình)'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500 font-bold">SMTP Port:</span>
+                            <span className="font-mono text-slate-700 font-semibold">{smtpConfig.smtpPort || 587}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500 font-bold">Tài khoản:</span>
+                            <span className="font-mono text-slate-700 font-extrabold truncate max-w-[150px]">{smtpConfig.smtpUser || '(Chưa cấu hình)'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500 font-bold">Mật khẩu:</span>
+                            <span className="font-bold text-slate-700">
+                              {smtpConfig.smtpPass ? '🟢 Đã cấu hình' : '🔴 Chưa cấu hình'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-slate-500 font-bold">Trạng thái:</span>
+                            <span className="font-bold">
+                              {smtpConfig.smtpHost && smtpConfig.smtpUser && smtpConfig.smtpPass
+                                ? <span className="text-emerald-600">🟢 Sẵn sàng gửi</span>
+                                : <span className="text-red-600">🔴 Chưa cấu hình đủ</span>
+                              }
+                            </span>
+                          </div>
+                        </div>
+                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[10px] text-amber-800 space-y-1">
+                          <p className="font-extrabold">💡 Hướng dẫn Gmail App Password:</p>
+                          <ol className="list-decimal list-inside space-y-0.5 font-medium">
+                            <li>Bật xác minh 2 bước cho tài khoản Google</li>
+                            <li>Vào <strong>myaccount.google.com → Bảo mật → Mật khẩu ứng dụng</strong></li>
+                            <li>Tạo App Password cho "Mail" → copy 16 ký tự</li>
+                            <li>Điền vào SMTP PASS trong Cài đặt hệ thống</li>
+                          </ol>
+                        </div>
+                      </>
+                    )}
 
                     {emailGateway === 'resend' && (
                       <>

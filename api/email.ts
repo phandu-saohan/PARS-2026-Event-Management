@@ -442,6 +442,74 @@ async function handleSendAwsSes(req: VercelRequest, res: VercelResponse) {
 }
 
 // ==========================================
+// 2e. Action: send-smtp (Direct SMTP Send)
+// ==========================================
+async function handleSendSmtp(req: VercelRequest, res: VercelResponse) {
+  const { smtpHost, smtpPort, smtpUser, smtpPass, from, senderName, to, subject, html } = req.body;
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    return res.status(400).json({ success: false, error: 'SMTP configuration (smtpHost, smtpUser, smtpPass) is required.' });
+  }
+  if (!to) {
+    return res.status(400).json({ success: false, error: 'Recipient email (to) is required.' });
+  }
+  if (!html) {
+    return res.status(400).json({ success: false, error: 'Email body (html) is required.' });
+  }
+
+  try {
+    const isSecure = Number(smtpPort) === 465;
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: Number(smtpPort) || 587,
+      secure: isSecure,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+
+    const mailOptions = {
+      from: {
+        name: senderName || "PARS 2026 BTC",
+        address: from || smtpUser,
+      },
+      to,
+      subject: subject || "Thư xác nhận PARS 2026",
+      html,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return res.json({
+      success: true,
+      messageId: info.messageId,
+      response: info.response,
+      server: smtpHost,
+    });
+  } catch (err: any) {
+    let errorMessage = err.message || "Lỗi khi gửi mail SMTP";
+    const lowerError = errorMessage.toLowerCase();
+    if (
+      errorMessage.includes("5.7.1") || 
+      lowerError.includes("sender address rejected") || 
+      lowerError.includes("allowed sender address mismatch") ||
+      lowerError.includes("not owned by user")
+    ) {
+      errorMessage += " (Gợi ý: Một số nhà cung cấp SMTP như Gmail/Zoho/Outlook yêu cầu 'MÃ SENDER EMAIL' phải khớp chính xác với tài khoản 'SMTP USER' đăng nhập).";
+    }
+
+    console.error('[SMTP Send Error]:', err);
+    return res.status(500).json({
+      success: false,
+      error: errorMessage,
+    });
+  }
+}
+
+// ==========================================
 // Main Handler
 // ==========================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -473,6 +541,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return handleSendCloudflare(req, res);
   } else if (action === 'send-ses') {
     return handleSendAwsSes(req, res);
+  } else if (action === 'send-smtp') {
+    return handleSendSmtp(req, res);
   } else if (action === 'test-connection') {
     return handleTestConnection(req, res);
   } else if (action === 'track-open') {
