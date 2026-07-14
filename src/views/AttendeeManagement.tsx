@@ -5069,7 +5069,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     <div>
                       <p className="font-black text-slate-800">Đại biểu đã chọn</p>
                       <p className="text-slate-500 font-mono">
-                        Dự kiến hoàn thành trong ~{Math.ceil(selectedAttendeeIds.length * 2 / 60)} phút
+                        Dự kiến hoàn thành trong ~{Math.ceil(selectedAttendeeIds.length * 5 / 60)} phút
                         {selectedAttendeeIds.length > 20 && ` (bao gồm ${Math.floor(selectedAttendeeIds.length / 20)} lần batch pause)`}
                       </p>
                     </div>

@@ -11,11 +11,17 @@
  */
 
 // ─── Hằng số điều chỉnh tốc độ ─────────────────────────────────────────────
-const SEND_DELAY_MS   = 2_000;   // delay giữa mỗi email (ms) — tránh flood SMTP
-const BATCH_SIZE      = 20;      // sau N email thì nghỉ
-const BATCH_PAUSE_MS  = 8_000;   // nghỉ bao nhiêu ms sau mỗi batch (giúp tránh block)
-const MAX_RETRY       = 2;       // số lần retry tối đa khi gặp lỗi tạm thời
-const RETRY_BASE_MS   = 5_000;   // backoff cơ sở (ms), nhân đôi mỗi lần: 5s, 10s
+// Tối ưu cho Google Workspace Individual (Pro) — giới hạn 2.000 email/ngày
+//
+// Công thức:
+//   SEND_DELAY_MS = 5s  →  tối đa 720 email/giờ
+//   Batch pause 15s/20 email  →  thực tế ~610 email/giờ (an toàn)
+//   Nếu chạy liên tục 3 tiếng = ~1.830 email (< 2.000/ngày ✓)
+const SEND_DELAY_MS   = 5_000;   // 5 giây giữa mỗi email — an toàn với Workspace Individual
+const BATCH_SIZE      = 20;      // 20 email/batch (khuyến nghị Google)
+const BATCH_PAUSE_MS  = 15_000;  // nghỉ 15 giây sau mỗi 20 email — tránh block IP
+const MAX_RETRY       = 2;       // retry tối đa 2 lần khi gặp lỗi tạm thời
+const RETRY_BASE_MS   = 8_000;   // backoff cơ sở 8s → 16s (lần 2)
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
