@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { Search, Filter, Trash, CheckCircle2, QrCode, Plus, Check, FileDown, Eye, RefreshCcw, Wifi, WifiOff, Sparkles, Printer, Award, FileSpreadsheet, Download, Database, Upload, Edit3, Save, AlertTriangle, User, Calendar, MapPin, Info, CreditCard, Tag, Phone, Mail, UserCheck, Cloud, X } from 'lucide-react';
+import { Search, Filter, Trash, CheckCircle2, QrCode, Plus, Check, FileDown, Eye, RefreshCcw, Wifi, WifiOff, Sparkles, Printer, Award, FileSpreadsheet, Download, Database, Upload, Edit3, Save, AlertTriangle, User, Calendar, MapPin, Info, CreditCard, Tag, Phone, Mail, UserCheck, Cloud, X, Send } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { store, DEFAULT_CME_TEMPLATE_CONFIG } from '../dataStore';
 import { Attendee, Role } from '../types';
+import { emailQueue, EmailJobResult, QueueStatus } from '../lib/emailQueue';
 
 const parseCustomFieldsFromNotes = (notes: string | undefined): { label: string; value: string }[] | null => {
   if (!notes || !notes.includes('[Trường tùy chỉnh]')) return null;
@@ -198,6 +199,12 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
   const [bulkSendResults, setBulkSendResults] = useState<Array<{ name: string; phone: string; status: 'success' | 'failed'; detail?: string }>>([]);
   const [bulkProgress, setBulkProgress] = useState(0);
 
+  // States for Email Queue bulk send (anti-spam)
+  const [showBulkEmailModal, setShowBulkEmailModal] = useState(false);
+  const [bulkEmailTemplateId, setBulkEmailTemplateId] = useState<string>('');
+  const [emailQueueStatus, setEmailQueueStatus] = useState<QueueStatus | null>(null);
+  const [emailQueueRunning, setEmailQueueRunning] = useState(false);
+
   const handleStartBulkZns = async () => {
     if (!bulkZnsTemplateId) {
       alert(`Vui lòng chọn mẫu tin nhắn ${bulkChannel === 'zalo' ? 'Zalo ZNS' : 'WhatsApp'} để tiến hành gửi hàng loạt.`);
@@ -239,6 +246,58 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
     
     setBulkSendingStatus('completed');
   };
+
+  /**
+   * handleStartBulkEmail — Gửi email hàng loạt qua EmailQueue chống Spam.
+   * Xếp hàng, delay 2s/email, retry 2 lần với backoff, batch pause 8s/20 email.
+   */
+  const handleStartBulkEmail = useCallback(async () => {
+    const selectedAttendees = attendees.filter(a => selectedAttendeeIds.includes(a.id));
+    if (selectedAttendees.length === 0) return;
+
+    // Build jobs cho EmailQueue
+    const jobs = selectedAttendees.map(att => ({
+      jobId: att.id,
+      recipientName: formatName(att.title, att.fullName),
+      recipientEmail: att.email,
+      send: () => store.sendEmailQueued(att, undefined, undefined, bulkEmailTemplateId || undefined),
+      meta: { attendeeId: att.id },
+    }));
+
+    // Reset và load queue
+    emailQueue.load(jobs);
+    setEmailQueueStatus(emailQueue.getStatus());
+    setEmailQueueRunning(true);
+
+    // Đăng ký observers để UI re-render real-time
+    const onUpdate = (status: QueueStatus) => {
+      setEmailQueueStatus({ ...status, results: [...status.results] });
+    };
+    emailQueue
+      .on('start', onUpdate)
+      .on('job_start', onUpdate)
+      .on('job_done', onUpdate)
+      .on('job_retry', onUpdate)
+      .on('batch_pause', onUpdate)
+      .on('delay_tick', onUpdate)
+      .on('complete', onUpdate)
+      .on('cancel', onUpdate);
+
+    await emailQueue.run();
+
+    // Cleanup listeners
+    emailQueue
+      .off('start', onUpdate)
+      .off('job_start', onUpdate)
+      .off('job_done', onUpdate)
+      .off('job_retry', onUpdate)
+      .off('batch_pause', onUpdate)
+      .off('delay_tick', onUpdate)
+      .off('complete', onUpdate)
+      .off('cancel', onUpdate);
+
+    setEmailQueueRunning(false);
+  }, [attendees, selectedAttendeeIds, bulkEmailTemplateId]);
 
   const handleOpenNotifyModal = (att: Attendee, tempId: 'tmpl-confirmation' | 'tmpl-reminder' = 'tmpl-confirmation') => {
     setNotifyAttendee(att);
@@ -1422,6 +1481,7 @@ Ban Thư ký Hội nghị PARS 2026`
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Zalo/WhatsApp bulk send */}
             <button
               type="button"
               onClick={() => {
@@ -1445,6 +1505,23 @@ Ban Thư ký Hội nghị PARS 2026`
             >
               <Sparkles className="w-4 h-4 text-teal-100" />
               Gửi Tin Hàng Loạt 🚀
+            </button>
+
+            {/* Email Queue bulk send */}
+            <button
+              type="button"
+              onClick={() => {
+                // Pre-select first email template if available
+                const emailTemplates = store.getTemplates().filter(t => t.channel === 'email');
+                setBulkEmailTemplateId(emailTemplates.length > 0 ? emailTemplates[0].id : '');
+                setEmailQueueStatus(null);
+                setEmailQueueRunning(false);
+                setShowBulkEmailModal(true);
+              }}
+              className="px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-lg flex items-center gap-1.5 transition-all shadow-sm cursor-pointer border-none"
+            >
+              <Send className="w-3.5 h-3.5" />
+              Email Hàng Loạt 📧
             </button>
             <button
               type="button"
@@ -4936,6 +5013,264 @@ Ban Thư ký Hội nghị PARS 2026`
           </div>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          BULK EMAIL QUEUE MODAL — Gửi email hàng loạt chống spam
+          Cơ chế: delay 2s/email, batch pause 8s/20 email, retry 2× backoff
+          ═══════════════════════════════════════════════════════════════════ */}
+      {showBulkEmailModal && (
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden border border-slate-200 shadow-2xl animate-fade-in flex flex-col max-h-[92vh]">
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 p-5 text-white flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-500/15 border border-indigo-400/25 flex items-center justify-center">
+                  <Send className="w-4.5 h-4.5 text-indigo-300" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm tracking-wider uppercase">Gửi Email Hàng Loạt (Queue + Anti-Spam)</h4>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Xếp hàng FIFO · Delay 2s/email · Batch pause 8s/20 email · Auto-retry 2×</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (emailQueueRunning) emailQueue.cancel();
+                  setShowBulkEmailModal(false);
+                }}
+                disabled={emailQueueRunning && emailQueueStatus?.state !== 'completed' && emailQueueStatus?.state !== 'cancelled'}
+                className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer border-none bg-transparent disabled:opacity-30"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 text-slate-900">
+
+              {/* Config section — only when not yet started */}
+              {!emailQueueStatus && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-indigo-50 border border-indigo-200 rounded-2xl text-xs text-indigo-800 leading-relaxed">
+                    <p className="font-black text-sm mb-1">📋 Cơ chế hàng đợi chống Spam Gmail SMTP</p>
+                    <ul className="space-y-1 list-none pl-1">
+                      <li>⏱ <strong>Delay cố định 2 giây</strong> giữa mỗi email — tránh flood SMTP</li>
+                      <li>🔁 <strong>Retry tự động 2 lần</strong> với backoff 5s → 10s khi lỗi tạm thời</li>
+                      <li>⚡ <strong>Batch pause 8 giây</strong> sau mỗi 20 email — tránh bị block IP</li>
+                      <li>🚫 <strong>Không retry</strong> với lỗi vĩnh viễn (email không tồn tại)</li>
+                    </ul>
+                  </div>
+
+                  {/* Recipient count */}
+                  <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                    <div className="w-8 h-8 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center text-indigo-700 font-black text-sm shrink-0">
+                      {selectedAttendeeIds.length}
+                    </div>
+                    <div>
+                      <p className="font-black text-slate-800">Đại biểu đã chọn</p>
+                      <p className="text-slate-500 font-mono">
+                        Dự kiến hoàn thành trong ~{Math.ceil(selectedAttendeeIds.length * 2 / 60)} phút
+                        {selectedAttendeeIds.length > 20 && ` (bao gồm ${Math.floor(selectedAttendeeIds.length / 20)} lần batch pause)`}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Template selector */}
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 block mb-1.5 uppercase">Mẫu email sẽ gửi</label>
+                    <select
+                      value={bulkEmailTemplateId}
+                      onChange={e => setBulkEmailTemplateId(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-indigo-500"
+                    >
+                      <option value="">— Mẫu mặc định (đăng ký thành công) —</option>
+                      {store.getTemplates().filter(t => t.channel === 'email').map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Attendee preview list */}
+                  <div>
+                    <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Danh sách ({selectedAttendeeIds.length} người)</p>
+                    <div className="max-h-48 overflow-y-auto border border-slate-150 rounded-xl divide-y divide-slate-100">
+                      {attendees.filter(a => selectedAttendeeIds.includes(a.id)).map((a, idx) => (
+                        <div key={a.id} className="flex items-center gap-2.5 p-2.5 text-xs hover:bg-slate-50">
+                          <span className="text-[10px] font-mono text-slate-400 w-6 text-right shrink-0">{idx + 1}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-slate-800 truncate">{formatName(a.title, a.fullName)}</p>
+                            <p className="text-slate-400 font-mono text-[10px] truncate">{a.email}</p>
+                          </div>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold shrink-0 ${
+                            a.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' :
+                            a.paymentStatus === 'pending_verification' ? 'bg-amber-50 text-amber-700' :
+                            'bg-slate-100 text-slate-500'
+                          }`}>
+                            {a.paymentStatus === 'paid' ? '✓ Đã TT' : a.paymentStatus === 'pending_verification' ? '⏳ Chờ' : 'Chưa TT'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Queue progress — shown while running or after done */}
+              {emailQueueStatus && (
+                <div className="space-y-4 animate-fade-in">
+
+                  {/* Overall progress bar */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-700">
+                        {emailQueueStatus.state === 'running' ? '⚙️ Đang xử lý queue...' :
+                         emailQueueStatus.state === 'paused' ? '⏸ Đang nghỉ chống spam...' :
+                         emailQueueStatus.state === 'completed' ? '✅ Hoàn thành!' :
+                         emailQueueStatus.state === 'cancelled' ? '🛑 Đã hủy' : '⏳ Đang khởi động...'}
+                      </span>
+                      <span className="font-mono text-indigo-700">
+                        {emailQueueStatus.processed}/{emailQueueStatus.total}
+                      </span>
+                    </div>
+                    <div className="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+                        style={{ width: `${emailQueueStatus.total > 0 ? Math.round(emailQueueStatus.processed / emailQueueStatus.total * 100) : 0}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                      <span>✓ Thành công: <strong className="text-emerald-600">{emailQueueStatus.succeeded}</strong></span>
+                      <span>✗ Thất bại: <strong className="text-rose-600">{emailQueueStatus.failed}</strong></span>
+                      <span>Tổng: <strong className="text-slate-700">{emailQueueStatus.total}</strong></span>
+                    </div>
+                  </div>
+
+                  {/* Delay countdown indicator */}
+                  {(emailQueueStatus.state === 'running' || emailQueueStatus.state === 'paused') && emailQueueStatus.delayRemaining > 0 && (
+                    <div className={`p-3 rounded-xl border text-xs flex items-center gap-3 animate-pulse ${
+                      emailQueueStatus.state === 'paused'
+                        ? 'bg-amber-50 border-amber-200 text-amber-800'
+                        : 'bg-slate-50 border-slate-200 text-slate-600'
+                    }`}>
+                      <div className="text-2xl shrink-0">{emailQueueStatus.state === 'paused' ? '☕' : '⏱'}</div>
+                      <div>
+                        <p className="font-black">
+                          {emailQueueStatus.state === 'paused'
+                            ? `Batch pause — nghỉ ${(emailQueueStatus.delayRemaining / 1000).toFixed(1)}s để tránh spam filter`
+                            : `Delay chống spam — gửi tiếp sau ${(emailQueueStatus.delayRemaining / 1000).toFixed(1)}s`}
+                        </p>
+                        <p className="text-[10px] opacity-70 mt-0.5">
+                          Email hiện tại: <strong>#{emailQueueStatus.currentIndex + 1}</strong> / {emailQueueStatus.total}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Per-job results log */}
+                  {emailQueueStatus.results.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-500 uppercase mb-1.5">Nhật ký gửi email</p>
+                      <div className="max-h-52 overflow-y-auto border border-slate-150 rounded-xl divide-y divide-slate-100">
+                        {[...emailQueueStatus.results].reverse().map((r: EmailJobResult) => (
+                          <div key={r.jobId} className={`flex items-start gap-2.5 p-2.5 text-xs ${
+                            r.status === 'success' ? 'bg-emerald-50/40' : 'bg-rose-50/40'
+                          }`}>
+                            <span className={`mt-0.5 shrink-0 text-base ${
+                              r.status === 'success' ? 'text-emerald-600' : 'text-rose-500'
+                            }`}>
+                              {r.status === 'success' ? '✓' : '✗'}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-slate-800 truncate">{r.recipientName}</p>
+                              <p className="text-slate-400 font-mono text-[10px] truncate">{r.recipientEmail}</p>
+                              {r.status === 'failed' && r.error && (
+                                <p className="text-rose-600 text-[10px] mt-0.5 font-medium truncate" title={r.error}>{r.error}</p>
+                              )}
+                            </div>
+                            <div className="text-right shrink-0">
+                              {r.attempts > 1 && (
+                                <span className="text-[9px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">
+                                  {r.attempts} lần thử
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Summary when done */}
+                  {(emailQueueStatus.state === 'completed' || emailQueueStatus.state === 'cancelled') && (
+                    <div className={`p-4 rounded-2xl border text-sm font-bold text-center ${
+                      emailQueueStatus.state === 'completed'
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-slate-100 border-slate-300 text-slate-600'
+                    }`}>
+                      {emailQueueStatus.state === 'completed'
+                        ? `🎉 Hoàn thành! ${emailQueueStatus.succeeded}/${emailQueueStatus.total} email đã gửi thành công.`
+                        : `⚠️ Queue bị hủy. Đã gửi được ${emailQueueStatus.processed}/${emailQueueStatus.total} email.`
+                      }
+                    </div>
+                  )}
+                </div>
+              )}
+
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-150 flex justify-between items-center gap-3 shrink-0">
+              <div className="text-[10px] text-slate-400 font-mono">
+                {emailQueueStatus && emailQueueStatus.state !== 'idle'
+                  ? `${emailQueueStatus.state.toUpperCase()} · ${emailQueueStatus.processed}/${emailQueueStatus.total} processed`
+                  : `${selectedAttendeeIds.length} đại biểu đã chọn`
+                }
+              </div>
+              <div className="flex gap-2">
+                {/* Cancel button while running */}
+                {emailQueueRunning && emailQueueStatus?.state === 'running' && (
+                  <button
+                    type="button"
+                    onClick={() => emailQueue.cancel()}
+                    className="px-4 py-2 text-xs bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold rounded-xl border border-rose-200 cursor-pointer transition-all"
+                  >
+                    🛑 Hủy Queue
+                  </button>
+                )}
+
+                {/* Close button — disabled while running */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (emailQueueRunning && emailQueueStatus?.state === 'running') {
+                      emailQueue.cancel();
+                    }
+                    setShowBulkEmailModal(false);
+                  }}
+                  disabled={emailQueueRunning && emailQueueStatus?.state !== 'completed' && emailQueueStatus?.state !== 'cancelled' && emailQueueStatus?.state !== 'paused'}
+                  className="px-4 py-2 text-xs bg-white hover:bg-slate-100 text-slate-700 font-bold rounded-xl border border-slate-300 cursor-pointer transition-all disabled:opacity-40"
+                >
+                  {emailQueueStatus?.state === 'completed' || emailQueueStatus?.state === 'cancelled' ? 'Đóng lại' : 'Thoát'}
+                </button>
+
+                {/* Start / Done button */}
+                {!emailQueueStatus && (
+                  <button
+                    type="button"
+                    onClick={handleStartBulkEmail}
+                    className="px-5 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold rounded-xl flex items-center gap-1.5 cursor-pointer border-none shadow-md transition-all active:scale-95"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    Bắt Đầu Gửi Email 🚀
+                  </button>
+                )}
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

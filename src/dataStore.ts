@@ -3671,6 +3671,23 @@ export class DataStore {
     return log;
   }
 
+  /**
+   * sendEmailQueued — Wrapper dùng trong EmailQueue jobs.
+   * Gọi sendEmail() và ném Error nếu status !== 'success',
+   * để EmailQueue có thể detect thất bại và retry.
+   */
+  async sendEmailQueued(
+    attendee: Attendee,
+    customSubject?: string,
+    customBody?: string,
+    templateId?: string
+  ): Promise<void> {
+    const log = await this.sendEmail(attendee, customSubject, customBody, templateId);
+    if (log.status !== 'success') {
+      throw new Error(log.response?.message || log.response?.error || 'Gửi email thất bại');
+    }
+  }
+
   async sendWhatsapp(attendee: Attendee, templateId?: string): Promise<SentNotificationLog> {
     let template = templateId ? this.templates.find(t => t.id === templateId) : null;
     if (!template && templateId === 'payment_confirmed') {
