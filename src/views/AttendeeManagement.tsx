@@ -5,11 +5,12 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useReactToPrint } from 'react-to-print';
-import { Search, Filter, Trash, CheckCircle2, QrCode, Plus, Check, FileDown, Eye, RefreshCcw, Wifi, WifiOff, Sparkles, Printer, Award, FileSpreadsheet, Download, Database, Upload, Edit3, Save, AlertTriangle, User, Calendar, MapPin, Info, CreditCard, Tag, Phone, Mail, UserCheck, Cloud, X, Send } from 'lucide-react';
+import { Search, Filter, Trash, CheckCircle2, QrCode, Plus, Check, FileDown, Eye, RefreshCcw, Wifi, WifiOff, Sparkles, Printer, Award, FileSpreadsheet, Download, Database, Upload, Edit3, Save, AlertTriangle, User, Calendar, MapPin, Info, CreditCard, Tag, Phone, Mail, UserCheck, Cloud, X, Send, CalendarDays, ChevronRight, Layers } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { store, DEFAULT_CME_TEMPLATE_CONFIG } from '../dataStore';
 import { Attendee, Role } from '../types';
 import { emailQueue, EmailJobResult, QueueStatus } from '../lib/emailQueue';
+import { campaignManager, CampaignState, CampaignStats } from '../lib/emailCampaign';
 
 const parseCustomFieldsFromNotes = (notes: string | undefined): { label: string; value: string }[] | null => {
   if (!notes || !notes.includes('[Trường tùy chỉnh]')) return null;
@@ -205,6 +206,19 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
   const [emailQueueStatus, setEmailQueueStatus] = useState<QueueStatus | null>(null);
   const [emailQueueRunning, setEmailQueueRunning] = useState(false);
 
+  // States for multi-day Campaign Mode
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [campaign, setCampaign] = useState<CampaignState | null>(() => campaignManager.load());
+  const [campaignStats, setCampaignStats] = useState<CampaignStats | null>(() => {
+    const c = campaignManager.load();
+    return c ? campaignManager.getStats(c) : null;
+  });
+  const [campaignTemplateId, setCampaignTemplateId] = useState<string>('');
+  const [campaignDailyLimit, setCampaignDailyLimit] = useState<number>(700);
+  const [campaignSending, setCampaignSending] = useState(false);
+  const [campaignQueueStatus, setCampaignQueueStatus] = useState<QueueStatus | null>(null);
+  const [campaignName, setCampaignName] = useState<string>(`Chiến dịch Email PARS 2026 - ${new Date().toLocaleDateString('vi-VN')}`);
+
   const handleStartBulkZns = async () => {
     if (!bulkZnsTemplateId) {
       alert(`Vui lòng chọn mẫu tin nhắn ${bulkChannel === 'zalo' ? 'Zalo ZNS' : 'WhatsApp'} để tiến hành gửi hàng loạt.`);
@@ -298,6 +312,86 @@ export default function AttendeeManagement({ role }: AttendeeManagementProps) {
 
     setEmailQueueRunning(false);
   }, [attendees, selectedAttendeeIds, bulkEmailTemplateId]);
+
+  // ── Campaign handlers ────────────────────────────────────────────────────
+
+  const refreshCampaignState = useCallback((c: CampaignState) => {
+    setCampaign(c);
+    setCampaignStats(campaignManager.getStats(c));
+  }, []);
+
+  /** Tạo chiến dịch mới từ danh sách đã chọn */
+  const handleCreateCampaign = useCallback(() => {
+    const ids = selectedAttendeeIds.length > 0
+      ? selectedAttendeeIds
+      : attendees.map(a => a.id);
+    if (ids.length === 0) { alert('Không có đại biểu nào!'); return; }
+    if (!window.confirm(`Tạo chiến dịch gửi email cho ${ids.length.toLocaleString()} đại biểu?\n\nDự kiến: ~${Math.ceil(ids.length / campaignDailyLimit)} ngày (${campaignDailyLimit} email/ngày).\n\nChiến dịch cũ sẽ bị xóa nếu tồn tại.`)) return;
+    const c = campaignManager.create({
+      name: campaignName,
+      templateId: campaignTemplateId,
+      allIds: ids,
+      dailyLimit: campaignDailyLimit,
+    });
+    refreshCampaignState(c);
+    setCampaignQueueStatus(null);
+  }, [attendees, selectedAttendeeIds, campaignName, campaignTemplateId, campaignDailyLimit, refreshCampaignState]);
+
+  /** Gửi đợt hôm nay của chiến dịch đang active */
+  const handleSendTodayBatch = useCallback(async () => {
+    if (!campaign) return;
+    const stats = campaignManager.getStats(campaign);
+    if (!stats.canSendToday) { alert('Đã gửi đợt hôm nay rồi. Quay lại vào ngày mai nhé!'); return; }
+
+    const batchIds = campaignManager.getTodaysBatch(campaign);
+    const batchAttendees = attendees.filter(a => batchIds.includes(a.id));
+
+    if (batchAttendees.length === 0) {
+      alert('Không tìm thấy đại biểu trong đợt này trong danh sách hiện tại.');
+      return;
+    }
+
+    const jobs = batchAttendees.map(att => ({
+      jobId: att.id,
+      recipientName: `${att.title || ''} ${att.fullName}`.trim(),
+      recipientEmail: att.email,
+      send: () => store.sendEmailQueued(att, undefined, undefined, campaign.templateId || undefined),
+      meta: { attendeeId: att.id },
+    }));
+
+    // Load queue & register listeners
+    emailQueue.load(jobs);
+    setCampaignQueueStatus(emailQueue.getStatus());
+    setCampaignSending(true);
+
+    const onUpdate = (status: QueueStatus) => {
+      setCampaignQueueStatus({ ...status, results: [...status.results] });
+    };
+    emailQueue
+      .on('start', onUpdate).on('job_start', onUpdate).on('job_done', onUpdate)
+      .on('job_retry', onUpdate).on('batch_pause', onUpdate).on('delay_tick', onUpdate)
+      .on('complete', onUpdate).on('cancel', onUpdate);
+
+    const finalStatus = await emailQueue.run();
+
+    // Cleanup
+    emailQueue
+      .off('start', onUpdate).off('job_start', onUpdate).off('job_done', onUpdate)
+      .off('job_retry', onUpdate).off('batch_pause', onUpdate).off('delay_tick', onUpdate)
+      .off('complete', onUpdate).off('cancel', onUpdate);
+
+    // Build results map for campaign manager
+    const resultsMap: Record<string, 'success' | 'failed' | 'permanent_fail'> = {};
+    for (const r of finalStatus.results) {
+      if (r.status === 'success') resultsMap[r.jobId] = 'success';
+      else if (r.error && /550|invalid.*email|no such user/i.test(r.error)) resultsMap[r.jobId] = 'permanent_fail';
+      else resultsMap[r.jobId] = 'failed';
+    }
+
+    const updated = campaignManager.recordBatchResult(campaign, batchIds, resultsMap);
+    refreshCampaignState(updated);
+    setCampaignSending(false);
+  }, [campaign, attendees, refreshCampaignState]);
 
   const handleOpenNotifyModal = (att: Attendee, tempId: 'tmpl-confirmation' | 'tmpl-reminder' = 'tmpl-confirmation') => {
     setNotifyAttendee(att);
@@ -1475,8 +1569,8 @@ Ban Thư ký Hội nghị PARS 2026`
               Đã chọn {selectedAttendeeIds.length} đại biểu
             </div>
             <div className="text-left">
-              <p className="text-[12px] font-black text-slate-800">Thao tác gửi tin hàng loạt</p>
-              <p className="text-[10px] text-slate-500 font-medium font-sans">Chọn kênh (Zalo ZNS / WhatsApp) và mẫu tin để gửi tin nhắn hàng loạt cho các đại biểu đã chọn.</p>
+              <p className="text-[12px] font-black text-slate-800">Thao tác gửi email hàng loạt</p>
+              <p className="text-[10px] text-slate-500 font-medium font-sans">Gửi email qua Google SMTP — chọn đơn lẻ hoặc thiết lập chiến dịch nhiều ngày.</p>
             </div>
           </div>
 
@@ -1523,6 +1617,21 @@ Ban Thư ký Hội nghị PARS 2026`
               <Send className="w-3.5 h-3.5" />
               Email Hàng Loạt 📧
             </button>
+
+            {/* Campaign Mode button */}
+            <button
+              type="button"
+              onClick={() => {
+                const emailTemplates = store.getTemplates().filter(t => t.channel === 'email');
+                setCampaignTemplateId(emailTemplates.length > 0 ? emailTemplates[0].id : '');
+                setShowCampaignModal(true);
+              }}
+              className="px-4 py-2 text-xs bg-violet-600 hover:bg-violet-700 text-white font-black rounded-lg flex items-center gap-1.5 transition-all shadow-sm cursor-pointer border-none"
+            >
+              <CalendarDays className="w-3.5 h-3.5" />
+              Chiến Dịch Nhiều Ngày 📅
+            </button>
+
             <button
               type="button"
               onClick={() => setSelectedAttendeeIds([])}
@@ -5265,6 +5374,325 @@ Ban Thư ký Hội nghị PARS 2026`
                   </button>
                 )}
               </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════
+          CAMPAIGN MODAL — Chiến dịch gửi email nhiều ngày (8000 email)
+          Mỗi ngày chỉ gửi 1 đợt ≤ 700 người, tự động lưu tiến trình
+          ═══════════════════════════════════════════════════════════════════ */}
+      {showCampaignModal && (
+        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-2xl w-full overflow-hidden border border-slate-200 shadow-2xl animate-fade-in flex flex-col max-h-[94vh]">
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-violet-900 via-violet-950 to-slate-900 p-5 text-white flex justify-between items-center shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-violet-500/15 border border-violet-400/25 flex items-center justify-center">
+                  <CalendarDays className="w-4.5 h-4.5 text-violet-300" />
+                </div>
+                <div>
+                  <h4 className="font-extrabold text-sm tracking-wider uppercase">Chiến Dịch Email Nhiều Ngày</h4>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    {campaign
+                      ? `${campaign.name} · ${campaignStats?.batchesCompleted ?? 0}/${campaign.estimatedDays} đợt`
+                      : 'Thiết lập chiến dịch gửi email tự động theo ngày'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => { if (!campaignSending) setShowCampaignModal(false); }}
+                disabled={campaignSending}
+                className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer border-none bg-transparent disabled:opacity-30"
+              >✕</button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto">
+
+              {/* ── SETUP PANEL (khi chưa có chiến dịch) ─────────────────── */}
+              {!campaign && (
+                <div className="p-5 space-y-4">
+                  <div className="p-4 bg-violet-50 border border-violet-200 rounded-2xl text-xs text-violet-900 leading-relaxed">
+                    <p className="font-black text-sm mb-2">📅 Cách hoạt động</p>
+                    <ul className="space-y-1.5 list-none">
+                      <li>1️⃣ Chọn danh sách đại biểu (hoặc dùng toàn bộ {attendees.length.toLocaleString()} người hiện tại)</li>
+                      <li>2️⃣ Hệ thống chia thành các đợt <strong>{campaignDailyLimit} người/ngày</strong></li>
+                      <li>3️⃣ Mỗi ngày mở app → bấm <strong>"Gửi Đợt Hôm Nay"</strong></li>
+                      <li>4️⃣ Sau khi gửi xong đợt → tự động khóa đến ngày mai</li>
+                      <li>5️⃣ Tiến trình được lưu tự động, đóng app không mất dữ liệu</li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-black text-slate-500 block mb-1.5 uppercase">Tên chiến dịch</label>
+                    <input
+                      type="text"
+                      value={campaignName}
+                      onChange={e => setCampaignName(e.target.value)}
+                      className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-violet-500"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 block mb-1.5 uppercase">Mẫu email</label>
+                      <select
+                        value={campaignTemplateId}
+                        onChange={e => setCampaignTemplateId(e.target.value)}
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-violet-500"
+                      >
+                        <option value="">— Mẫu mặc định —</option>
+                        {store.getTemplates().filter(t => t.channel === 'email').map(t => (
+                          <option key={t.id} value={t.id}>{t.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] font-black text-slate-500 block mb-1.5 uppercase">Giới hạn email/ngày</label>
+                      <select
+                        value={campaignDailyLimit}
+                        onChange={e => setCampaignDailyLimit(Number(e.target.value))}
+                        className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-violet-500"
+                      >
+                        <option value={500}>500/ngày (~3.3h)</option>
+                        <option value={700}>700/ngày (~4.7h) ✅</option>
+                        <option value={800}>800/ngày (~5.3h)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Preview */}
+                  <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl">
+                    <p className="text-[10px] font-black text-slate-500 uppercase mb-3">Dự kiến tiến trình</p>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                      {[
+                        { label: 'Tổng email', value: (selectedAttendeeIds.length > 0 ? selectedAttendeeIds.length : attendees.length).toLocaleString(), color: 'text-violet-700' },
+                        { label: 'Số đợt', value: Math.ceil((selectedAttendeeIds.length > 0 ? selectedAttendeeIds.length : attendees.length) / campaignDailyLimit), color: 'text-indigo-700' },
+                        { label: 'Số ngày', value: Math.ceil((selectedAttendeeIds.length > 0 ? selectedAttendeeIds.length : attendees.length) / campaignDailyLimit), color: 'text-emerald-700' },
+                      ].map(item => (
+                        <div key={item.label} className="bg-white rounded-xl p-3 border border-slate-150 shadow-xs">
+                          <p className={`text-xl font-black ${item.color}`}>{item.value}</p>
+                          <p className="text-[10px] text-slate-400 font-bold mt-0.5">{item.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    {selectedAttendeeIds.length > 0 && (
+                      <p className="text-[10px] text-violet-600 font-bold mt-2 text-center">
+                        📌 Dùng {selectedAttendeeIds.length.toLocaleString()} đại biểu đã chọn
+                      </p>
+                    )}
+                    {selectedAttendeeIds.length === 0 && (
+                      <p className="text-[10px] text-slate-400 mt-2 text-center">
+                        💡 Sẽ dùng toàn bộ {attendees.length.toLocaleString()} đại biểu hiện tại
+                      </p>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCreateCampaign}
+                    className="w-full py-3 bg-violet-600 hover:bg-violet-700 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 cursor-pointer border-none shadow-md transition-all active:scale-[.99]"
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    Tạo Chiến Dịch Email
+                  </button>
+                </div>
+              )}
+
+              {/* ── CAMPAIGN DASHBOARD (khi đã có chiến dịch) ─────────────── */}
+              {campaign && campaignStats && (
+                <div className="p-5 space-y-4">
+
+                  {/* Overall progress */}
+                  <div className="bg-gradient-to-br from-violet-50 to-indigo-50 border border-violet-200 rounded-2xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-xs font-black text-violet-900 truncate max-w-xs">{campaign.name}</p>
+                        <p className="text-[10px] text-violet-600 font-mono mt-0.5">
+                          Đợt {campaignStats.batchesCompleted} / {campaign.estimatedDays} · {campaign.status === 'completed' ? '🎉 Hoàn thành!' : `Còn ~${campaignStats.estimatedDaysLeft} ngày`}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-black text-violet-800">{campaignStats.progressPercent}%</p>
+                        <p className="text-[10px] text-violet-500 font-mono">{campaignStats.sentCount.toLocaleString()}/{campaignStats.totalCount.toLocaleString()}</p>
+                      </div>
+                    </div>
+
+                    {/* Progress bar */}
+                    <div className="w-full bg-violet-200/60 h-3 rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 transition-all duration-700"
+                        style={{ width: `${campaignStats.progressPercent}%` }}
+                      />
+                    </div>
+
+                    {/* Stats row */}
+                    <div className="grid grid-cols-4 gap-2 mt-3 text-center">
+                      {[
+                        { label: 'Đã gửi', value: campaignStats.sentCount.toLocaleString(), color: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-150' },
+                        { label: 'Còn lại', value: campaignStats.pendingCount.toLocaleString(), color: 'text-violet-700', bg: 'bg-violet-50 border-violet-150' },
+                        { label: 'Lỗi vĩnh viễn', value: campaignStats.failedCount.toLocaleString(), color: 'text-rose-700', bg: 'bg-rose-50 border-rose-150' },
+                        { label: 'Số đợt xong', value: String(campaignStats.batchesCompleted), color: 'text-indigo-700', bg: 'bg-indigo-50 border-indigo-150' },
+                      ].map(s => (
+                        <div key={s.label} className={`rounded-xl p-2 border ${s.bg}`}>
+                          <p className={`text-base font-black ${s.color}`}>{s.value}</p>
+                          <p className="text-[9px] text-slate-400 font-bold">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Today's batch status / send area */}
+                  {campaign.status === 'active' && (
+                    <div className={`rounded-2xl border p-4 ${campaignStats.canSendToday ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
+                      {campaignStats.canSendToday ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <p className="text-xs font-black text-emerald-800">
+                              Đợt {campaignStats.nextBatchNo} — Sẵn sàng gửi hôm nay ({campaignStats.nextBatchSize.toLocaleString()} email)
+                            </p>
+                          </div>
+                          <p className="text-[10px] text-emerald-700 font-mono">
+                            Thời gian dự kiến: ~{Math.ceil(campaignStats.nextBatchSize * 5 / 60)} phút
+                            {campaignStats.nextBatchSize > 20 && ` · ${Math.floor(campaignStats.nextBatchSize / 20)} lần batch pause`}
+                          </p>
+
+                          {/* Queue progress while sending */}
+                          {campaignSending && campaignQueueStatus && (
+                            <div className="space-y-2 mt-2">
+                              <div className="flex justify-between text-[10px] font-bold text-slate-600">
+                                <span>{campaignQueueStatus.state === 'paused' ? '☕ Batch pause...' : '⚙️ Đang gửi...'}</span>
+                                <span className="font-mono">{campaignQueueStatus.processed}/{campaignQueueStatus.total}</span>
+                              </div>
+                              <div className="w-full bg-emerald-200/70 h-2 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full bg-emerald-500 transition-all duration-500"
+                                  style={{ width: `${campaignQueueStatus.total > 0 ? Math.round(campaignQueueStatus.processed / campaignQueueStatus.total * 100) : 0}%` }}
+                                />
+                              </div>
+                              {campaignQueueStatus.delayRemaining > 0 && (
+                                <p className="text-[10px] text-emerald-700 font-mono animate-pulse">
+                                  {campaignQueueStatus.state === 'paused'
+                                    ? `⏸ Nghỉ ${(campaignQueueStatus.delayRemaining / 1000).toFixed(1)}s...`
+                                    : `⏱ Gửi tiếp sau ${(campaignQueueStatus.delayRemaining / 1000).toFixed(1)}s`}
+                                </p>
+                              )}
+                              <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                                <span>✓ {campaignQueueStatus.succeeded} thành công</span>
+                                <span>✗ {campaignQueueStatus.failed} thất bại</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {!campaignSending && (
+                            <button
+                              type="button"
+                              onClick={handleSendTodayBatch}
+                              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl flex items-center justify-center gap-2 cursor-pointer border-none shadow-md transition-all active:scale-[.99]"
+                            >
+                              <Send className="w-4 h-4" />
+                              Gửi Đợt {campaignStats.nextBatchNo} Hôm Nay ({campaignStats.nextBatchSize.toLocaleString()} email)
+                            </button>
+                          )}
+                          {campaignSending && (
+                            <button
+                              type="button"
+                              onClick={() => emailQueue.cancel()}
+                              className="w-full py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-2xl flex items-center justify-center gap-2 cursor-pointer border border-rose-200 transition-all"
+                            >
+                              🛑 Dừng khẩn cấp
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl">✅</div>
+                          <div>
+                            <p className="text-xs font-black text-slate-700">Đã gửi đợt hôm nay ({campaign.lastBatchDate})</p>
+                            <p className="text-[10px] text-slate-500 mt-0.5">
+                              Quay lại vào <strong>ngày mai</strong> để gửi đợt {campaignStats.nextBatchNo} ({campaignStats.nextBatchSize.toLocaleString()} email tiếp theo).
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {campaign.status === 'completed' && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
+                      <p className="text-2xl mb-1">🎉</p>
+                      <p className="text-sm font-black text-emerald-800">Chiến dịch hoàn thành!</p>
+                      <p className="text-[11px] text-emerald-600 mt-1">
+                        Đã gửi {campaignStats.sentCount.toLocaleString()} email trong {campaignStats.batchesCompleted} đợt.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Batch history */}
+                  {campaign.batches.length > 0 && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-500 uppercase mb-2">Lịch sử các đợt đã gửi</p>
+                      <div className="border border-slate-150 rounded-2xl overflow-hidden divide-y divide-slate-100 max-h-48 overflow-y-auto">
+                        {[...campaign.batches].reverse().map(b => (
+                          <div key={b.batchNo} className="flex items-center justify-between p-3 text-xs hover:bg-slate-50">
+                            <div className="flex items-center gap-2.5">
+                              <span className="w-7 h-7 rounded-full bg-violet-100 text-violet-700 font-black text-[10px] flex items-center justify-center shrink-0">
+                                {b.batchNo}
+                              </span>
+                              <div>
+                                <p className="font-bold text-slate-800">Đợt {b.batchNo} — {b.date}</p>
+                                <p className="text-slate-400 font-mono text-[10px]">{b.attendeeIds.length} người</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-black text-emerald-600">✓ {b.sent}</p>
+                              {b.failed > 0 && <p className="text-rose-500 font-bold">✗ {b.failed}</p>}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Danger zone */}
+                  <div className="pt-2 border-t border-slate-150">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!window.confirm('Xóa toàn bộ chiến dịch? Tiến trình sẽ mất!')) return;
+                        campaignManager.delete();
+                        setCampaign(null);
+                        setCampaignStats(null);
+                        setCampaignQueueStatus(null);
+                      }}
+                      className="text-[10px] text-rose-500 hover:text-rose-700 font-bold cursor-pointer bg-transparent border-none"
+                    >
+                      🗑 Xóa chiến dịch và bắt đầu lại
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-150 flex justify-between items-center shrink-0">
+              <div className="text-[10px] text-slate-400 font-mono">
+                {campaign
+                  ? `ID: ${campaign.id.slice(0, 18)}... · Tạo: ${new Date(campaign.createdAt).toLocaleDateString('vi-VN')}`
+                  : 'Tiến trình lưu tự động vào trình duyệt'}
+              </div>
+              <button
+                type="button"
+                onClick={() => { if (!campaignSending) setShowCampaignModal(false); }}
+                disabled={campaignSending}
+                className="px-5 py-2 text-xs bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl cursor-pointer border-none disabled:opacity-40"
+              >
+                {campaignSending ? 'Đang gửi...' : 'Đóng'}
+              </button>
             </div>
 
           </div>
