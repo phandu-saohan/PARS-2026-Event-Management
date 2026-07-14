@@ -206,7 +206,6 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
     if (!phone.trim()) return 'Vui lòng nhập số điện thoại liên lạc.';
     if (!email.trim() || !email.includes('@')) return 'Vui lòng cung cấp hòm thư email chính xác.';
     if (formConfig.requiredFields.organization && !organization.trim()) return 'Vui lòng nhập cơ quan công tác.';
-    if (formConfig.fields.cmeRequired && cmeRequired && !cmeIdentityNo.trim()) return 'Vui lòng điền số CCCD để cấp CME.';
     if (formConfig.fields.avatarUrl && !avatarImage) return 'Vui lòng tải lên ảnh thẻ đại biểu.';
     if (formConfig.fields.doctorProofUrl && !doctorProofImage) return 'Vui lòng tải lên bằng chứng Bác sĩ (Bằng cấp).';
 
@@ -839,19 +838,6 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
                 <span className="text-[10px] text-slate-400 font-semibold">Cần tích lũy đủ thời gian nghe báo cáo khoa học theo quy chế (Phụ phí: +{cmeFee.toLocaleString()}đ)</span>
               </div>
             </label>
-            {cmeRequired && (
-              <div className="pt-2 border-t border-slate-100 space-y-1">
-                <label className="text-[10px] font-black text-slate-500 block uppercase">Số CCCD (Để in chứng chỉ CME) *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Nhập số căn cước công dân của bạn"
-                  value={cmeIdentityNo}
-                  onChange={(e) => setCmeIdentityNo(e.target.value)}
-                  className="w-full px-3 py-1.5 border border-slate-200 rounded-xl text-xs font-semibold text-slate-900 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-slate-50/50"
-                />
-              </div>
-            )}
           </div>
         ) : null;
 

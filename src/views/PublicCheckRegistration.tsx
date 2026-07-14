@@ -284,7 +284,7 @@ export default function PublicCheckRegistration({ onNavigate }: PublicCheckRegis
                       Vé điện tử QR
                     </button>
 
-                    {att.paymentStatus === 'paid' && att.cmeIdentityNo && (
+                    {att.paymentStatus === 'paid' && att.cmeRequired && (
                       <button
                         onClick={() => {
                           setSelectedAttendee(att);
@@ -536,7 +536,7 @@ export default function PublicCheckRegistration({ onNavigate }: PublicCheckRegis
               <div className="space-y-1">
                 <h2 className="text-sm font-extrabold text-slate-800 uppercase leading-snug">{formatName(selectedAttendee.title, selectedAttendee.fullName)}</h2>
                 <p className="text-xs text-slate-500 font-medium">{selectedAttendee.organization}</p>
-                <p className="text-[10px] text-slate-400 italic">Mã số CCHN: {selectedAttendee.cmeIdentityNo || 'Không đăng ký CME'}</p>
+                <p className="text-[10px] text-slate-400 italic">Chứng chỉ CME: {selectedAttendee.cmeRequired ? 'Đã đăng ký' : 'Không đăng ký'}</p>
               </div>
 
               <div className="pt-2 flex justify-center">

@@ -2786,7 +2786,7 @@ Ban Thư ký Hội nghị PARS 2026`
                               <span className="text-[11px] font-black text-slate-900 uppercase block">Nhu cầu Chứng Chỉ Đào Tạo (CME)</span>
                               <p className="text-[10px] text-slate-500 mt-0.5">
                                 {viewDetailAttendee.cmeRequired 
-                                  ? `Yêu cầu cấp CME hoạt động. Số định danh / CCCD: ${viewDetailAttendee.cmeIdentityNo || 'Chưa nhập số CCCD!'}`
+                                  ? 'Yêu cầu cấp CME hoạt động.'
                                   : 'Không đăng ký nhu cầu cấp tín chỉ đào tạo liên tục.'}
                               </p>
                             </div>
@@ -2887,7 +2887,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     /* ACTIVE EDIT FORM (Only for ADMIN/OPERATOR, role isn't 'ctv') */
                     <div className="space-y-4 animate-fade-in text-xs">
                       <div className="p-3 bg-indigo-50 border border-indigo-150 rounded-xl text-indigo-800 leading-normal text-[11px]">
-                        <strong>Sửa đổi thông tin:</strong> Bạn đang trực tiếp ghi đè dữ liệu lên bộ cơ sở đại biểu. Hãy chắc chắn thông tin số điện thoại & CCCD khớp chính xác để in chứng chỉ CME sau hội nghị.
+                        <strong>Sửa đổi thông tin:</strong> Bạn đang trực tiếp ghi đè dữ liệu lên bộ cơ sở đại biểu. Hãy chắc chắn thông tin số điện thoại khớp chính xác để in chứng chỉ CME sau hội nghị.
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -3084,21 +3084,6 @@ Ban Thư ký Hội nghị PARS 2026`
                             />
                             <label htmlFor="detail-edit-cmeRequired" className="text-xs font-black text-slate-800 select-none cursor-pointer">Đại biểu đăng ký cấp nhận tín chỉ CME hội nghị (Có phí)</label>
                           </div>
-
-                          {detailEditForm.cmeRequired && (
-                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 animate-fade-in text-left">
-                              <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Số CMND / Thẻ căn cước công dân (CCCD) *</label>
-                              <input
-                                type="text"
-                                required={detailEditForm.cmeRequired}
-                                value={detailEditForm.cmeIdentityNo || ''}
-                                onChange={(e) => setDetailEditForm({ ...detailEditForm, cmeIdentityNo: e.target.value })}
-                                placeholder="Nhập số căn cước gồm 12 chữ số..."
-                                className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 font-mono font-semibold focus:outline-none focus:border-indigo-500"
-                              />
-                              <p className="text-[10px] text-slate-400 mt-1">CCCD bắt buộc để đồng bộ danh sách đào tạo phát hành lên Tổng Hội Y Học Việt Nam.</p>
-                            </div>
-                          )}
                         </div>
 
                         {/* Event Sub services checkboxes */}
@@ -4224,14 +4209,14 @@ Ban Thư ký Hội nghị PARS 2026`
               <div>
                 <label className="text-[10.5px] font-bold text-slate-700 block mb-1">Xem trước dữ liệu tải lên hoặc Dán khối văn bản phân tách bằng dấu gạch đứng (|):</label>
                 <p className="text-[9.5px] text-indigo-750 bg-indigo-50/50 p-2 rounded leading-snug mb-2 font-mono text-indigo-800">
-                  Định dạng dòng: Học vị | Họ và Tên | Điện thoại | Email | Cơ quan | Năm Sinh | Số định danh CCCD (Nếu làm cọc CME)
+                  Định dạng dòng: Học vị | Họ và Tên | Điện thoại | Email | Cơ quan | Năm Sinh
                 </p>
                 <textarea
                   required
                   rows={6}
                   value={bulkInputText}
                   onChange={(e) => setBulkInputText(e.target.value)}
-                  placeholder="BS. | NGUYỄN VĂN A | 0987112233 | nva@hmu.edu.vn | Bệnh viện Bạch Mai | 1980 | 001180009212&#10;TS.BS. | TRẦN THỊ BÚT | 0912343212 | ttbut@ump.edu.vn | BV Chợ Rẫy | 1975 | 079175001211"
+                  placeholder="BS. | NGUYỄN VĂN A | 0987112233 | nva@hmu.edu.vn | Bệnh viện Bạch Mai | 1980&#10;TS.BS. | TRẦN THỊ BÚT | 0912343212 | ttbut@ump.edu.vn | BV Chợ Rẫy | 1975"
                   className="w-full px-3 py-2 border border-slate-200 focus:border-indigo-500 rounded-lg text-xs font-mono h-[140px] focus:outline-none"
                 />
               </div>
@@ -4841,7 +4826,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     <div className="pt-1.5 flex flex-wrap gap-1">
                       {kioskCheckInAttendee.cmeRequired && (
                         <span className="text-[9px] bg-red-50 text-red-700 border border-red-100 px-1.5 py-0.2 rounded font-bold">
-                          CME {kioskCheckInAttendee.cmeIdentityNo && `(${kioskCheckInAttendee.cmeIdentityNo})`}
+                          CME
                         </span>
                       )}
                       {kioskCheckInAttendee.galaRequired && (
