@@ -631,7 +631,9 @@ export default function BulkCampaignManager() {
               organization: recipient.organization || 'Cá nhân',
               presentation_title: recipient.presentation_title || '',
               track: recipient.track || '',
-              qr_url: recipient.qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(recipient.code || ('PARS-BULK-' + formattedPhone))}`
+              qr_url: recipient.qr_url || `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(recipient.code || ('PARS-BULK-' + formattedPhone))}`,
+              order_code: recipient.code || ('ATT-' + Math.floor(Math.random() * 9000 + 1000)),
+              order_date: new Date().toISOString().split('T')[0]
             };
 
             const znsTemplateId = selectedZaloTemplate?.znsTemplateId || selectedZaloTemplate?.id || 'tmpl-reg-zalo';

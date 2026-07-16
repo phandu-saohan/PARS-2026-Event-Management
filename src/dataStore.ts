@@ -3400,6 +3400,7 @@ export class DataStore {
         title: attendee.title || '',
         fullname: attendee.fullName || '',
         package: attendee.packageName || '',
+        package_fee: attendee.packageFee ? attendee.packageFee.toLocaleString('vi-VN') : '0',
         code: attendee.id || '',
         payment_status: payStatusText,
         organization: attendee.organization || '',
@@ -3407,7 +3408,9 @@ export class DataStore {
         phone: attendee.phone || '',
         presentation_title: attAny.presentationTitle || '',
         track: attAny.presentationTrack || '',
-        qr_url: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(attendee.qrCodeValue)}`
+        qr_url: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(attendee.qrCodeValue)}`,
+        order_code: attendee.id || '',
+        order_date: attendee.registrationDate || new Date().toISOString().split('T')[0]
       },
       raw_text_sent: content
     };
