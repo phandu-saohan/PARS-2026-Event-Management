@@ -3399,10 +3399,13 @@ export class DataStore {
       template_data: {
         title: attendee.title || '',
         fullname: attendee.fullName || '',
+        hoten: attendee.fullName || '',
         package: attendee.packageName || '',
+        goidk: attendee.packageName || '',
         package_fee: attendee.packageFee ? attendee.packageFee.toLocaleString('vi-VN') : '0',
         code: attendee.id || '',
         payment_status: payStatusText,
+        trangthai: payStatusText,
         organization: attendee.organization || '',
         email: attendee.email || '',
         phone: attendee.phone || '',
