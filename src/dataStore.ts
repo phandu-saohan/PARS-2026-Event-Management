@@ -1057,9 +1057,9 @@ const DEFAULT_BUSINESS_CONFIG: BusinessConfig = {
   },
   paymentConfig: {
     vietqr: {
-      bankCode: 'VCB',
-      accountNo: '0331000516283',
-      accountName: 'HOI PHAU THUAT TAO HINH THAM MY VIET NAM',
+      bankCode: 'VBA',
+      accountNo: '6100209004815',
+      accountName: 'CONG TY CO PHAN BENH VIEN EMCAS',
       isEnabled: true,
     },
     vnpay: {

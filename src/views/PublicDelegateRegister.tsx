@@ -371,7 +371,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[đĐ]/g, 'D')
     .replace(/[^A-Z0-9\s]/g, '');
-  const transferMessage = `${cleanFullNameAscii} ${cleanPhoneInput}`;
+  const transferMessage = `PARS2026 ${cleanFullNameAscii} ${cleanPhoneInput}`;
 
   const baseFee = selectedPackage?.fee ?? 0;
 
@@ -386,8 +386,12 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
 
   const calculatedTotalFee = baseFee + totalAddOnFee;
 
+  const bankCode = businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB';
+  const bankAccountNo = businessConfig.paymentConfig?.vietqr?.accountNo || '';
+  const bankAccountName = businessConfig.paymentConfig?.vietqr?.accountName || '';
+
   // Dynamic preview for bank transfer using VietQR
-  const currentVietQRUrl = `https://img.vietqr.io/image/VCB-0331000516283-compact.png?amount=${calculatedTotalFee}&addInfo=${encodeURIComponent(transferMessage)}&accountName=HOI%20PHAU%20THUAT%2520TAO%2520HINH%2520THAM%2520MY%2520VIET%2520NAM`;
+  const currentVietQRUrl = `https://img.vietqr.io/image/${bankCode}-${bankAccountNo}-compact.png?amount=${calculatedTotalFee}&addInfo=${encodeURIComponent(transferMessage)}&accountName=${encodeURIComponent(bankAccountName)}`;
 
   // Vietnam address selectors handlers
   const handleProvinceChange = (selectedProv: string) => {
@@ -575,7 +579,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[đĐ]/g, 'D')
       .replace(/[^A-Z0-9\s]/g, '');
-    const transferMessageSub = `${cleanFullNameAsciiSub} ${createdAttendee.phone}`;
+    const transferMessageSub = `PARS2026 ${cleanFullNameAsciiSub} ${createdAttendee.phone}`;
 
     return (
       <div className={isInline ? "w-full text-slate-800 font-sans" : "bg-slate-100 min-h-screen py-4 md:py-6 px-4 text-slate-800 font-sans"}>
@@ -1459,9 +1463,9 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             </div>
 
                             <div className="text-left w-full text-[10.5px] space-y-1.5 text-slate-700 bg-slate-50/50 p-3 rounded-xl border border-slate-100">
-                              <p>• Ngân hàng: <strong className="text-slate-900 font-mono">VIETCOMBANK</strong></p>
-                              <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">0331000516283</strong></p>
-                              <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">Hoi phau thuat tao hinh tham my Viet Nam</strong></p>
+                              <p>• Ngân hàng: <strong className="text-slate-900 font-mono uppercase">{bankCode === 'VBA' ? 'AGRIBANK' : bankCode === 'VCB' ? 'VIETCOMBANK' : bankCode}</strong></p>
+                              <p>• Số tài khoản: <strong className="text-teal-900 font-mono font-bold text-xs">{bankAccountNo}</strong></p>
+                              <p>• Chủ tài khoản: <strong className="text-slate-900 font-sans uppercase">{bankAccountName}</strong></p>
                               <p>• Số tiền: <strong className="text-teal-700 font-bold font-mono text-xs">{calculatedTotalFee.toLocaleString()}đ</strong></p>
                               <p>• Nội dung CK: <strong className="text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-mono font-extrabold text-xs">{transferMessage}</strong></p>
                             </div>

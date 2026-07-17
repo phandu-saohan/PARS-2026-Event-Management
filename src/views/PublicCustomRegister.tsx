@@ -335,9 +335,8 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
     setCurrentStep(3);
   };
 
-  // Generate VietQR dynamic code transfer parameters
   const cleanName = fullName.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/Đ/g, 'D').trim();
-  const transferMessage = `${cleanName} ${phone.trim()}`;
+  const transferMessage = `PARS2026 ${cleanName} ${phone.trim()}`;
   const bankCode = formConfig.bankCode || businessConfig.paymentConfig?.vietqr?.bankCode || 'VCB';
   const bankAccountNo = formConfig.bankAccountNo || businessConfig.paymentConfig?.vietqr?.accountNo || '';
   const bankAccountName = formConfig.bankAccountName || businessConfig.paymentConfig?.vietqr?.accountName || '';
