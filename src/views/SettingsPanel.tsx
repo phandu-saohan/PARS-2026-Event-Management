@@ -4402,6 +4402,7 @@ ON CONFLICT (code) DO UPDATE SET
                       className="w-full px-3.5 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-800"
                     >
                       <option value="VCB">Vietcombank (VCB)</option>
+                      <option value="VBA">Agribank (VBA)</option>
                       <option value="TCB">Techcombank (TCB)</option>
                       <option value="MB">MB Bank</option>
                       <option value="ACB">ACB Bank</option>
@@ -4755,6 +4756,7 @@ ON CONFLICT (code) DO UPDATE SET
                           className="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-850 focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
                         >
                           <option value="VCB">Vietcombank (VCB)</option>
+                          <option value="VBA">Agribank (VBA)</option>
                           <option value="TCB">Techcombank (TCB)</option>
                           <option value="MB">MB Bank</option>
                           <option value="ACB">ACB Bank</option>
