@@ -1370,7 +1370,7 @@ export class DataStore {
           this.businessConfig.appUrl = 'https://pars2026.vercel.app';
           this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, this.businessConfig);
           // Sync it back to Supabase as well
-          this.saveBusinessConfig(this.businessConfig);
+          this.saveBusinessConfig(this.businessConfig).catch(err => console.error("Error syncing auto-migrated business config:", err));
         } else {
           this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, this.businessConfig);
         }
@@ -3082,12 +3082,12 @@ export class DataStore {
   }
 
   getBusinessConfig() { return this.businessConfig || DEFAULT_BUSINESS_CONFIG; }
-  saveBusinessConfig(config: BusinessConfig) {
+  async saveBusinessConfig(config: BusinessConfig) {
     this.businessConfig = config;
     this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, config);
 
     // Run background upload if there are base64 images, which will also handle saving to database
-    this.uploadBusinessConfigImagesBackground(config);
+    await this.uploadBusinessConfigImagesBackground(config);
 
     window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'business_config' } }));
     return config;
@@ -3149,16 +3149,25 @@ export class DataStore {
         this.saveToLocalStorage(DataStore.KEY_BUSINESS_CONFIG, updatedConfig);
         
         // Save to database
-        await supabase.from('business_config').upsert(mapBusinessConfigToDb(updatedConfig));
+        const { error } = await supabase.from('business_config').upsert(mapBusinessConfigToDb(updatedConfig));
+        if (error) {
+          console.error('Error saving business config:', error);
+          throw new Error(`Lỗi lưu database: ${error.message}`);
+        }
         
         // Notify UI to re-render with the new public URLs
         window.dispatchEvent(new CustomEvent('store-updated', { detail: { table: 'business_config' } }));
       } else {
         // Just save the regular config to database if no images changed
-        await supabase.from('business_config').upsert(mapBusinessConfigToDb(config));
+        const { error } = await supabase.from('business_config').upsert(mapBusinessConfigToDb(config));
+        if (error) {
+          console.error('Error saving business config:', error);
+          throw new Error(`Lỗi lưu database: ${error.message}`);
+        }
       }
     } catch (err) {
       console.error('Error in background upload of business config images:', err);
+      throw err;
     }
   }
 

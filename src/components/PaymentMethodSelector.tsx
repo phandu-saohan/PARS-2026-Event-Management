@@ -7,7 +7,7 @@
  * - Quốc tế: Stripe Checkout (Visa / Mastercard)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { CreditCard, Smartphone, Building2, Globe, ChevronRight, CheckCircle2, Lock, Shield } from 'lucide-react';
 import { PaymentGatewayConfig } from '../types';
 
@@ -40,17 +40,17 @@ const VNPAY_LOGO = (
 );
 
 const VISA_LOGO = (
-  <svg viewBox="0 0 48 16" className="h-5 w-auto">
-    <rect width="48" height="16" rx="3" fill="#1A1F71" />
-    <text x="6" y="12" fontFamily="Arial" fontWeight="bold" fontSize="11" fill="white" letterSpacing="1">VISA</text>
+  <svg viewBox="0 0 40 24" className="h-5 w-auto" fill="none">
+    <rect width="40" height="24" rx="4" fill="#1A1F71" />
+    <text x="5" y="17" fontFamily="Arial" fontWeight="bold" fontSize="13" fill="white" letterSpacing="1">VISA</text>
   </svg>
 );
 
 const MASTERCARD_LOGO = (
-  <svg viewBox="0 0 36 24" className="h-5 w-auto">
-    <circle cx="13" cy="12" r="10" fill="#EB001B" />
-    <circle cx="23" cy="12" r="10" fill="#F79E1B" />
-    <path d="M18 5.5a10 10 0 0 1 0 13A10 10 0 0 1 18 5.5Z" fill="#FF5F00" />
+  <svg viewBox="0 0 36 24" className="h-5 w-auto" fill="none">
+    <rect width="36" height="24" rx="4" fill="#222222" />
+    <circle cx="13" cy="12" r="8" fill="#EB001B" />
+    <circle cx="23" cy="12" r="8" fill="#F79E1B" opacity="0.85" />
   </svg>
 );
 
@@ -123,9 +123,18 @@ export default function PaymentMethodSelector({
   const defaultTab = nationality === 'foreign' ? 'international' : 'domestic';
   const [activeTab, setActiveTab] = useState<'domestic' | 'international'>(defaultTab);
 
-  const domesticOptions = PAYMENT_OPTIONS.filter(o => o.group === 'domestic');
-  const intlOptions = PAYMENT_OPTIONS.filter(o => o.group === 'international');
+  const domesticOptions = useMemo(() => PAYMENT_OPTIONS.filter(o => o.group === 'domestic' && o.isAvailable(paymentConfig)), [paymentConfig]);
+  const intlOptions = useMemo(() => PAYMENT_OPTIONS.filter(o => o.group === 'international' && o.isAvailable(paymentConfig)), [paymentConfig]);
   const currentOptions = activeTab === 'domestic' ? domesticOptions : intlOptions;
+
+  useEffect(() => {
+    // If the currently selected method is not available in the active tab's list of options,
+    // automatically select the first available option (if any).
+    const isSelectedAvailable = currentOptions.some(o => o.id === selectedMethod);
+    if (!isSelectedAvailable && currentOptions.length > 0) {
+      onSelect(currentOptions[0].id);
+    }
+  }, [activeTab, selectedMethod, currentOptions, onSelect]);
 
   const totalUSD = Math.round(totalFee / 25000);
 

@@ -346,13 +346,17 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // --- Handlers for Business Config ---
-  const handleSaveBusinessSubmit = (e: React.FormEvent) => {
+  const handleSaveBusinessSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    store.saveBusinessConfig(businessConfig);
-    // Apply PWA icon & theme-color to DOM immediately after save
-    applyPwaIconToDocument(businessConfig.pwaLogoUrl, businessConfig.pwaThemeColor);
-    alert('Đã cập nhật cấu hình Nghiệp vụ sự kiện lưu vào database thành công!');
-    reloadData();
+    try {
+      await store.saveBusinessConfig(businessConfig);
+      // Apply PWA icon & theme-color to DOM immediately after save
+      applyPwaIconToDocument(businessConfig.pwaLogoUrl, businessConfig.pwaThemeColor);
+      alert('Đã cập nhật cấu hình Nghiệp vụ sự kiện lưu vào database thành công!');
+      reloadData();
+    } catch (err: any) {
+      alert('Lỗi cập nhật cấu hình: ' + err.message);
+    }
   };
 
   // --- Handlers for Registration Packages ---
@@ -2727,9 +2731,13 @@ export default function SettingsPanel({ role }: SettingsPanelProps) {
                       <div className="flex justify-end pt-2">
                         <button
                           type="button"
-                          onClick={() => {
-                            store.saveBusinessConfig(businessConfig);
-                            alert('Đã lưu cấu hình dịch vụ phụ trợ thành công!');
+                          onClick={async () => {
+                            try {
+                              await store.saveBusinessConfig(businessConfig);
+                              alert('Đã lưu cấu hình dịch vụ phụ trợ thành công!');
+                            } catch (err: any) {
+                              alert('Lỗi lưu cấu hình: ' + err.message);
+                            }
                           }}
                           className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-xl text-xs cursor-pointer border-none shadow-sm transition-all"
                         >
@@ -4691,11 +4699,15 @@ ON CONFLICT (code) DO UPDATE SET
               </div>
 
               <form
-                onSubmit={(e) => {
+                onSubmit={async (e) => {
                   e.preventDefault();
-                  store.saveBusinessConfig(businessConfig);
-                  alert('Đã lưu cấu hình Phương Thức Thanh Toán thành công!');
-                  reloadData();
+                  try {
+                    await store.saveBusinessConfig(businessConfig);
+                    alert('Đã lưu cấu hình Phương Thức Thanh Toán thành công!');
+                    reloadData();
+                  } catch (err: any) {
+                    alert('Lỗi lưu cấu hình: ' + err.message);
+                  }
                 }}
                 className="space-y-5"
               >
@@ -5132,10 +5144,14 @@ ON CONFLICT (code) DO UPDATE SET
 
                 {/* Form config editor */}
                 <form
-                  onSubmit={(e) => {
+                  onSubmit={async (e) => {
                     e.preventDefault();
-                    store.saveBusinessConfig(businessConfig);
-                    alert(`Đã lưu cấu hình form ${formLabels[formActiveSection].label} thành công!`);
+                    try {
+                      await store.saveBusinessConfig(businessConfig);
+                      alert(`Đã lưu cấu hình form ${formLabels[formActiveSection].label} thành công!`);
+                    } catch (err: any) {
+                      alert('Lỗi lưu cấu hình: ' + err.message);
+                    }
                   }}
                   className="space-y-5"
                 >
@@ -5652,10 +5668,14 @@ ON CONFLICT (code) DO UPDATE SET
               });
             };
 
-            const handleSaveCmeSubmit = (e: React.FormEvent) => {
+            const handleSaveCmeSubmit = async (e: React.FormEvent) => {
               e.preventDefault();
-              store.saveBusinessConfig(businessConfig);
-              alert('Đã lưu cấu hình layout chứng chỉ CME thành công!');
+              try {
+                await store.saveBusinessConfig(businessConfig);
+                alert('Đã lưu cấu hình layout chứng chỉ CME thành công!');
+              } catch (err: any) {
+                alert('Lỗi lưu cấu hình: ' + err.message);
+              }
             };
 
             return (
