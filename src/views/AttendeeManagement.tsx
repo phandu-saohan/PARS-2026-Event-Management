@@ -1222,10 +1222,19 @@ Ban Thư ký Hội nghị PARS 2026`
   // Simulated Excel/CSV download
   const handleExportCSV = () => {
     const filteredRows = getFilteredAttendees();
-    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In\n';
+    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In,Yêu cầu hóa đơn,Chi tiết hóa đơn\n';
     
     filteredRows.forEach(a => {
-      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}"\n`;
+      const invReq = a.invoiceInfo?.required ? (a.invoiceInfo.type === 'company' ? 'Công ty' : 'Cá nhân') : 'Không';
+      let invDetail = '';
+      if (a.invoiceInfo?.required) {
+        if (a.invoiceInfo.type === 'company') {
+          invDetail = `Cty: ${a.invoiceInfo.companyName} | MST: ${a.invoiceInfo.taxNo} | ĐC: ${a.invoiceInfo.address} | SĐT: ${a.invoiceInfo.phone} | Email: ${a.invoiceInfo.email}`;
+        } else {
+          invDetail = `Cá nhân: ${a.invoiceInfo.name} | CCCD: ${a.invoiceInfo.idNo} | ĐC: ${a.invoiceInfo.address} | SĐT: ${a.invoiceInfo.phone} | Email: ${a.invoiceInfo.email}`;
+        }
+      }
+      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}","${invReq}","${invDetail.replace(/"/g, '""')}"\n`;
     });
 
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -2810,6 +2819,35 @@ Ban Thư ký Hội nghị PARS 2026`
                             🗺️ TOUR DU LỊCH
                           </div>
                         </div>
+
+                        {/* Yêu cầu xuất hóa đơn */}
+                        {viewDetailAttendee.invoiceInfo && viewDetailAttendee.invoiceInfo.required && (
+                          <div className="sm:col-span-2 p-3.5 rounded-xl border border-blue-200 bg-blue-50/20 text-xs space-y-2">
+                            <div className="flex items-center gap-1.5 font-bold text-blue-900 uppercase">
+                              <span>📄 Yêu cầu xuất hóa đơn</span>
+                              <span className="px-1.5 py-0.5 text-[9px] font-black uppercase bg-blue-600 text-white rounded">
+                                {viewDetailAttendee.invoiceInfo.type === 'company' ? 'Công ty' : 'Cá nhân'}
+                              </span>
+                            </div>
+                            {viewDetailAttendee.invoiceInfo.type === 'company' ? (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700 font-medium">
+                                <div><span className="text-slate-400">Tên công ty:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.companyName}</strong></div>
+                                <div><span className="text-slate-400">Mã số thuế:</span> <strong className="text-slate-800 font-bold font-mono">{viewDetailAttendee.invoiceInfo.taxNo}</strong></div>
+                                <div><span className="text-slate-400">Số điện thoại:</span> <strong className="text-slate-800 font-bold font-mono">{viewDetailAttendee.invoiceInfo.phone}</strong></div>
+                                <div><span className="text-slate-400">Email:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.email}</strong></div>
+                                <div className="sm:col-span-2"><span className="text-slate-400">Địa chỉ:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.address}</strong></div>
+                              </div>
+                            ) : (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1.5 text-slate-700 font-medium">
+                                <div><span className="text-slate-400">Họ và tên:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.name}</strong></div>
+                                <div><span className="text-slate-400">Số CCCD:</span> <strong className="text-slate-800 font-bold font-mono">{viewDetailAttendee.invoiceInfo.idNo}</strong></div>
+                                <div><span className="text-slate-400">Số điện thoại:</span> <strong className="text-slate-800 font-bold font-mono">{viewDetailAttendee.invoiceInfo.phone}</strong></div>
+                                <div><span className="text-slate-400">Email:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.email}</strong></div>
+                                <div className="sm:col-span-2"><span className="text-slate-400">Địa chỉ:</span> <strong className="text-slate-800 font-bold">{viewDetailAttendee.invoiceInfo.address}</strong></div>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                       </div>
 

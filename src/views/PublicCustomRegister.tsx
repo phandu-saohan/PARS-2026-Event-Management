@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ArrowLeft, CheckCircle, QrCode, Mail, Phone, FileText, Upload, 
-  AlertCircle, Sparkles, Check, HelpCircle, MapPin, User, Calendar
+  AlertCircle, Sparkles, Check, HelpCircle, MapPin, User, Calendar, Building2
 } from 'lucide-react';
 import { store } from '../dataStore';
 import { Attendee, CustomFormConfig, AddOnService, FormFieldConfig } from '../types';
@@ -93,6 +93,86 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
 
   // Custom field values state
   const [customValues, setCustomValues] = useState<Record<string, any>>({});
+
+  // Invoice Request States
+  const [wantsInvoice, setWantsInvoice] = useState<boolean>(false);
+  const [invoiceType, setInvoiceType] = useState<'individual' | 'company'>('individual');
+  const [invoiceSubmitted, setInvoiceSubmitted] = useState<boolean>(false);
+  const [isSavingInvoice, setIsSavingInvoice] = useState<boolean>(false);
+
+  // Individual fields
+  const [invIndName, setInvIndName] = useState('');
+  const [invIndIdNo, setInvIndIdNo] = useState('');
+  const [invIndPhone, setInvIndPhone] = useState('');
+  const [invIndAddress, setInvIndAddress] = useState('');
+  const [invIndEmail, setInvIndEmail] = useState('');
+
+  // Company fields
+  const [invCompName, setInvCompName] = useState('');
+  const [invCompAddress, setInvCompAddress] = useState('');
+  const [invCompPhone, setInvCompPhone] = useState('');
+  const [invCompTaxNo, setInvCompTaxNo] = useState('');
+  const [invCompEmail, setInvCompEmail] = useState('');
+
+  // Prefill invoice details with registration info
+  useEffect(() => {
+    if (createdAttendee) {
+      setInvIndName(createdAttendee.fullName);
+      setInvIndPhone(createdAttendee.phone);
+      setInvIndAddress(createdAttendee.address);
+      setInvIndEmail(createdAttendee.email);
+
+      setInvCompPhone(createdAttendee.phone);
+      setInvCompEmail(createdAttendee.email);
+      setInvCompAddress(createdAttendee.address);
+    }
+  }, [createdAttendee]);
+
+  const handleSubmitInvoice = async () => {
+    if (!createdAttendee) return;
+    
+    if (invoiceType === 'individual') {
+      if (!invIndName || !invIndIdNo || !invIndPhone || !invIndAddress || !invIndEmail) {
+        alert('Vui lòng điền đầy đủ tất cả các trường thông tin cá nhân.');
+        return;
+      }
+    } else {
+      if (!invCompName || !invCompAddress || !invCompPhone || !invCompTaxNo || !invCompEmail) {
+        alert('Vui lòng điền đầy đủ tất cả các trường thông tin công ty.');
+        return;
+      }
+    }
+
+    setIsSavingInvoice(true);
+    try {
+      const invoiceData = {
+        required: true,
+        type: invoiceType,
+        name: invoiceType === 'individual' ? invIndName : undefined,
+        idNo: invoiceType === 'individual' ? invIndIdNo : undefined,
+        companyName: invoiceType === 'company' ? invCompName : undefined,
+        taxNo: invoiceType === 'company' ? invCompTaxNo : undefined,
+        phone: invoiceType === 'individual' ? invIndPhone : invCompPhone,
+        address: invoiceType === 'individual' ? invIndAddress : invCompAddress,
+        email: invoiceType === 'individual' ? invIndEmail : invCompEmail
+      };
+
+      const updatedAttendee = {
+        ...createdAttendee,
+        invoiceInfo: invoiceData
+      };
+
+      const saved = await store.saveAttendeeAsync(updatedAttendee);
+      setCreatedAttendee(saved);
+      setInvoiceSubmitted(true);
+      alert('Đã gửi yêu cầu xuất hóa đơn thành công!');
+    } catch (err: any) {
+      console.error('Error saving invoice:', err);
+      alert('Lỗi khi gửi yêu cầu xuất hóa đơn: ' + err.message);
+    } finally {
+      setIsSavingInvoice(false);
+    }
+  };
 
   // Load form settings on startup
   useEffect(() => {
@@ -1220,6 +1300,235 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
               </div>
             </div>
 
+            {/* Yêu cầu xuất hóa đơn */}
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 md:p-6 space-y-4 max-w-sm mx-auto text-left">
+              {!invoiceSubmitted ? (
+                <>
+                  <div className="flex flex-col gap-3 pb-3 border-b border-slate-200">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-teal-650 shrink-0" />
+                      <span>Bạn có muốn xuất hóa đơn tài chính?</span>
+                    </h4>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold select-none">
+                        <input
+                          type="radio"
+                          name="wantsInvoice"
+                          checked={wantsInvoice}
+                          onChange={() => setWantsInvoice(true)}
+                          className="w-4 h-4 accent-teal-650"
+                        />
+                        <span>Có</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold select-none">
+                        <input
+                          type="radio"
+                          name="wantsInvoice"
+                          checked={!wantsInvoice}
+                          onChange={() => setWantsInvoice(false)}
+                          className="w-4 h-4 accent-teal-650"
+                        />
+                        <span>Không</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {wantsInvoice && (
+                    <div className="space-y-4 pt-1 animate-fade-in">
+                      {/* Chọn loại đối tượng xuất hóa đơn */}
+                      <div className="flex items-center gap-2 bg-slate-150/70 p-1 rounded-xl border border-slate-200 max-w-[200px]">
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceType('individual')}
+                          className={`flex-1 py-1 text-[10px] font-black rounded-lg border-none cursor-pointer transition-all ${
+                            invoiceType === 'individual' 
+                              ? 'bg-teal-900 text-white shadow-sm' 
+                              : 'bg-transparent text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          Cá nhân
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceType('company')}
+                          className={`flex-1 py-1 text-[10px] font-black rounded-lg border-none cursor-pointer transition-all ${
+                            invoiceType === 'company' 
+                              ? 'bg-teal-900 text-white shadow-sm' 
+                              : 'bg-transparent text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          Công ty
+                        </button>
+                      </div>
+
+                      {invoiceType === 'individual' ? (
+                        <div className="space-y-3 text-xs">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Họ và Tên *</label>
+                            <div className="relative">
+                              <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndName}
+                                onChange={(e) => setInvIndName(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Họ và tên của bạn"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Số CCCD *</label>
+                            <div className="relative">
+                              <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndIdNo}
+                                onChange={(e) => setInvIndIdNo(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Số Căn cước công dân"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại *</label>
+                            <div className="relative">
+                              <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndPhone}
+                                onChange={(e) => setInvIndPhone(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Số điện thoại liên hệ"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Địa chỉ Email *</label>
+                            <div className="relative">
+                              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="email"
+                                required
+                                value={invIndEmail}
+                                onChange={(e) => setInvIndEmail(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Email nhận hóa đơn"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Địa chỉ *</label>
+                            <input
+                              type="text"
+                              required
+                              value={invIndAddress}
+                              onChange={(e) => setInvIndAddress(e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                              placeholder="Địa chỉ thường trú"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 text-xs">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Tên Công Ty *</label>
+                            <div className="relative">
+                              <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompName}
+                                onChange={(e) => setInvCompName(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Tên đầy đủ của doanh nghiệp"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Mã số thuế *</label>
+                            <div className="relative">
+                              <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompTaxNo}
+                                onChange={(e) => setInvCompTaxNo(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Mã số thuế doanh nghiệp"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Số điện thoại *</label>
+                            <div className="relative">
+                              <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompPhone}
+                                onChange={(e) => setInvCompPhone(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Số điện thoại liên hệ"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Email nhận hóa đơn *</label>
+                            <div className="relative">
+                              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="email"
+                                required
+                                value={invCompEmail}
+                                onChange={(e) => setInvCompEmail(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder="Địa chỉ Email nhận hóa đơn"
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Địa chỉ Công Ty *</label>
+                            <input
+                              type="text"
+                              required
+                              value={invCompAddress}
+                              onChange={(e) => setInvCompAddress(e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                              placeholder="Địa chỉ đăng ký kinh doanh"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleSubmitInvoice}
+                          disabled={isSavingInvoice}
+                          className="w-full px-6 py-2.5 bg-teal-900 hover:bg-teal-950 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all border-none shadow"
+                        >
+                          {isSavingInvoice ? 'Đang gửi...' : 'Gửi yêu cầu xuất hóa đơn 💾'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-150 rounded-2xl p-4 text-xs text-emerald-900 space-y-1.5">
+                  <h5 className="font-bold text-emerald-950 flex items-center gap-1.5">
+                    <CheckCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+                    Yêu cầu xuất hóa đơn đã được tiếp nhận!
+                  </h5>
+                  <p className="text-[11px] text-slate-650 leading-relaxed font-sans text-left">
+                    Ban Tổ Chức sẽ kiểm tra thông tin và xuất hóa đơn điện tử gửi về email đăng ký của bạn sau khi giao dịch đóng phí được đối soát thành công.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <div className="border-t border-slate-100 pt-5 flex items-center justify-center">
               <button
                 type="button"
@@ -1243,6 +1552,20 @@ export default function PublicCustomRegister({ onNavigate }: PublicCustomRegiste
                   setDoctorProofImage(null);
                   setTransactionProofImage(null);
                   setCustomValues({});
+                  setWantsInvoice(false);
+                  setInvoiceType('individual');
+                  setInvoiceSubmitted(false);
+                  setIsSavingInvoice(false);
+                  setInvIndName('');
+                  setInvIndIdNo('');
+                  setInvIndPhone('');
+                  setInvIndAddress('');
+                  setInvIndEmail('');
+                  setInvCompName('');
+                  setInvCompAddress('');
+                  setInvCompPhone('');
+                  setInvCompTaxNo('');
+                  setInvCompEmail('');
                 }}
                 className="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs cursor-pointer shadow-md"
               >

@@ -46,6 +46,7 @@ export function mapAttendeeToDb(a: Attendee): Record<string, any> {
     province: a.province || null,
     avatar_url: a.avatarUrl || null,
     source: a.source || 'website',
+    invoice_info: a.invoiceInfo || null,
   };
 }
 
@@ -82,6 +83,7 @@ export function mapDbToAttendee(row: any): Attendee {
     province: row.province || undefined,
     avatarUrl: row.avatar_url || undefined,
     source: row.source || 'website',
+    invoiceInfo: row.invoice_info || undefined,
   };
 }
 

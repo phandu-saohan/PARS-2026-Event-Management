@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, CheckCircle, QrCode, Mail, Phone, FileText, Upload, AlertCircle, Sparkles, Check, HelpCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, CheckCircle, QrCode, Mail, Phone, FileText, Upload, AlertCircle, Sparkles, Check, HelpCircle, ExternalLink, Building2, User } from 'lucide-react';
 import { store } from '../dataStore';
 import { sendRealtimeNotification } from '../lib/realtime';
 import { Attendee, RegistrationPackage, AddOnService } from '../types';
@@ -212,6 +212,86 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
   const [createdAttendee, setCreatedAttendee] = useState<Attendee | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Invoice Request States
+  const [wantsInvoice, setWantsInvoice] = useState<boolean>(false);
+  const [invoiceType, setInvoiceType] = useState<'individual' | 'company'>('individual');
+  const [invoiceSubmitted, setInvoiceSubmitted] = useState<boolean>(false);
+  const [isSavingInvoice, setIsSavingInvoice] = useState<boolean>(false);
+
+  // Individual fields
+  const [invIndName, setInvIndName] = useState('');
+  const [invIndIdNo, setInvIndIdNo] = useState('');
+  const [invIndPhone, setInvIndPhone] = useState('');
+  const [invIndAddress, setInvIndAddress] = useState('');
+  const [invIndEmail, setInvIndEmail] = useState('');
+
+  // Company fields
+  const [invCompName, setInvCompName] = useState('');
+  const [invCompAddress, setInvCompAddress] = useState('');
+  const [invCompPhone, setInvCompPhone] = useState('');
+  const [invCompTaxNo, setInvCompTaxNo] = useState('');
+  const [invCompEmail, setInvCompEmail] = useState('');
+
+  // Prefill invoice details with registration info
+  useEffect(() => {
+    if (createdAttendee) {
+      setInvIndName(createdAttendee.fullName);
+      setInvIndPhone(createdAttendee.phone);
+      setInvIndAddress(createdAttendee.address);
+      setInvIndEmail(createdAttendee.email);
+
+      setInvCompPhone(createdAttendee.phone);
+      setInvCompEmail(createdAttendee.email);
+      setInvCompAddress(createdAttendee.address);
+    }
+  }, [createdAttendee]);
+
+  const handleSubmitInvoice = async () => {
+    if (!createdAttendee) return;
+    
+    if (invoiceType === 'individual') {
+      if (!invIndName || !invIndIdNo || !invIndPhone || !invIndAddress || !invIndEmail) {
+        alert('Vui lòng điền đầy đủ tất cả các trường thông tin cá nhân.');
+        return;
+      }
+    } else {
+      if (!invCompName || !invCompAddress || !invCompPhone || !invCompTaxNo || !invCompEmail) {
+        alert('Vui lòng điền đầy đủ tất cả các trường thông tin công ty.');
+        return;
+      }
+    }
+
+    setIsSavingInvoice(true);
+    try {
+      const invoiceData = {
+        required: true,
+        type: invoiceType,
+        name: invoiceType === 'individual' ? invIndName : undefined,
+        idNo: invoiceType === 'individual' ? invIndIdNo : undefined,
+        companyName: invoiceType === 'company' ? invCompName : undefined,
+        taxNo: invoiceType === 'company' ? invCompTaxNo : undefined,
+        phone: invoiceType === 'individual' ? invIndPhone : invCompPhone,
+        address: invoiceType === 'individual' ? invIndAddress : invCompAddress,
+        email: invoiceType === 'individual' ? invIndEmail : invCompEmail
+      };
+
+      const updatedAttendee = {
+        ...createdAttendee,
+        invoiceInfo: invoiceData
+      };
+
+      const saved = await store.saveAttendeeAsync(updatedAttendee);
+      setCreatedAttendee(saved);
+      setInvoiceSubmitted(true);
+      alert('Đã gửi yêu cầu xuất hóa đơn thành công!');
+    } catch (err: any) {
+      console.error('Error saving invoice:', err);
+      alert('Lỗi khi gửi yêu cầu xuất hóa đơn: ' + err.message);
+    } finally {
+      setIsSavingInvoice(false);
+    }
+  };
 
   // Sync nationality with lang prop
   useEffect(() => {
@@ -804,6 +884,258 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
 
               </div>
 
+            </div>
+
+            {/* Yêu cầu xuất hóa đơn */}
+            <div className="bg-slate-50 border border-slate-200 rounded-3xl p-5 md:p-6 space-y-4">
+              {!invoiceSubmitted ? (
+                <>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-slate-150">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileText className="w-4 h-4 text-teal-650 shrink-0" />
+                      <span>{L.t('Bạn có muốn xuất hóa đơn tài chính?', 'Do you want to request a tax invoice?')}</span>
+                    </h4>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold select-none">
+                        <input
+                          type="radio"
+                          name="wantsInvoice"
+                          checked={wantsInvoice}
+                          onChange={() => setWantsInvoice(true)}
+                          className="w-4 h-4 accent-teal-650"
+                        />
+                        <span>{L.t('Có, tôi cần xuất hóa đơn', 'Yes, I need an invoice')}</span>
+                      </label>
+                      <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold select-none">
+                        <input
+                          type="radio"
+                          name="wantsInvoice"
+                          checked={!wantsInvoice}
+                          onChange={() => setWantsInvoice(false)}
+                          className="w-4 h-4 accent-teal-650"
+                        />
+                        <span>{L.t('Không cần', 'No, thanks')}</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {wantsInvoice && (
+                    <div className="space-y-4 pt-1 animate-fade-in">
+                      {/* Chọn loại đối tượng xuất hóa đơn */}
+                      <div className="flex items-center gap-2 bg-slate-150/70 p-1 rounded-xl border border-slate-200 max-w-[240px]">
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceType('individual')}
+                          className={`flex-1 py-1.5 text-[10.5px] font-black rounded-lg border-none cursor-pointer transition-all ${
+                            invoiceType === 'individual' 
+                              ? 'bg-teal-900 text-white shadow-sm' 
+                              : 'bg-transparent text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          {L.t('Cá nhân', 'Individual')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setInvoiceType('company')}
+                          className={`flex-1 py-1.5 text-[10.5px] font-black rounded-lg border-none cursor-pointer transition-all ${
+                            invoiceType === 'company' 
+                              ? 'bg-teal-900 text-white shadow-sm' 
+                              : 'bg-transparent text-slate-500 hover:text-slate-700'
+                          }`}
+                        >
+                          {L.t('Công ty', 'Company')}
+                        </button>
+                      </div>
+
+                      {invoiceType === 'individual' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div className="relative">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Họ và Tên *', 'Full Name *')}
+                            </label>
+                            <div className="relative">
+                              <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndName}
+                                onChange={(e) => setInvIndName(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Họ và tên của bạn', 'Your full name')}
+                              />
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Số CCCD *', 'ID Card No (CCCD) *')}
+                            </label>
+                            <div className="relative">
+                              <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndIdNo}
+                                onChange={(e) => setInvIndIdNo(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Số Căn cước công dân', 'National ID Number')}
+                              />
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Số điện thoại *', 'Phone *')}
+                            </label>
+                            <div className="relative">
+                              <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invIndPhone}
+                                onChange={(e) => setInvIndPhone(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Số điện thoại liên hệ', 'Contact phone')}
+                              />
+                            </div>
+                          </div>
+                          <div className="relative">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Địa chỉ Email *', 'Email *')}
+                            </label>
+                            <div className="relative">
+                              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="email"
+                                required
+                                value={invIndEmail}
+                                onChange={(e) => setInvIndEmail(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Email nhận hóa đơn', 'Email for receipt')}
+                              />
+                            </div>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Địa chỉ *', 'Address *')}
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={invIndAddress}
+                              onChange={(e) => setInvIndAddress(e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                              placeholder={L.t('Địa chỉ thường trú', 'Permanent address')}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Tên Công Ty *', 'Company Name *')}
+                            </label>
+                            <div className="relative">
+                              <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompName}
+                                onChange={(e) => setInvCompName(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Tên đầy đủ của doanh nghiệp', 'Full company name')}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Mã số thuế *', 'Tax ID (MST) *')}
+                            </label>
+                            <div className="relative">
+                              <FileText className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompTaxNo}
+                                onChange={(e) => setInvCompTaxNo(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Mã số thuế doanh nghiệp', 'Company tax ID')}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Số điện thoại *', 'Phone *')}
+                            </label>
+                            <div className="relative">
+                              <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="text"
+                                required
+                                value={invCompPhone}
+                                onChange={(e) => setInvCompPhone(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Số điện thoại liên hệ', 'Contact phone')}
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Email nhận hóa đơn *', 'Invoice Email *')}
+                            </label>
+                            <div className="relative">
+                              <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                              <input
+                                type="email"
+                                required
+                                value={invCompEmail}
+                                onChange={(e) => setInvCompEmail(e.target.value)}
+                                className="w-full pl-9 pr-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-mono font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                                placeholder={L.t('Địa chỉ Email nhận hóa đơn', 'Email for electronic invoice')}
+                              />
+                            </div>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                              {L.t('Địa chỉ Công Ty *', 'Company Address *')}
+                            </label>
+                            <input
+                              type="text"
+                              required
+                              value={invCompAddress}
+                              onChange={(e) => setInvCompAddress(e.target.value)}
+                              className="w-full px-3 py-2 bg-white border border-slate-205 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none focus:bg-white"
+                              placeholder={L.t('Địa chỉ đăng ký kinh doanh', 'Registered business address')}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleSubmitInvoice}
+                          disabled={isSavingInvoice}
+                          className="w-full sm:w-auto px-6 py-2.5 bg-teal-900 hover:bg-teal-950 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl cursor-pointer transition-all border-none shadow"
+                        >
+                          {isSavingInvoice 
+                            ? L.t('Đang gửi...', 'Submitting...') 
+                            : L.t('Gửi yêu cầu xuất hóa đơn 💾', 'Submit Invoice Request 💾')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="bg-emerald-50 border border-emerald-150 rounded-2xl p-4 text-xs text-emerald-900 space-y-1.5">
+                  <h5 className="font-bold text-emerald-950 flex items-center gap-1.5">
+                    <CheckCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+                    {L.t('Yêu cầu xuất hóa đơn đã được tiếp nhận!', 'Invoice request submitted successfully!')}
+                  </h5>
+                  <p className="text-[11px] text-slate-600 leading-relaxed font-sans">
+                    {L.t('Ban Tổ Chức sẽ kiểm tra thông tin và xuất hóa đơn điện tử gửi về email đăng ký của bạn sau khi giao dịch đóng phí được đối soát thành công.',
+                         'The organizers will check the details and send the electronic invoice to your email after your payment is successfully verified.')}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* SePay auto payment check */}
