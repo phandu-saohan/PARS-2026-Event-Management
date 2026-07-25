@@ -1332,8 +1332,8 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                         </div>
                       </div>
 
-                                            {/* Hàng 2 — 4 cột đều nhau: Giới tính | Năm sinh | Số điện thoại | Email */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            {/* Hàng 2 — 2 cột: Giới tính | Năm sinh */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.t('Giới tính *', 'Gender *')}
@@ -1370,7 +1370,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             required
                             maxLength={4}
                             value={yearOfBirth}
-                            onChange={(e) => setYearOfBirth(e.target.value.replace(/D/g, ''))}
+                            onChange={(e) => setYearOfBirth(e.target.value.replace(/\D/g, ''))}
                             placeholder={L.p('ví dụ: 1988', 'e.g. 1988')}
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
@@ -1378,7 +1378,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             {L.t('Cần thiết cho chứng chỉ CME', 'Required for CME certification')}
                           </span>
                         </div>
+                      </div>
 
+                      {/* Hàng 2.5 — 2 cột: Số điện thoại di động | Địa chỉ Email */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('phone', 'Số điện thoại di động *', 'Contact Phone Number *')}
