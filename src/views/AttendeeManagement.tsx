@@ -1780,16 +1780,7 @@ Ban Thư ký Hội nghị PARS 2026`
                               GALA
                             </span>
                           )}
-                          {att.masterclassRequired && (
-                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-indigo-50 text-indigo-750 border border-indigo-100" title="Yêu cầu Masterclass">
-                              M-CLASS
-                            </span>
-                          )}
-                          {att.tourRequired && (
-                            <span className="px-1.5 py-0.5 rounded-[4px] text-[8.5px] font-black bg-teal-50 text-teal-750 border border-teal-100" title="Yêu cầu Tour">
-                              TOUR
-                            </span>
-                          )}
+                          
                         </div>
                       </div>
                     </td>
@@ -1981,8 +1972,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     <div className="flex gap-0.5 flex-wrap justify-end">
                       {att.cmeRequired && <span className="px-1 py-0.2 bg-emerald-50 text-emerald-750 border border-emerald-100 rounded text-[7px] font-black">CME</span>}
                       {att.galaRequired && <span className="px-1 py-0.2 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[7px] font-black">GALA</span>}
-                      {att.masterclassRequired && <span className="px-1 py-0.2 bg-indigo-50 text-indigo-755 border border-indigo-100 rounded text-[7px] font-black">MC</span>}
-                      {att.tourRequired && <span className="px-1 py-0.2 bg-teal-50 text-teal-755 border border-teal-100 rounded text-[7px] font-black">TOUR</span>}
+                      
                     </div>
                   </div>
                 </div>
@@ -2503,31 +2493,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     </div>
                   </label>
 
-                  <label className="flex items-center gap-2.5 p-2 bg-white border border-slate-150 rounded-xl hover:border-teal-200 cursor-pointer transition-all">
-                    <input
-                      type="checkbox"
-                      checked={newMasterclassRequired}
-                      onChange={(e) => setNewMasterclassRequired(e.target.checked)}
-                      className="w-4 h-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded cursor-pointer"
-                    />
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-800">Chuyên đề Masterclass</p>
-                      <p className="text-[9px] text-slate-400 font-medium">+500.000 VNĐ</p>
-                    </div>
-                  </label>
-
-                  <label className="flex items-center gap-2.5 p-2 bg-white border border-slate-150 rounded-xl hover:border-teal-200 cursor-pointer transition-all">
-                    <input
-                      type="checkbox"
-                      checked={newTourRequired}
-                      onChange={(e) => setNewTourRequired(e.target.checked)}
-                      className="w-4 h-4 text-teal-600 focus:ring-teal-500 border-slate-300 rounded cursor-pointer"
-                    />
-                    <div className="text-left">
-                      <p className="text-xs font-bold text-slate-800">Tour trải nghiệm City Tour</p>
-                      <p className="text-[9px] text-slate-400 font-medium">+4.500.000 VNĐ</p>
-                    </div>
-                  </label>
+                  
                 </div>
               </div>
 
@@ -2808,16 +2774,11 @@ Ban Thư ký Hội nghị PARS 2026`
                         </div>
 
                         {/* Event Sub services flags */}
-                        <div className="sm:col-span-2 grid grid-cols-3 gap-2 text-center text-[9.5px]">
+                        <div className="sm:col-span-2 grid grid-cols-1 gap-2 text-center text-[9.5px]">
                           <div className={`p-1.5 rounded-lg border ${viewDetailAttendee.galaRequired ? 'bg-amber-500/10 border-amber-300 text-amber-850 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
                             🍽️ GALA DINNER
                           </div>
-                          <div className={`p-1.5 rounded-lg border ${viewDetailAttendee.masterclassRequired ? 'bg-indigo-500/10 border-indigo-300 text-indigo-850 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
-                            🎓 MASTERCLASS
-                          </div>
-                          <div className={`p-1.5 rounded-lg border ${viewDetailAttendee.tourRequired ? 'bg-teal-500/10 border-teal-300 text-teal-850 font-bold' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
-                            🗺️ TOUR DU LỊCH
-                          </div>
+                          
                         </div>
 
                         {/* Yêu cầu xuất hóa đơn */}
@@ -3137,27 +3098,7 @@ Ban Thư ký Hội nghị PARS 2026`
                             <label htmlFor="detail-edit-gala" className="text-[11px] font-bold text-slate-700 select-none cursor-pointer">Gala Dinner</label>
                           </div>
 
-                          <div className="flex items-center gap-1.5 leading-none">
-                            <input
-                              type="checkbox"
-                              id="detail-edit-masterclass"
-                              checked={detailEditForm.masterclassRequired}
-                              onChange={(e) => setDetailEditForm({ ...detailEditForm, masterclassRequired: e.target.checked })}
-                              className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 cursor-pointer"
-                            />
-                            <label htmlFor="detail-edit-masterclass" className="text-[11px] font-bold text-slate-700 select-none cursor-pointer">Masterclass</label>
-                          </div>
-
-                           <div className="flex items-center gap-1.5 leading-none">
-                            <input
-                              type="checkbox"
-                              id="detail-edit-tour"
-                              checked={detailEditForm.tourRequired}
-                              onChange={(e) => setDetailEditForm({ ...detailEditForm, tourRequired: e.target.checked })}
-                              className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500 cursor-pointer"
-                            />
-                            <label htmlFor="detail-edit-tour" className="text-[11px] font-bold text-slate-700 select-none cursor-pointer">Tour du lịch</label>
-                          </div>
+                          
                         </div>
 
                         {/* Doctor Proof Upload in Edit Mode */}
@@ -4872,16 +4813,7 @@ Ban Thư ký Hội nghị PARS 2026`
                           Gala Dinner
                         </span>
                       )}
-                      {kioskCheckInAttendee.masterclassRequired && (
-                        <span className="text-[9px] bg-purple-50 text-purple-700 border border-purple-100 px-1.5 py-0.2 rounded font-bold">
-                          Masterclass
-                        </span>
-                      )}
-                      {kioskCheckInAttendee.tourRequired && (
-                        <span className="text-[9px] bg-teal-50 text-teal-700 border border-teal-100 px-1.5 py-0.2 rounded font-bold">
-                          City Tour
-                        </span>
-                      )}
+                      
                     </div>
                   </div>
                 </div>

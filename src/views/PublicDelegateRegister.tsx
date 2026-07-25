@@ -1332,8 +1332,35 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                         </div>
                       </div>
 
-                      {/* Hàng 2 — 3 cột đều nhau: Năm sinh | Số điện thoại | Email */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            {/* Hàng 2 — 4 cột đều nhau: Giới tính | Năm sinh | Số điện thoại | Email */}
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.t('Giới tính *', 'Gender *')}
+                          </label>
+                          <div className="flex gap-4 px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl">
+                            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold select-none">
+                              <input
+                                type="radio"
+                                name="gender"
+                                checked={gender === 'Nam'}
+                                onChange={() => setGender('Nam')}
+                                className="w-4 h-4 accent-teal-650"
+                              />
+                              <span>{L.t('Nam', 'Male')}</span>
+                            </label>
+                            <label className="flex items-center gap-1.5 cursor-pointer text-xs font-bold select-none">
+                              <input
+                                type="radio"
+                                name="gender"
+                                checked={gender === 'Nữ'}
+                                onChange={() => setGender('Nữ')}
+                                className="w-4 h-4 accent-teal-650"
+                              />
+                              <span>{L.t('Nữ', 'Female')}</span>
+                            </label>
+                          </div>
+                        </div>
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('yearOfBirth', 'Năm sinh *', 'Year of Birth *')}
