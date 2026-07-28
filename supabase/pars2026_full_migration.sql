@@ -457,9 +457,11 @@ CREATE POLICY "Allow authenticated manage sessions" ON public.sessions TO authen
 -- [attendees]
 DROP POLICY IF EXISTS "Allow public insert attendees"        ON public.attendees;
 DROP POLICY IF EXISTS "Allow public update attendees"        ON public.attendees;
+DROP POLICY IF EXISTS "Allow public read attendees for checkin" ON public.attendees;
 DROP POLICY IF EXISTS "Allow authenticated manage attendees" ON public.attendees;
 CREATE POLICY "Allow public insert attendees"        ON public.attendees FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update attendees"        ON public.attendees FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public read attendees for checkin" ON public.attendees FOR SELECT USING (true);
 CREATE POLICY "Allow authenticated manage attendees" ON public.attendees TO authenticated USING (true) WITH CHECK (true);
 
 -- [speakers]

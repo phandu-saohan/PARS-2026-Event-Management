@@ -295,6 +295,7 @@ CREATE POLICY "Allow public read sessions" ON public.sessions FOR SELECT USING (
 CREATE POLICY "Allow public read sponsors" ON public.sponsors FOR SELECT USING (true);
 CREATE POLICY "Allow public read speakers" ON public.speakers FOR SELECT USING (true);
 CREATE POLICY "Allow public read marketing_posts" ON public.marketing_posts FOR SELECT USING (true);
+CREATE POLICY "Allow public read attendees for checkin" ON public.attendees FOR SELECT USING (true);
 
 -- 2. Registration Policies (allow public insert for delegates, speakers & sponsors registration forms)
 CREATE POLICY "Allow public insert attendees" ON public.attendees FOR INSERT WITH CHECK (true);
