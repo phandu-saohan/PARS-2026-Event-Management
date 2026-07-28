@@ -60,7 +60,9 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
-      console.warn('Supabase getUser returned error, trying local session:', error);
+      if (error.name !== 'AuthSessionMissingError') {
+        console.warn('Supabase getUser returned error, trying local session:', error);
+      }
       // Fallback to local session user
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
