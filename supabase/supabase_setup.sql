@@ -579,7 +579,7 @@ CREATE POLICY "Allow public insert sponsors" ON public.sponsors FOR INSERT WITH 
 
 -- 5.3. Public Select/Update for Kiosk Check-In & Proof Upload
 CREATE POLICY "Allow public read attendees for checkin" ON public.attendees FOR SELECT USING (true);
-CREATE POLICY "Allow public update attendees proof" ON public.attendees FOR UPDATE USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public update attendees" ON public.attendees FOR UPDATE USING (true) WITH CHECK (true);
 
 -- 5.4. Authenticated Users Full Management Access
 CREATE POLICY "Allow authenticated manage roles" ON public.roles TO authenticated USING (true) WITH CHECK (true);

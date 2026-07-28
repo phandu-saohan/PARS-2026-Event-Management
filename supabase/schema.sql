@@ -298,6 +298,7 @@ CREATE POLICY "Allow public read marketing_posts" ON public.marketing_posts FOR 
 
 -- 2. Registration Policies (allow public insert for delegates, speakers & sponsors registration forms)
 CREATE POLICY "Allow public insert attendees" ON public.attendees FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update attendees" ON public.attendees FOR UPDATE USING (true) WITH CHECK (true);
 CREATE POLICY "Allow public insert speakers" ON public.speakers FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public insert sponsors" ON public.sponsors FOR INSERT WITH CHECK (true);
 
