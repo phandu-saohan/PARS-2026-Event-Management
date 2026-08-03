@@ -1222,7 +1222,7 @@ Ban Thư ký Hội nghị PARS 2026`
   // Simulated Excel/CSV download
   const handleExportCSV = () => {
     const filteredRows = getFilteredAttendees();
-    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In,Yêu cầu hóa đơn,Chi tiết hóa đơn\n';
+    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Ngày đăng ký,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In,Yêu cầu hóa đơn,Chi tiết hóa đơn\n';
     
     filteredRows.forEach(a => {
       const invReq = a.invoiceInfo?.required ? (a.invoiceInfo.type === 'company' ? 'Công ty' : 'Cá nhân') : 'Không';
@@ -1234,7 +1234,7 @@ Ban Thư ký Hội nghị PARS 2026`
           invDetail = `Cá nhân: ${a.invoiceInfo.name} | CCCD: ${a.invoiceInfo.idNo} | ĐC: ${a.invoiceInfo.address} | SĐT: ${a.invoiceInfo.phone} | Email: ${a.invoiceInfo.email}`;
         }
       }
-      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}","${invReq}","${invDetail.replace(/"/g, '""')}"\n`;
+      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.registrationDate || ''}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}","${invReq}","${invDetail.replace(/"/g, '""')}"\n`;
     });
 
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
