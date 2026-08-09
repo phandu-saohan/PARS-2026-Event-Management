@@ -165,6 +165,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
   const [fullName, setFullName] = useState('');
   const [gender, setGender] = useState('Nam');
   const [yearOfBirth, setYearOfBirth] = useState('');
+  const [cmeIdentityNo, setCmeIdentityNo] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [organization, setOrganization] = useState('');
@@ -406,6 +407,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
       setErrorMsg('Vui lòng điền họ và tên đại biểu.');
       return false;
     }
+    if (!cmeIdentityNo) {
+      setErrorMsg('Vui lòng nhập số CCCD.');
+      return false;
+    }
     if (!yearOfBirth) {
       setErrorMsg('Vui lòng điền năm sinh để hoàn tất thông tin đăng ký CME.');
       return false;
@@ -528,6 +533,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
       setErrorMsg('Vui lòng điền họ và tên đại biểu.');
       return;
     }
+    if (!cmeIdentityNo) {
+      setErrorMsg('Vui lòng nhập số CCCD.');
+      return;
+    }
     if (!yearOfBirth) {
       setErrorMsg('Vui lòng điền năm sinh để hoàn tất thông tin đăng ký CME.');
       return;
@@ -615,7 +624,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
         yearOfBirth,
         gender,
         cmeRequired: isCmeSelected,
-        cmeIdentityNo: undefined,
+        cmeIdentityNo: cmeIdentityNo,
         galaRequired: isGalaSelected,
         masterclassRequired: isMasterclassSelected,
         tourRequired: isTourSelected,
@@ -1380,8 +1389,25 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                         </div>
                       </div>
 
-                      {/* Hàng 2.5 — 2 cột: Số điện thoại di động | Địa chỉ Email */}
+                      {/* Hàng 2.5 — 2 cột: Số CCCD | Số điện thoại di động */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-700 mb-1">
+                            {L.t('Số CCCD *', 'ID Card No (CCCD) *')}
+                          </label>
+                          <input
+                            type="text"
+                            required
+                            value={cmeIdentityNo}
+                            onChange={(e) => setCmeIdentityNo(e.target.value.replace(/\D/g, ''))}
+                            placeholder={L.p('ví dụ: 037090123456', 'e.g. 037090123456')}
+                            className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-mono font-bold focus:border-teal-600 focus:outline-none placeholder-slate-400"
+                          />
+                          <span className="text-[10px] text-slate-400 mt-1 block">
+                            {L.t('Bắt buộc để BTC làm hồ sơ và chứng chỉ CME', 'Required for CME certification')}
+                          </span>
+                        </div>
+
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('phone', 'Số điện thoại di động *', 'Contact Phone Number *')}
@@ -1398,7 +1424,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             {L.t('Zalo OA dùng để gửi vé QR tự động', 'Zalo OA for automated QR ticket sending')}
                           </span>
                         </div>
+                      </div>
 
+                      {/* Hàng 3 — 2 cột: Địa chỉ Email | Đơn vị công tác */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('email', 'Địa chỉ Email nhận vé & CME *', 'Email for Ticket & CME *')}
@@ -1412,10 +1441,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
                         </div>
-                      </div>
 
-                      {/* Hàng 3 — 2 cột: Đơn vị công tác | Địa chỉ liên hệ */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('workplace', 'Đơn vị công tác *', 'Workplace *')}
@@ -1429,7 +1455,10 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
                         </div>
+                      </div>
 
+                      {/* Hàng 4 — 1 cột: Địa chỉ liên hệ */}
+                      <div className="grid grid-cols-1 gap-4">
                         <div>
                           <label className="block text-xs font-bold text-slate-700 mb-1">
                             {L.f('address', 'Địa chỉ liên hệ *', 'Contact Address *')}
