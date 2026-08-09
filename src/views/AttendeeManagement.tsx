@@ -1222,7 +1222,7 @@ Ban Thư ký Hội nghị PARS 2026`
   // Simulated Excel/CSV download
   const handleExportCSV = () => {
     const filteredRows = getFilteredAttendees();
-    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Ngày đăng ký,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In,Yêu cầu hóa đơn,Chi tiết hóa đơn\n';
+    let csvContent = 'ID,Danh xưng,Họ và tên,Cơ quan,Số ĐT,Email,Số CCCD,Ngày đăng ký,Gói Đăng Ký,Phí (VNĐ),Thanh Toán,Check In,Yêu cầu hóa đơn,Chi tiết hóa đơn\n';
     
     filteredRows.forEach(a => {
       const invReq = a.invoiceInfo?.required ? (a.invoiceInfo.type === 'company' ? 'Công ty' : 'Cá nhân') : 'Không';
@@ -1234,7 +1234,7 @@ Ban Thư ký Hội nghị PARS 2026`
           invDetail = `Cá nhân: ${a.invoiceInfo.name} | CCCD: ${a.invoiceInfo.idNo} | ĐC: ${a.invoiceInfo.address} | SĐT: ${a.invoiceInfo.phone} | Email: ${a.invoiceInfo.email}`;
         }
       }
-      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.registrationDate || ''}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}","${invReq}","${invDetail.replace(/"/g, '""')}"\n`;
+      csvContent += `"${a.id}","${a.title}","${a.fullName}","${a.organization}","${a.phone}","${a.email}","${a.cmeIdentityNo || ''}","${a.registrationDate || ''}","${a.packageName}",${a.packageFee},"${a.paymentStatus}","${a.isCheckedIn ? 'Đã có mặt' : 'Chưa'}","${invReq}","${invDetail.replace(/"/g, '""')}"\n`;
     });
 
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -2708,6 +2708,14 @@ Ban Thư ký Hội nghị PARS 2026`
                           </div>
                         </div>
 
+                        <div>
+                          <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Số CCCD đại biểu:</span>
+                          <div className="flex items-center gap-1.5 p-2 bg-slate-50/50 rounded-lg border border-slate-150 text-slate-800 font-mono font-semibold">
+                            <CreditCard className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                            <span>{viewDetailAttendee.cmeIdentityNo || 'Chưa cung cấp'}</span>
+                          </div>
+                        </div>
+
                         {/* Organization & Department */}
                         <div>
                           <span className="text-[10px] text-slate-450 block font-bold mb-0.5">Cơ quan công tác liên kết:</span>
@@ -3028,6 +3036,17 @@ Ban Thư ký Hội nghị PARS 2026`
                             disabled
                             value={detailEditForm.source || 'website'}
                             className="w-full px-3 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-550 font-semibold focus:outline-none cursor-not-allowed text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Số CCCD đại biểu</label>
+                          <input
+                            type="text"
+                            value={detailEditForm.cmeIdentityNo || ''}
+                            onChange={(e) => setDetailEditForm({ ...detailEditForm, cmeIdentityNo: e.target.value.replace(/\D/g, '') })}
+                            placeholder="Nhập 12 số CCCD..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-mono font-semibold focus:outline-none focus:border-indigo-500"
                           />
                         </div>
 
