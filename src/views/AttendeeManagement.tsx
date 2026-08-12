@@ -2419,7 +2419,7 @@ Ban Thư ký Hội nghị PARS 2026`
                     required
                     value={newAddress}
                     onChange={(e) => setNewAddress(e.target.value)}
-                    placeholder="ví dụ: Phường Thảo Điền, Thành phố Thủ Đức"
+                    placeholder="ví dụ: 120 Hồng Bàng, Quận 5, TP. Hồ Chí Minh"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                   />
                 </div>

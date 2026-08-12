@@ -1468,7 +1468,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
                             required
                             value={address}
                             onChange={(e) => setAddress(e.target.value)}
-                            placeholder={L.p('ví dụ: Phường Thảo Điền, TP Thủ Đức, Hồ Chí Minh', 'e.g. Thao Dien, Thu Duc City, Ho Chi Minh City')}
+                            placeholder={L.p('ví dụ: 120 Hồng Bàng, Quận 5, TP. Hồ Chí Minh', 'e.g. 120 Hong Bang, District 5, Ho Chi Minh City')}
                             className="w-full px-3.5 py-2.5 bg-slate-55 border border-slate-200 rounded-xl text-xs font-semibold focus:border-teal-600 focus:outline-none placeholder-slate-400"
                           />
                         </div>
