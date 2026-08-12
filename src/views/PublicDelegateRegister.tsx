@@ -581,7 +581,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
       const newId = `${prefix}-${randomSeq}`;
       const qrCodeValue = `${newId}-${fullName.replace(/\s+/g, '').toUpperCase()}`;
 
-      const fullAddress = `${address.trim()}${ward ? ', ' + ward : ''}${district ? ', ' + district : ''}`;
+      const fullAddress = address.trim();
 
       const isCmeSelected = addOnServices.some(s => s.id.toLowerCase().includes('cme') && addOnSelections[s.id]);
       const isGalaSelected = addOnServices.some(s => s.id.toLowerCase().includes('gala') && addOnSelections[s.id]);
