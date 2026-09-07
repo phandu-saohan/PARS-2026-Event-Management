@@ -697,14 +697,24 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
                           <td className="p-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
                               {spk.avatarUrl ? (
-                                <img 
-                                  src={spk.avatarUrl} 
-                                  alt={spk.fullName} 
-                                  className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md shrink-0"
-                                />
+                                <>
+                                  <img 
+                                    src={spk.avatarUrl} 
+                                    alt={spk.fullName} 
+                                    className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-md shrink-0"
+                                    onError={(e) => {
+                                      (e.target as HTMLElement).style.display = 'none';
+                                      const fallback = (e.target as HTMLElement).nextElementSibling;
+                                      if (fallback) fallback.classList.remove('hidden');
+                                    }}
+                                  />
+                                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-black items-center justify-center shrink-0 shadow text-xs border border-transparent hidden">
+                                    {spk.fullName ? spk.fullName.substring(0, 2).toUpperCase() : 'BC'}
+                                  </div>
+                                </>
                               ) : (
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-black flex items-center justify-center shrink-0 shadow text-xs border border-transparent">
-                                  {spk.fullName ? spk.fullName.substring(0, 1) : 'BC'}
+                                  {spk.fullName ? spk.fullName.substring(0, 2).toUpperCase() : 'BC'}
                                 </div>
                               )}
                               <div>
@@ -852,10 +862,24 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
 
                     <div className="p-2.5 bg-slate-50 rounded-lg flex items-center gap-2 text-[10px] text-slate-600">
                       {spk.avatarUrl ? (
-                        <img src={spk.avatarUrl} alt="Avatar" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                        <>
+                          <img 
+                            src={spk.avatarUrl} 
+                            alt="Avatar" 
+                            className="w-8 h-8 rounded-full object-cover shrink-0" 
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                              const fallback = (e.target as HTMLElement).nextElementSibling;
+                              if (fallback) fallback.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold items-center justify-center shrink-0 text-[10px] hidden">
+                            {spk.fullName ? spk.fullName.substring(0, 2).toUpperCase() : 'BC'}
+                          </div>
+                        </>
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-indigo-500 text-white font-bold flex items-center justify-center shrink-0 text-[10px]">
-                          {spk.fullName ? spk.fullName.substring(0, 1) : 'BC'}
+                          {spk.fullName ? spk.fullName.substring(0, 2).toUpperCase() : 'BC'}
                         </div>
                       )}
                       <div className="truncate">
@@ -969,11 +993,21 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
                   {/* Speaker author info details */}
                   <div className="p-3 bg-slate-50/70 rounded-xl flex items-center gap-3 text-xs">
                     {spk.avatarUrl ? (
-                      <img 
-                        src={spk.avatarUrl} 
-                        alt="Avatar" 
-                        className="w-11 h-11 rounded-full object-cover border border-slate-200 shadow-sm shrink-0 font-sans" 
-                      />
+                      <>
+                        <img 
+                          src={spk.avatarUrl} 
+                          alt="Avatar" 
+                          className="w-11 h-11 rounded-full object-cover border border-slate-200 shadow-sm shrink-0 font-sans" 
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                            const fallback = (e.target as HTMLElement).nextElementSibling;
+                            if (fallback) fallback.classList.remove('hidden');
+                          }}
+                        />
+                        <div className="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 font-bold items-center justify-center shrink-0 text-xs hidden">
+                          {spk.fullName ? spk.fullName.substring(0, 2).toUpperCase() : 'BC'}
+                        </div>
+                      </>
                     ) : (
                       <div className="w-11 h-11 rounded-full bg-slate-150 border border-slate-200 flex items-center justify-center shrink-0">
                         <span className="text-[10px] font-bold text-slate-400">BCV</span>
@@ -1097,11 +1131,21 @@ export default function SpeakerManagement({ role }: SpeakerManagementProps) {
                 <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider font-mono block mb-2">Tác giả báo cáo chính:</span>
                 <div className="flex gap-4 items-center bg-slate-50 p-4 rounded-2xl border border-slate-150">
                   {selectedSpeaker.avatarUrl ? (
-                    <img 
-                      src={selectedSpeaker.avatarUrl} 
-                      alt="Avatar" 
-                      className="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" 
-                    />
+                    <>
+                      <img 
+                        src={selectedSpeaker.avatarUrl} 
+                        alt="Avatar" 
+                        className="w-12 h-12 rounded-full object-cover border border-slate-200 shadow-sm shrink-0" 
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                          const fallback = (e.target as HTMLElement).nextElementSibling;
+                          if (fallback) fallback.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="w-12 h-12 rounded-full bg-teal-100 text-teal-850 items-center justify-center font-bold text-sm shrink-0 uppercase border border-teal-200 hidden">
+                        {selectedSpeaker.fullName ? selectedSpeaker.fullName.substring(0, 2) : 'BS'}
+                      </div>
+                    </>
                   ) : (
                     <div className="w-12 h-12 rounded-full bg-teal-100 text-teal-850 flex items-center justify-center font-bold text-sm shrink-0 uppercase border border-teal-200">
                       {selectedSpeaker.fullName ? selectedSpeaker.fullName.substring(0, 2) : 'BS'}
