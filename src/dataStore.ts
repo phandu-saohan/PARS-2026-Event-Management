@@ -605,8 +605,73 @@ const INITIAL_SESSIONS: ConferenceSession[] = [
 const INITIAL_SPONSORS: Sponsor[] = [];
 const INITIAL_TASKS: InternalTask[] = [];
 const INITIAL_FINANCE: FinanceTransaction[] = [];
-const INITIAL_EMBED_SCRIPTS: EmbedScript[] = [];
-const INITIAL_TEMPLATES: NotificationTemplate[] = [];
+const INITIAL_TEMPLATES: NotificationTemplate[] = [
+  {
+    id: 'tmpl-reg-email',
+    name: 'Đăng Ký Đại Biểu Thành Công (Email)',
+    type: 'registration_success',
+    channel: 'email',
+    subject: '🎯 Xác nhận đăng ký tham dự thành công Đại biểu Hội nghị PARS 2026',
+    content: `Kính gửi Quý đại biểu {{title}} {{fullname}},
+
+Thay mặt Ban Tổ Chức Hội nghị Khoa học PARS 2026, chúng tôi xin trân trọng xác nhận Quý đại biểu đã hoàn tất đăng ký thông tin tham dự.
+
+THÔNG TIN CHI TIẾT ĐĂNG KÝ VÀ SỬ DỤNG MÃ QR CHECK-IN:
+• Mã đại biểu: {{code}}
+• Họ và tên: {{fullname}}
+• Đơn vị công tác: {{organization}}
+• Gói đăng ký: {{package}}
+• Trạng thái thanh toán: {{payment_status}}
+
+Quý đại biểu vui lòng xuất trình Mã QR đính kèm trong thư này tại Quầy tiếp đón của hội nghị để nhận thẻ đeo chính thức nhanh chóng.
+
+MỌI CHI TIẾT XIN LIÊN HỆ:
+• Email: contact@parsevent.org
+• Hotline: 091-234-5678
+
+Trân trọng,
+Ban Tổ Chức Hội nghị Khoa học PARS 2026`,
+    status: 'approved',
+  },
+  {
+    id: 'tmpl-reg-zalo',
+    name: 'Đăng Ký Đại Biểu Thành Công (Zalo ZNS)',
+    type: 'registration_success',
+    channel: 'zalo',
+    content: '[PARS 2026] XÁC NHẬN ĐĂNG KÝ THÀNH CÔNG\nXin chào {{title}} {{fullname}}. Bạn đã đăng ký thành công tham dự Hội nghị Khoa học PARS 2026.\n- Gói: {{package}}\n- Mã Đại biểu: {{code}}\n- Trạng thái: {{payment_status}}\nVui lòng xuất trình QR đính kèm tại quầy check-in. Hotline hỗ trợ: 0912345678. Trân trọng cảm ơn!',
+    status: 'approved',
+    znsTemplateId: '607948',
+    znsType: 'transaction',
+  },
+  {
+    id: 'tmpl-pay-zalo',
+    name: 'Xác Nhận Đã Thanh Toán Lệ Phí (Zalo ZNS)',
+    type: 'payment_confirmed',
+    channel: 'zalo',
+    content: '[PARS 2026] XÁC NHẬN HOÀN TẤT THANH TOÁN\nKính gửi {{title}} {{fullname}}. Ban Tổ Chức đã tiếp nhận đóng góp lệ phí trị giá {{package_fee}} VNĐ cho Gói: {{package}}. Sắp xếp check-in của bạn đã được ưu tiên hoàn tất.',
+    status: 'approved',
+    znsTemplateId: '607948',
+    znsType: 'transaction',
+  },
+  {
+    id: 'tmpl-speaker-email',
+    name: 'Xác Nhận Đệ Trình Báo Cáo (Email)',
+    type: 'abstract_approved',
+    channel: 'email',
+    subject: '📚 Thư xác nhận đăng ký báo cáo chuyên đề hội nghị PARS 2026',
+    content: 'Kính gửi Báo cáo viên {{title}} {{fullname}},\n\nBan Tổ Chức xin chân thành cảm ơn Quý bác sĩ/nhà khoa học đã gửi đăng ký đề tài báo cáo tại PARS 2026.\n\n• Tên đề tài: {{presentation_title}}\n• Chuyên khoa/Chương trình: {{track}}\n• Trạng thái đệ trình: Đang thẩm định\n\nXin trân trọng kính chúc sức khỏe và thành công!\nBan Tổ Chức Hội nghị Khoa học PARS 2026',
+    status: 'approved',
+  },
+  {
+    id: 'tmpl-sponsor-registered',
+    name: 'Xác Nhận Đăng Ký Tài Trợ (Email)',
+    type: 'sponsor_registered',
+    channel: 'email',
+    subject: '🤝 Xác nhận đăng ký tài trợ Hội nghị Khoa học PARS 2026',
+    content: 'Kính gửi Đại diện {{organization}},\n\nBan Tổ Chức Hội nghị Khoa học Thường niên PARS 2026 xin chân thành cảm ơn Quý đơn vị đã đăng ký đồng hành cùng hội nghị với tư cách là Nhà tài trợ.\n\nTHÔNG TIN ĐĂNG KÝ CHI TIẾT:\n• Đơn vị tài trợ: {{organization}}\n• Gói tài trợ: {{package}}\n• Giá trị tài trợ: {{package_fee}} VNĐ\n• Người liên hệ: {{fullname}}\n• Số điện thoại: {{phone}}\n• Email: {{email}}\n\nTrân trọng cảm ơn sự đồng hành của Quý đơn vị!\nBan Tổ Chức Hội nghị Khoa học PARS 2026.',
+    status: 'approved',
+  },
+];
 
 const DEFAULT_ZALO_CONFIG: ZaloConfig = {
   appId: '',
@@ -3394,102 +3459,107 @@ export class DataStore {
     if (!template) {
       if (templateId === 'payment_confirmed') {
         template = {
-          id: 'tmpl-payment-zalo',
-          name: 'Xác Nhận Thanh Toán Thành Công (Zalo ZNS)',
+          id: 'tmpl-pay-zalo',
+          name: 'Xác Nhận Đã Thanh Toán Lệ Phí (Zalo ZNS)',
           type: 'payment_confirmed',
           channel: 'zalo',
-          content: 'Xin chào {{title}} {{fullname}}. Chúng tôi xác nhận bạn đã thanh toán thành công phí tham dự Hội nghị PARS 2026 cho gói {{package}}. Trạng thái: {{payment_status}}.'
+          content: '[PARS 2026] XÁC NHẬN HOÀN TẤT THANH TOÁN\nKính gửi {{title}} {{fullname}}. Ban Tổ Chức đã tiếp nhận đóng góp lệ phí trị giá {{package_fee}} VNĐ cho Gói: {{package}}. Sắp xếp check-in của bạn đã được ưu tiên hoàn tất.',
+          znsTemplateId: '607948',
+          znsType: 'transaction'
         };
       } else {
         template = this.templates.find(t => t.channel === 'zalo' && t.type === 'registration_success')
-          || { id: 'tmpl-reg-zalo', name: 'Đăng Ký Đại Biểu Thành Công (Zalo ZNS)', type: 'registration_success', channel: 'zalo', content: 'Xin chào {{title}} {{fullname}}...' };
+          || {
+            id: 'tmpl-reg-zalo',
+            name: 'Đăng Ký Đại Biểu Thành Công (Zalo ZNS)',
+            type: 'registration_success',
+            channel: 'zalo',
+            content: '[PARS 2026] XÁC NHẬN ĐĂNG KÝ THÀNH CÔNG\nXin chào {{title}} {{fullname}}. Bạn đã đăng ký thành công tham dự Hội nghị Khoa học PARS 2026.\n- Gói: {{package}}\n- Mã Đại biểu: {{code}}\n- Trạng thái: {{payment_status}}\nVui lòng xuất trình QR đính kèm tại quầy check-in. Hotline hỗ trợ: 0912345678. Trân trọng cảm ơn!',
+            znsTemplateId: '607948',
+            znsType: 'transaction'
+          };
       }
     }
 
     let formattedPhone = attendee.phone.replace(/[^0-9]/g, '');
     if (formattedPhone.startsWith('0')) {
       formattedPhone = '84' + formattedPhone.substring(1);
+    } else if (formattedPhone.startsWith('840')) {
+      formattedPhone = '84' + formattedPhone.substring(3);
     }
 
     const payStatusText = attendee.paymentStatus === 'paid' ? 'Đã Thanh Toán' : attendee.paymentStatus === 'pending_verification' ? 'Chờ Đối Soát' : 'Chưa Thanh Toán';
     const attAny = attendee as any;
-    const content = template.content
+    const content = (template.content || '')
       .replace(/\{\{title\}\}/g, attendee.title || '')
       .replace(/\{\{fullname\}\}/g, attendee.fullName || '')
       .replace(/\{\{package\}\}/g, attendee.packageName || '')
       .replace(/\{\{code\}\}/g, attendee.id || '')
       .replace(/\{\{payment_status\}\}/g, payStatusText)
+      .replace(/\{\{package_fee\}\}/g, attendee.packageFee ? attendee.packageFee.toLocaleString('vi-VN') : '0')
       .replace(/\{\{organization\}\}/g, attendee.organization || '')
       .replace(/\{\{email\}\}/g, attendee.email || '')
       .replace(/\{\{phone\}\}/g, attendee.phone || '')
       .replace(/\{\{presentation_title\}\}/g, attAny.presentationTitle || '')
       .replace(/\{\{track\}\}/g, attAny.presentationTrack || '');
 
+    const resolvedTemplateId = template.znsTemplateId || (template.id === 'tmpl-pay-zalo' ? '607948' : '607948');
+
     const payload = {
       recipient: { phone: formattedPhone },
-      template_id: template.znsTemplateId || template.id,
+      template_id: resolvedTemplateId,
       template_data: {
+        order_code: String(attendee.id || 'PARS2026').trim().substring(0, 30),
+        hoten: String(attendee.fullName || 'Quý Đại Biểu').trim().substring(0, 30),
+        goidk: String(attendee.packageName || 'Gói Tiêu Chuẩn').trim().substring(0, 30),
+        trangthai: String(payStatusText || 'Chờ Đối Soát').trim().substring(0, 30),
+        email: String(attendee.email || 'contact@parsevent.org').trim().substring(0, 30),
         title: attendee.title || '',
         fullname: attendee.fullName || '',
-        hoten: attendee.fullName || '',
         package: attendee.packageName || '',
-        goidk: attendee.packageName || '',
         package_fee: attendee.packageFee ? attendee.packageFee.toLocaleString('vi-VN') : '0',
         code: attendee.id || '',
         payment_status: payStatusText,
-        trangthai: payStatusText,
         organization: attendee.organization || '',
-        email: attendee.email || '',
         phone: attendee.phone || '',
         presentation_title: attAny.presentationTitle || '',
         track: attAny.presentationTrack || '',
         qr_url: `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(attendee.qrCodeValue)}`,
-        order_code: attendee.id || '',
         order_date: attendee.registrationDate || new Date().toISOString().split('T')[0]
       },
       raw_text_sent: content
     };
 
     let status: 'success' | 'failed' = 'success';
-    let responseObj: any = { message: "Tin nhắn ZNS đã xếp hàng gửi thành công qua cổng Zalo OA Sandbox" };
+    let responseObj: any = { message: "Đang gửi qua cổng Zalo OA Gateway..." };
 
-    const isRealZalo = (this.zaloConfig.accessToken && this.zaloConfig.accessToken !== 'zalo-oa-token-active-2026-ready-pars') || isSupabaseConfigured();
-
-    if (isRealZalo) {
-      try {
-        const response = await fetch('/api/zalo/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            config: this.zaloConfig,
-            payload: {
-              recipient: { phone: formattedPhone },
-              template_id: template.znsTemplateId || template.id,
-              template_data: payload.template_data
-            }
-          })
-        });
-        const resData = await response.json();
-        if (resData.success) {
-          responseObj = resData.data;
-          if (responseObj && responseObj.error !== 0) status = 'failed';
-        } else {
+    try {
+      const response = await fetch('/api/zalo/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          config: this.zaloConfig,
+          payload: {
+            phone: formattedPhone,
+            recipient: { phone: formattedPhone },
+            template_id: resolvedTemplateId,
+            template_data: payload.template_data
+          }
+        })
+      });
+      const resData = await response.json();
+      if (resData.success) {
+        responseObj = resData.data;
+        if (responseObj && responseObj.error !== 0) {
           status = 'failed';
-          responseObj = { error: -1, message: resData.error || "Lỗi trung chuyển Zalo" };
         }
-      } catch (err: any) {
+      } else {
         status = 'failed';
-        responseObj = { error: -1, message: err.message || "Không thể truyền dữ liệu đến API Zalo Gateway" };
+        responseObj = { error: -1, message: resData.error || resData.message || "Lỗi trung chuyển Zalo" };
       }
-    } else {
-      responseObj = {
-        error: 0,
-        message: "Thành công (Giả lập Sandbox)",
-        data: {
-          msg_id: "msg-sim-" + Math.floor(Math.random() * 1000000000),
-          sent_time: new Date().toISOString()
-        }
-      };
+    } catch (err: any) {
+      status = 'failed';
+      responseObj = { error: -1, message: err.message || "Không thể truyền dữ liệu đến API Zalo Gateway" };
     }
 
     const log: SentNotificationLog = {
