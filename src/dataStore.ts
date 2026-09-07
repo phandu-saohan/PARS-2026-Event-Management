@@ -1316,7 +1316,7 @@ export class DataStore {
     try {
       this.supabaseConfig.isConnected = true;
       this.supabaseConfig.url = import.meta.env.VITE_SUPABASE_URL || '';
-      this.supabaseConfig.anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+      this.supabaseConfig.anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
       this.saveToLocalStorage(DataStore.KEY_SUPABASE, this.supabaseConfig);
 
       console.log('⚡ Connected to Supabase. Stage 1: Loading public caches...');
