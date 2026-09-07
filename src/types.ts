@@ -157,6 +157,7 @@ export interface Attendee {
   doctorProofUrl?: string;
   source?: string;
   invoiceInfo?: any;
+  createdAt?: string;
 }
 
 export interface SpeakerRegistration {

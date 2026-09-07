@@ -632,6 +632,7 @@ export default function PublicDelegateRegister({ onNavigate, isInline = false, l
         province,
         avatarUrl: avatarImage || undefined,
         doctorProofUrl: doctorProofImage || undefined,
+        createdAt: new Date().toISOString(),
       };
 
       const saved = await store.saveAttendeeAsync(attendeeData);

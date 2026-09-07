@@ -47,6 +47,7 @@ export function mapAttendeeToDb(a: Attendee): Record<string, any> {
     avatar_url: a.avatarUrl || null,
     source: a.source || 'website',
     invoice_info: a.invoiceInfo || null,
+    ...(a.createdAt ? { created_at: a.createdAt } : {}),
   };
 }
 
@@ -84,6 +85,7 @@ export function mapDbToAttendee(row: any): Attendee {
     avatarUrl: row.avatar_url || undefined,
     source: row.source || 'website',
     invoiceInfo: row.invoice_info || undefined,
+    createdAt: row.created_at || undefined,
   };
 }
 

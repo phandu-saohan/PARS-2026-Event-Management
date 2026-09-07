@@ -1438,7 +1438,7 @@ export class DataStore {
       ] = await Promise.all([
         supabase.from('user_accounts').select('*'),
         supabase.from('roles').select('*'),
-        supabase.from('attendees').select('*'),
+        supabase.from('attendees').select('*').order('created_at', { ascending: false }),
         supabase.from('speakers').select('*'),
         supabase.from('internal_tasks').select('*'),
         supabase.from('finance_transactions').select('*'),
@@ -1474,9 +1474,23 @@ export class DataStore {
         this.attendees.forEach(localAtt => {
           if (this.pendingSyncAttendeeIds.includes(localAtt.id) && !dbAttendees.some(dbAtt => dbAtt.id === localAtt.id)) {
             if (!this.attendees.some(a => a.id === localAtt.id)) {
-              this.attendees.push(localAtt);
+              this.attendees.unshift(localAtt);
             }
           }
+        });
+
+        // Ensure sorted newest first
+        this.attendees.sort((a, b) => {
+          if (a.createdAt && b.createdAt) {
+            const timeA = new Date(a.createdAt).getTime();
+            const timeB = new Date(b.createdAt).getTime();
+            if (timeA !== timeB) return timeB - timeA;
+          }
+          if (a.createdAt && !b.createdAt) return -1;
+          if (!a.createdAt && b.createdAt) return 1;
+          const dateDiff = (b.registrationDate || '').localeCompare(a.registrationDate || '');
+          if (dateDiff !== 0) return dateDiff;
+          return (b.id || '').localeCompare(a.id || '', undefined, { numeric: true, sensitivity: 'base' });
         });
         
         this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
@@ -1600,8 +1614,11 @@ export class DataStore {
         if (eventType === 'INSERT' || eventType === 'UPDATE') {
           const attendee = mapDbToAttendee(newRow);
           const idx = this.attendees.findIndex(a => a.id === attendee.id);
-          if (idx >= 0) this.attendees[idx] = attendee;
-          else this.attendees.push(attendee);
+          if (idx >= 0) {
+            this.attendees[idx] = attendee;
+          } else {
+            this.attendees.unshift(attendee);
+          }
         } else if (eventType === 'DELETE') {
           this.attendees = this.attendees.filter(a => a.id !== oldRow.id);
         }
@@ -1854,12 +1871,15 @@ export class DataStore {
 
   getAttendees() { return this.attendees; }
   saveAttendee(attendee: Attendee) {
+    if (!attendee.createdAt) {
+      attendee.createdAt = new Date().toISOString();
+    }
     const idx = this.attendees.findIndex(a => a.id === attendee.id);
     const isNew = idx < 0;
     if (!isNew) {
       this.attendees[idx] = attendee;
     } else {
-      this.attendees.push(attendee);
+      this.attendees.unshift(attendee);
     }
     this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
     this.addPendingSyncAttendeeId(attendee.id);
@@ -1944,12 +1964,15 @@ export class DataStore {
   }
 
   async saveAttendeeAsync(attendee: Attendee): Promise<Attendee> {
+    if (!attendee.createdAt) {
+      attendee.createdAt = new Date().toISOString();
+    }
     const idx = this.attendees.findIndex(a => a.id === attendee.id);
     const isNew = idx < 0;
     if (!isNew) {
       this.attendees[idx] = attendee;
     } else {
-      this.attendees.push(attendee);
+      this.attendees.unshift(attendee);
     }
     this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
 

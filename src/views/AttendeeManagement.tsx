@@ -910,6 +910,7 @@ Ban Thư ký Hội nghị PARS 2026`
           paymentStatus: 'paid', // invitees are pre-paid
           paymentMethod: 'bank_transfer',
           registrationDate: new Date().toISOString().split('T')[0],
+          createdAt: new Date().toISOString(),
           qrCodeValue: `${newId}-${nameVal.replace(/\s+/g, '')}`,
           isCheckedIn: false,
           yearOfBirth: yob,
@@ -1170,6 +1171,7 @@ Ban Thư ký Hội nghị PARS 2026`
       avatarUrl: newAvatarImage || undefined,
       doctorProofUrl: newDoctorProofImage || undefined,
       transactionProofUrl: newTransactionProofImage || undefined,
+      createdAt: new Date().toISOString(),
     };
 
     store.saveAttendee(manualDelegate);
@@ -1248,28 +1250,49 @@ Ban Thư ký Hội nghị PARS 2026`
   };
 
   const getFilteredAttendees = () => {
-    return attendees.filter(a => {
-      const matchQuery = 
-        a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        a.phone.includes(searchQuery) ||
-        a.id.toLowerCase().includes(searchQuery.toLowerCase());
+    return attendees
+      .filter(a => {
+        const matchQuery = 
+          a.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          a.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          a.phone.includes(searchQuery) ||
+          a.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchStatus = 
-        statusFilter === 'all' || 
-        a.paymentStatus === statusFilter;
+        const matchStatus = 
+          statusFilter === 'all' || 
+          a.paymentStatus === statusFilter;
 
-      const matchCheckIn = 
-        checkInFilter === 'all' || 
-        (checkInFilter === 'checked' && a.isCheckedIn) ||
-        (checkInFilter === 'not_checked' && !a.isCheckedIn);
+        const matchCheckIn = 
+          checkInFilter === 'all' || 
+          (checkInFilter === 'checked' && a.isCheckedIn) ||
+          (checkInFilter === 'not_checked' && !a.isCheckedIn);
 
-      const matchSource = 
-        sourceFilter === 'all' || 
-        (a.source || 'website') === sourceFilter;
+        const matchSource = 
+          sourceFilter === 'all' || 
+          (a.source || 'website') === sourceFilter;
 
-      return matchQuery && matchStatus && matchCheckIn && matchSource;
-    });
+        return matchQuery && matchStatus && matchCheckIn && matchSource;
+      })
+      .sort((a, b) => {
+        // 1. Ưu tiên sắp xếp theo createdAt (thời gian đăng ký chính xác từng giây)
+        if (a.createdAt && b.createdAt) {
+          const timeA = new Date(a.createdAt).getTime();
+          const timeB = new Date(b.createdAt).getTime();
+          if (timeA !== timeB) return timeB - timeA;
+        }
+        if (a.createdAt && !b.createdAt) return -1;
+        if (!a.createdAt && b.createdAt) return 1;
+
+        // 2. So sánh theo registrationDate (YYYY-MM-DD)
+        const dateA = a.registrationDate || '';
+        const dateB = b.registrationDate || '';
+        if (dateA !== dateB) {
+          return dateB.localeCompare(dateA);
+        }
+
+        // 3. Fallback theo mã ID giảm dần
+        return (b.id || '').localeCompare(a.id || '', undefined, { numeric: true, sensitivity: 'base' });
+      });
   };
 
   const filteredData = getFilteredAttendees();
@@ -1708,7 +1731,14 @@ Ban Thư ký Hội nghị PARS 2026`
                         className="w-4 h-4 text-teal-600 border-slate-300 rounded cursor-pointer"
                       />
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-slate-900">{att.id}</td>
+                    <td className="px-6 py-4 font-mono">
+                      <div className="font-bold text-slate-900">{att.id}</div>
+                      <div className="text-[10px] text-slate-400 font-sans font-medium mt-0.5 whitespace-nowrap">
+                        {att.createdAt 
+                          ? new Date(att.createdAt).toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })
+                          : (att.registrationDate || '')}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
@@ -1957,7 +1987,9 @@ Ban Thư ký Hội nghị PARS 2026`
                       <span className="text-[8.5px] text-slate-450 mt-0.5 font-medium">
                         {att.gender || 'N/A'} • NS: {att.yearOfBirth || 'N/A'} • {att.nationality === 'vietname' ? 'Việt Nam' : 'Nước ngoài'}
                       </span>
-                      <span className="text-[9px] text-slate-400 mt-0.5 font-mono">{att.id} | {att.phone}</span>
+                      <span className="text-[9px] text-slate-400 mt-0.5 font-mono">
+                        {att.id} | {att.phone} {att.createdAt ? `• ${new Date(att.createdAt).toLocaleDateString('vi-VN')}` : (att.registrationDate ? `• ${att.registrationDate}` : '')}
+                      </span>
                       <span className="text-[9px] text-slate-400 max-w-[150px] truncate">{att.email}</span>
                     </div>
                   </div>
