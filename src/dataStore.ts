@@ -2140,10 +2140,23 @@ export class DataStore {
     // Update in local cache
     const idx = this.attendees.findIndex(a => a.id === id);
     if (idx >= 0) {
+      const prevStatus = this.attendees[idx].paymentStatus;
       if (fields.payment_status) this.attendees[idx].paymentStatus = fields.payment_status as any;
       if (fields.notes) this.attendees[idx].notes = fields.notes;
       if (fields.payment_method) this.attendees[idx].paymentMethod = fields.payment_method as any;
       this.saveToLocalStorage(DataStore.KEY_ATTENDEES, this.attendees);
+
+      if (prevStatus !== 'paid' && fields.payment_status === 'paid') {
+        try {
+          const zTmpl = this.templates.find(t => t.channel === 'zalo' && (t.type === 'payment_confirmed' || t.id === 'tmpl-pay-zalo'));
+          this.sendZaloZNS(this.attendees[idx], zTmpl?.id || 'tmpl-pay-zalo');
+
+          const eTmpl = this.templates.find(t => t.channel === 'email' && (t.id === 'tmpl-reg-email' || t.type === 'registration_success'));
+          this.sendEmail(this.attendees[idx], undefined, undefined, eTmpl?.id || 'tmpl-reg-email');
+        } catch (err) {
+          console.error('Lỗi tự động gửi thông báo khi cập nhật payment_status sang paid:', err);
+        }
+      }
     }
 
     // Update in Supabase
@@ -2764,24 +2777,27 @@ export class DataStore {
       
       // Auto-confirm payment status of attendee
       const refId = this.finance[idx].referenceId;
-      if (refId && refId.startsWith('ATT-')) {
+      if (refId) {
         const attendee = this.attendees.find(a => a.id === refId);
         if (attendee) {
+          const prevStatus = attendee.paymentStatus;
           attendee.paymentStatus = 'paid';
           this.saveAttendee(attendee);
           
-          // Trigger notifications
-          try {
-            const zTmpl = this.templates.find(t => t.channel === 'zalo' && t.type === 'payment_confirmed');
-            this.sendZaloZNS(attendee, zTmpl?.id || 'payment_confirmed');
+          // Trigger notifications if status changed to paid
+          if (prevStatus !== 'paid') {
+            try {
+              const zTmpl = this.templates.find(t => t.channel === 'zalo' && (t.type === 'payment_confirmed' || t.id === 'tmpl-pay-zalo'));
+              this.sendZaloZNS(attendee, zTmpl?.id || 'tmpl-pay-zalo');
 
-            const eTmpl = this.templates.find(t => t.channel === 'email' && t.type === 'payment_confirmed');
-            this.sendEmail(attendee, undefined, undefined, eTmpl?.id || 'payment_confirmed');
+              const eTmpl = this.templates.find(t => t.channel === 'email' && (t.id === 'tmpl-reg-email' || t.type === 'registration_success'));
+              this.sendEmail(attendee, undefined, undefined, eTmpl?.id || 'tmpl-reg-email');
 
-            const wTmpl = this.templates.find(t => t.channel === 'whatsapp' && t.type === 'payment_confirmed');
-            this.sendWhatsapp(attendee, wTmpl?.id || 'payment_confirmed');
-          } catch (err) {
-            console.error('Failed to trigger auto notifications:', err);
+              const wTmpl = this.templates.find(t => t.channel === 'whatsapp' && t.type === 'payment_confirmed');
+              this.sendWhatsapp(attendee, wTmpl?.id || 'payment_confirmed');
+            } catch (err) {
+              console.error('Failed to trigger auto notifications:', err);
+            }
           }
         }
       }

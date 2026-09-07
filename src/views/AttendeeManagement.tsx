@@ -1011,12 +1011,15 @@ Ban Thư ký Hội nghị PARS 2026`
       if (oldStatus !== 'paid' && newStatus === 'paid') {
         try {
           const templates = store.getTemplates();
-          const zTmpl = templates.find(t => t.channel === 'zalo' && t.type === 'payment_confirmed');
-          const eTmpl = templates.find(t => t.channel === 'email' && t.type === 'payment_confirmed');
+          const zTmpl = templates.find(t => t.channel === 'zalo' && (t.type === 'payment_confirmed' || t.id === 'tmpl-pay-zalo'));
+          const eTmpl = templates.find(t => t.channel === 'email' && (t.id === 'tmpl-reg-email' || t.type === 'registration_success'));
           const wTmpl = templates.find(t => t.channel === 'whatsapp' && t.type === 'payment_confirmed');
 
-          store.sendZaloZNS(found, zTmpl?.id || 'payment_confirmed');
-          store.sendEmail(found, undefined, undefined, eTmpl?.id || 'payment_confirmed');
+          // Tự động gửi Zalo ZNS thông báo thanh toán
+          store.sendZaloZNS(found, zTmpl?.id || 'tmpl-pay-zalo');
+          // Tự động gửi Email xác nhận đăng ký thành công (kèm thẻ QR check-in & trạng thái Đã Thanh Toán)
+          store.sendEmail(found, undefined, undefined, eTmpl?.id || 'tmpl-reg-email');
+          // Gửi tin nhắn Whatsapp nếu có
           store.sendWhatsapp(found, wTmpl?.id || 'payment_confirmed');
         } catch (err) {
           console.error('Lỗi gửi tin nhắn khi cập nhật trạng thái thanh toán:', err);
@@ -3247,12 +3250,12 @@ Ban Thư ký Hội nghị PARS 2026`
                             if (!wasPaid && detailEditForm.paymentStatus === 'paid') {
                               try {
                                 const templates = store.getTemplates();
-                                const zTmpl = templates.find(t => t.channel === 'zalo' && t.type === 'payment_confirmed');
-                                const eTmpl = templates.find(t => t.channel === 'email' && t.type === 'payment_confirmed');
+                                const zTmpl = templates.find(t => t.channel === 'zalo' && (t.type === 'payment_confirmed' || t.id === 'tmpl-pay-zalo'));
+                                const eTmpl = templates.find(t => t.channel === 'email' && (t.id === 'tmpl-reg-email' || t.type === 'registration_success'));
                                 const wTmpl = templates.find(t => t.channel === 'whatsapp' && t.type === 'payment_confirmed');
 
-                                store.sendZaloZNS(detailEditForm, zTmpl?.id || 'payment_confirmed');
-                                store.sendEmail(detailEditForm, undefined, undefined, eTmpl?.id || 'payment_confirmed');
+                                store.sendZaloZNS(detailEditForm, zTmpl?.id || 'tmpl-pay-zalo');
+                                store.sendEmail(detailEditForm, undefined, undefined, eTmpl?.id || 'tmpl-reg-email');
                                 store.sendWhatsapp(detailEditForm, wTmpl?.id || 'payment_confirmed');
                               } catch (err) {
                                 console.error('Lỗi gửi tin nhắn khi lưu sửa đổi và xác nhận thanh toán:', err);

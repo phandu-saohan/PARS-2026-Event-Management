@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS public.business_config (
     speaker_form_config     JSONB DEFAULT '{}'::jsonb,
     sponsor_form_config     JSONB DEFAULT '{}'::jsonb,
     add_on_services         JSONB DEFAULT '[]'::jsonb,
+    payment_config          JSONB DEFAULT '{}'::jsonb,
     cme_template_config     JSONB DEFAULT '{}'::jsonb,
     landing_logo_url        TEXT,
     landing_landmarks_url   TEXT,
