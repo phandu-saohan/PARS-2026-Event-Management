@@ -1064,6 +1064,33 @@ Ban Thư ký Hội nghị PARS 2026`
     }
   };
 
+  const handleEditAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && detailEditForm) {
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Dung lượng ảnh tối đa là 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDetailEditForm({
+          ...detailEditForm,
+          avatarUrl: reader.result as string
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveEditAvatar = () => {
+    if (detailEditForm) {
+      setDetailEditForm({
+        ...detailEditForm,
+        avatarUrl: undefined
+      });
+    }
+  };
+
   const handleEditDoctorProofUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && detailEditForm) {
@@ -1744,14 +1771,22 @@ Ban Thư ký Hội nghị PARS 2026`
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 relative">
                           {att.avatarUrl ? (
-                            <img src={att.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-[10px] uppercase font-extrabold text-slate-400 font-mono">
-                              {att.fullName ? att.fullName.substring(0, 2) : 'BS'}
-                            </span>
-                          )}
+                            <img 
+                              src={att.avatarUrl} 
+                              alt="Avatar" 
+                              className="w-full h-full object-cover" 
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                if (fallback) fallback.style.display = 'flex';
+                              }}
+                            />
+                          ) : null}
+                          <span className={`text-[10px] uppercase font-extrabold font-mono w-full h-full items-center justify-center bg-indigo-50 text-indigo-700 ${att.avatarUrl ? 'hidden' : 'flex'}`}>
+                            {att.fullName ? att.fullName.trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase() : 'BS'}
+                          </span>
                         </div>
                         <div className="flex flex-col">
                           <span className="font-bold text-slate-950 text-sm">
@@ -1974,14 +2009,22 @@ Ban Thư ký Hội nghị PARS 2026`
                       }}
                       className="w-4 h-4 text-teal-600 border-slate-300 rounded cursor-pointer shrink-0 animate-fade-in"
                     />
-                    <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0 relative">
                       {att.avatarUrl ? (
-                        <img src={att.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-[10px] uppercase font-extrabold text-slate-400 font-mono">
-                          {att.fullName ? att.fullName.substring(0, 2) : 'BS'}
-                        </span>
-                      )}
+                        <img 
+                          src={att.avatarUrl} 
+                          alt="Avatar" 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => {
+                            (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (fallback) fallback.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <span className={`text-[10px] uppercase font-extrabold font-mono w-full h-full items-center justify-center bg-indigo-50 text-indigo-700 ${att.avatarUrl ? 'hidden' : 'flex'}`}>
+                        {att.fullName ? att.fullName.trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase() : 'BS'}
+                      </span>
                     </div>
                     <div className="flex flex-col">
                       <span className="font-bold text-slate-950 text-xs">
@@ -2598,20 +2641,24 @@ Ban Thư ký Hội nghị PARS 2026`
               {/* LEFT COLUMN: Visual profile assets (Avatar, QR, Status badges) - spans 4 cols */}
               <div className="md:col-span-4 bg-slate-50 p-6 flex flex-col items-center border-r border-slate-105 text-center space-y-5">
                 
-                {/* Avatar view & upload avatar simulated section */}
-                <div className="relative group">
+                {/* Avatar view & upload avatar section */}
+                <div className="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-500/25 shadow-md flex-shrink-0 flex items-center justify-center bg-slate-100">
                   {viewDetailAttendee.avatarUrl ? (
                     <img 
                       src={viewDetailAttendee.avatarUrl} 
                       alt="Avatar" 
-                      className="w-24 h-24 rounded-full object-cover border-4 border-indigo-500/25 shadow-md flex-shrink-0" 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
                     />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center font-extrabold text-slate-500 text-2xl shadow-inner flex-shrink-0">
-                      {viewDetailAttendee.fullName.substring(0, 1)}
-                    </div>
-                  )}
-                  <span className="absolute bottom-0 right-0 p-1 px-2.5 rounded-full text-[8.5px] font-mono leading-none bg-slate-900 border border-slate-800 text-slate-200 font-extrabold">
+                  ) : null}
+                  <div className={`w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-extrabold text-2xl items-center justify-center shadow-inner ${viewDetailAttendee.avatarUrl ? 'hidden' : 'flex'}`}>
+                    {viewDetailAttendee.fullName ? viewDetailAttendee.fullName.trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase() : 'BS'}
+                  </div>
+                  <span className="absolute bottom-0 right-0 p-1 px-2.5 rounded-full text-[8.5px] font-mono leading-none bg-slate-900 border border-slate-800 text-slate-200 font-extrabold z-10">
                     {viewDetailAttendee.title || 'BS.'}
                   </span>
                 </div>
@@ -3153,6 +3200,51 @@ Ban Thư ký Hội nghị PARS 2026`
                           </div>
 
                           
+                        </div>
+
+                        {/* Avatar Upload in Edit Mode */}
+                        <div className="sm:col-span-2 border-t border-slate-100 pt-3">
+                          <label className="text-[10px] font-black text-slate-500 block mb-1 uppercase">Ảnh đại diện đại biểu (Avatar)</label>
+                          <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                            {detailEditForm.avatarUrl ? (
+                              <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 border border-slate-300 shrink-0 group flex items-center justify-center">
+                                <img 
+                                  src={detailEditForm.avatarUrl} 
+                                  alt="Avatar" 
+                                  className="w-full h-full object-cover" 
+                                  onError={(e) => {
+                                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                    if (fallback) fallback.style.display = 'flex';
+                                  }}
+                                />
+                                <span className="hidden text-[11px] font-extrabold text-indigo-700 bg-indigo-50 w-full h-full items-center justify-center uppercase font-mono">
+                                  {detailEditForm.fullName ? detailEditForm.fullName.trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase() : 'DB'}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={handleRemoveEditAvatar}
+                                  className="absolute top-0.5 right-0.5 bg-rose-600 text-white rounded-full p-0.5 hover:bg-rose-700 shadow border-none cursor-pointer flex items-center justify-center z-10"
+                                  title="Xóa ảnh đại diện"
+                                >
+                                  <X className="w-2.5 h-2.5" />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="w-16 h-16 rounded-full bg-indigo-50 border border-indigo-200 flex items-center justify-center font-extrabold text-indigo-600 text-sm shadow-inner shrink-0 text-center uppercase leading-tight p-1">
+                                {detailEditForm.fullName ? detailEditForm.fullName.trim().split(/\s+/).map(w => w[0]).filter(Boolean).slice(-2).join('').toUpperCase() : 'BS'}
+                              </div>
+                            )}
+                            <div className="space-y-1 flex-1">
+                              <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleEditAvatarUpload}
+                                className="block w-full text-xs text-slate-500 file:mr-3 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+                              />
+                              <p className="text-[9px] text-slate-400">Chọn ảnh chân dung đại biểu để tải lên Supabase mới.</p>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Doctor Proof Upload in Edit Mode */}
@@ -4766,10 +4858,20 @@ Ban Thư ký Hội nghị PARS 2026`
                 {/* Avatar */}
                 <div className="w-16 h-16 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 font-black text-xl shrink-0 overflow-hidden">
                   {kioskCheckInAttendee.avatarUrl ? (
-                    <img src={kioskCheckInAttendee.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{kioskCheckInAttendee.fullName ? kioskCheckInAttendee.fullName.split(' ').pop()?.substring(0, 2) : 'DB'}</span>
-                  )}
+                    <img 
+                      src={kioskCheckInAttendee.avatarUrl} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover" 
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).style.display = 'none';
+                        const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <span className={`w-full h-full items-center justify-center font-bold font-mono text-indigo-700 bg-indigo-50 ${kioskCheckInAttendee.avatarUrl ? 'hidden' : 'flex'}`}>
+                    {kioskCheckInAttendee.fullName ? kioskCheckInAttendee.fullName.trim().split(/\s+/).pop()?.substring(0, 2) : 'DB'}
+                  </span>
                 </div>
 
                 {/* Details */}
