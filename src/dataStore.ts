@@ -605,6 +605,7 @@ const INITIAL_SESSIONS: ConferenceSession[] = [
 const INITIAL_SPONSORS: Sponsor[] = [];
 const INITIAL_TASKS: InternalTask[] = [];
 const INITIAL_FINANCE: FinanceTransaction[] = [];
+const INITIAL_EMBED_SCRIPTS: EmbedScript[] = [];
 const INITIAL_TEMPLATES: NotificationTemplate[] = [
   {
     id: 'tmpl-reg-email',
